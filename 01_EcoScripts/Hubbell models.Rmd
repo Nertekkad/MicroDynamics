@@ -1,0 +1,54 @@
+## Hubble model {-}
+
+Where N is the number of species in the local community, M the number of species in the metacommunity (set of communities), I is the number of individuals in the community, m is the immigration rate (the probability that a dead individuum will be replaced by an individuum from the metacommunity), d is the number of deaths at each time step, 
+
+```{r}
+pert<-perturbation(times = rep(500, N), durations = rep(100, N),
+                   deathrate = N)
+tsplot(simHubbell(N=N, M=N,I=1500,d=10, m=0.1, tskip=500, tend=1500,
+                  perturb = pert))
+```
+
+Let's iterate the model n times
+
+```{r}
+Hubbell_tables<-list()
+for(i in 1:50){
+  Hubbell_tables[[i]]<-simHubbell(N=N, M=N,I=1500,d=10, m=0.1,
+                                  tskip=500, tend=1500, perturb = pert)
+}
+tsplot(Hubbell_tables[[2]])
+```
+
+Diversity types
+```{r}
+hubbell_shannon<-ab_tables_div(Hubbell_tables, "shannon")
+hubbell_pielou<-ab_tables_div(Hubbell_tables, "pielou")
+hubbell_simpson<-ab_tables_div(Hubbell_tables, "simpson")
+plot(hubbell_shannon[[6]], xlab = "Time",
+     ylab = "Diversity", pch = 20)
+plot(hubbell_pielou[[6]], xlab = "Time",
+     ylab = "Evenness", pch = 20)
+plot(hubbell_simpson[[6]], xlab = "Time",
+     ylab = "Dominance", pch = 20)
+```
+
+Standard deviation of the diversity.
+```{r}
+plot(models_sd(Hubbell_tables), type = "l", lwd = 3, col = "brown",
+     xlab = "Time steps", ylab = "sd")
+
+models_sd<-function(ab_tables){
+   div_list<-list()
+ for(i in 1:length(ab_tables)){
+   div_list[[i]]<-ab_table_div(ab_tables[[i]], "shannon")
+ }
+ div_mat<-matrix(unlist(div_list), ncol = 30)
+ mat_sd<-c()
+ for(i in 1:nrow(div_mat)){
+   mat_sd[i]<-sd(div_mat[i,])
+ }
+ return(mat_sd)
+}
+```
+
