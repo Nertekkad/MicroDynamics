@@ -1,5 +1,5 @@
-
 # Dinámica de comunidades microbianas {-}
+
 
 ## Modelaje de poblaciones microbianas {-}
 
