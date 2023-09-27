@@ -191,13 +191,13 @@ v_colored<-function(g, T_table, g_tax, p_tax, g_colors){
 }
 
 # Colors
-unq<-unique(tax_bacter[,"Class"])
+unq<-unique(tax_bacter[,"Phylum"])
 unq<-unq[-c(which(unq == "uncultured"), which(is.na(unq)))]
 library(viridis)
 colors <- sample(viridis_pal()(length(unq)))
 
 # Tadpole under treatment 1
-BTad_T1Net<-v_colored(BTad_T1Net, tax_bacter, g_tax = "Class",
+BTad_T1Net<-v_colored(BTad_T1Net, tax_bacter, g_tax = "Phylum",
                       p_tax = "Genus", g_colors = colors)
 plot(BTad_T1Net, vertex.label.color="black",
      vertex.color = vertex.attributes(BTad_T1Net)$color, vertex.label.cex=.5,
@@ -205,7 +205,7 @@ plot(BTad_T1Net, vertex.label.color="black",
      main = "Tadpole under treatment 1")
 
 # Tadpole under treatment 2
-BTad_T2Net<-v_colored(BTad_T2Net, tax_bacter, g_tax = "Class",
+BTad_T2Net<-v_colored(BTad_T2Net, tax_bacter, g_tax = "Phylum",
                       p_tax = "Genus", g_colors = colors)
 plot(BTad_T2Net, vertex.label.color="black",
      vertex.color = vertex.attributes(BTad_T2Net)$color, vertex.label.cex=.5,
@@ -213,7 +213,7 @@ plot(BTad_T2Net, vertex.label.color="black",
      main = "Tadpole under treatment 2")
 
 # Tadpole control
-BTad_CtrNet<-v_colored(BTad_CtrNet, tax_bacter, g_tax = "Class",
+BTad_CtrNet<-v_colored(BTad_CtrNet, tax_bacter, g_tax = "Phylum",
                        p_tax = "Genus", g_colors = colors)
 plot(BTad_CtrNet, vertex.label.color="black",
      vertex.color = vertex.attributes(BTad_CtrNet)$color, vertex.label.cex=.5,
@@ -261,38 +261,105 @@ plot(BAdl_T2Net, vertex.label.color="black",
      main = "Sub-adult under treatment 2")
 
 # Sub-adult control
-BAdl_CtrNet<-v_colored(BAdl_CtrNet, tax_bacter, g_tax = "Class",
+BAdl_CtrNet<-v_colored(BAdl_CtrNet, tax_bacter, g_tax = "Phylum",
                        p_tax = "Genus", g_colors = colors)
 plot(BAdl_CtrNet, vertex.label.color="black",
      vertex.color = vertex.attributes(BAdl_CtrNet)$color, vertex.label.cex=.5,
      vertex.label.dist=1,layout=layout_with_kk, vertex.size = 5,
      main = "Sub-adult control")
 
+# Node's Phyla function
+
+TaxGroup<-function(g, T_table, g_tax, p_tax){
+  require(igraph)
+  unq<-unique(T_table[,g_tax])
+  for(i in 1:length(unq)){
+    IDs<-which(unq[i] == T_table[,g_tax])
+    t_names<-unique(T_table[p_tax][IDs,])
+    vertex<-which(vertex.attributes(g)$name %in% t_names)
+    V(g)[vertex]$Taxon<-unq[i]
+  }
+  return(g)
+}
+
+BTad_CtrNet<-TaxGroup(BTad_CtrNet, tax_bacter, "Phylum", "Genus")
+BTad_T1Net<-TaxGroup(BTad_T1Net, tax_bacter, "Phylum", "Genus")
+BTad_T2Net<-TaxGroup(BTad_T2Net, tax_bacter, "Phylum", "Genus")
+BMet_CtrNet<-TaxGroup(BMet_CtrNet, tax_bacter, "Phylum", "Genus")
+BMet_T1Net<-TaxGroup(BMet_T1Net, tax_bacter, "Phylum", "Genus")
+BMet_T2Net<-TaxGroup(BMet_T2Net, tax_bacter, "Phylum", "Genus")
+BAdl_CtrNet<-TaxGroup(BAdl_CtrNet, tax_bacter, "Phylum", "Genus")
+BAdl_T1Net<-TaxGroup(BAdl_T1Net, tax_bacter, "Phylum", "Genus")
+BAdl_T2Net<-TaxGroup(BAdl_T2Net, tax_bacter, "Phylum", "Genus")
+
+
 # Multilayer networks
 
 library(muxViz)
 
-ml_BTad<-list(BTad_T1Net, BTad_T2Net, BTad_CtrNet) # Tadpole
-ml_BMet<-list(BMet_T1Net, BMet_T2Net, BMet_CtrNet) # Metamorphic
-ml_BAdl<-list(BAdl_T1Net, BAdl_T2Net, BAdl_CtrNet) # Adult
+ml_BTad<-list(BTad_T2Net, BTad_T1Net, BTad_CtrNet) # Tadpole
+ml_BMet<-list(BMet_T2Net, BMet_T1Net, BMet_CtrNet) # Metamorphic
+ml_BAdl<-list(BAdl_T2Net, BAdl_T1Net, BAdl_CtrNet) # Adult
 
-# Matrix vertex-color function for multilayer network
-mat_colors<-function(colors, g.list){
-  colmat<-matrix(rep(colors, length(g.list)), nrow = length(colors),
-                 ncol = length(g.list))
-  return(colmat)
+# Node-color matrix function
+node_color_mat<-function(g.list, type){
+  if(type == "phylo"){
+    # Colors for each node
+    taxacolors<-list()
+    for(i in 1:length(g.list)){
+      taxacolors[[i]]<-V(g.list[[i]])$color
+    }
+    # Input color vector
+    taxacolors<-unlist(taxacolors)
+    # Color matrix at cetain taxonomic level
+    taxamat<-matrix(taxacolors, nrow = length(V(g.list[[1]])),
+                    ncol = length(g.list))
+    return(taxamat)
+  } else
+    if(type == "centrality"){
+      # Colors for each node
+      centrality<-list()
+      for(i in 1:length(g.list)){
+        centrality[[i]]<-V(g.list[[i]])$hl
+      }
+      # Input color vector
+      centrality<-unlist(centrality)
+      # Color matrix at cetain taxonomic level
+      heatmat<-matrix(centrality, nrow = length(V(g.list[[1]])),
+                      ncol = length(g.list))
+      return(heatmat)
+    }
 }
+
+# Abundances matrix function
+abs_mat<-function(abs.list, g.list, n){
+  # Colors for each node
+  abundances<-list()
+  for(i in 1:length(abs.list)){
+    abundances[[i]]<-log(colSums(abs.list[[i]])+2)/n
+  }
+  # Input color vector
+  abundances<-as.vector(unlist(abundances))
+  # Color matrix at cetain taxonomic level
+  absmat<-matrix(abundances, nrow = length(V(g.list[[1]])),
+                 ncol = length(g.list))
+  return(absmat)
+}
+
+# Abundance tables list
+abs_BTad<-list(BTad_T2, BTad_T1, BTad_Ctr)
 
 # 3D plot for tadpoles
 lay <- layoutMultiplex(ml_BTad, layout="fr", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BTad, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BTad)),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
-                 node.size.values=10, node.size.scale=0.6,
-                 node.colors=mat_colors(V(BTad_T1Net)$color, ml_BTad),
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_BTad, ml_BTad, 2),
+                 node.colors=node_color_mat(ml_BTad, "phylo"),
                  edge.colors="black",
-                 node.colors.aggr=mat_colors(V(BTad_T1Net)$color, ml_BTad),
+                 node.colors.aggr=NULL,
                  show.aggregate=F)
 
 # 3D plot for metamorphics
@@ -392,8 +459,8 @@ plot_multiplex3D(ml_BTad, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BTad)),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
-                 node.size.values=10, node.size.scale=0.6,
-                 node.colors=mat_colors(V(ml_BTad[[1]])$hl, ml_BTad),
+                 node.size.values="auto", node.size.scale=abs_mat(),
+                 node.colors=node_color_mat(ml_BTad, "phylo"),
                  edge.colors="black",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
@@ -716,18 +783,35 @@ legend("bottomright",bty = "n",legend = c("Treatment 1","Treatment 2","Control")
        col = line_cols,pch = 19)
 
 
+# Networks' connectivity analysis
 
+degree_df <- data.frame(Species = vertex.attributes(BTad_CtrNet)$name,
+                        color = vertex.attributes(BTad_CtrNet)$color,
+                        Phylum = vertex.attributes(BTad_CtrNet)$Taxon,
+                        Ctr_degree = degree(BTad_CtrNet),
+                        T1_degree = degree(BTad_T1Net),
+                        T2_degree = degree(BTad_T2Net))
 
+degree_df<-degree_df[-which(rowSums(degree_df[,c(4,5,6)])/
+                              mean(rowSums(degree_df[,c(4,5,6)]))<0.9),]
 
+library(gridExtra)
+p1<-ggplot(data=degree_df, aes(x=Species, y=Ctr_degree, fill=Phylum)) +
+  geom_bar(stat="identity")
+p2<-ggplot(data=degree_df, aes(x=Species, y=T1_degree, fill=Phylum)) +
+  geom_bar(stat="identity")
+p3<-ggplot(data=degree_df, aes(x=Species, y=T2_degree, fill=Phylum)) +
+  geom_bar(stat="identity")
 
-
-
-
-
-
-
-
-
-
-
-
+grid.arrange(p1 + coord_flip() +
+               theme(axis.text.y = element_text(size = 0.01),
+                     legend.position = "none") + ylab("Control"),
+             p2 + coord_flip() +
+               theme(axis.text.y = element_text(size = 0.01),
+                     legend.position = "none") + ylab("Treatment 1"),
+             p3 + coord_flip() +
+               theme(axis.text.y = element_text(size = 0.01),
+                     legend.text = element_text(size = 6),
+                     legend.position="bottom", legend.box = "horizontal") +
+               ylab("Treatment 2"),
+             ncol=3)
