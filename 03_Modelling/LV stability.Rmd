@@ -1,0 +1,275 @@
+# Theorical ecology {-}
+
+## Dynamics of microbial comunities {-}
+
+Let's consider an hipothetical population that grows at an $ r $ rate: $ \dot{x} = rx $. If $ r>0 $, the population will increase exponentially $ x(t) = x_{0}e^{rt} $, a model that doens't make any biological sense.
+
+```{r}
+library(deSolve)
+exponential <- function (time, y, parms) {
+  with(as.list(c(y, parms)), {
+  dN <- r * N
+  list(dN)
+ })
+}
+y <- c(N = 0.1)
+parms <- c(r = 0.1, K = 1)
+times <- seq(0, 100, 1)
+plot(ode(y, times, exponential, parms))
+```
+
+To solve the previous problem, we add intraespecific competition for resources between the members of the population $ x^2 $ and a limit of aviable resources, represented as the medium carrying capasity.
+
+```{r}
+model <- function (time, y, parms) {
+  with(as.list(c(y, parms)), {
+  dN <- r * N * (1 - N / K)
+  list(dN)
+ })
+}
+y <- c(N = 0.1)
+parms <- c(r = 1, K = 5)
+times <- seq(0, 10, 1)
+plot(ode(y, times, model, parms))
+```
+
+But the previous model is only considering an isolated population that has no interaction with any other species. The classical interaction model is the Lotka-Volterra. A generalization of this model is the so called generalized LV.
+
+For simplify this problem, we'll consider only two species competing for resources (nutrients, space, water, etc.).
+
+```{r}
+# Lotka-Volterra model
+LV2 <- function (time, y, parms) {
+  with(as.list(c(y, parms)), {
+  dN1 <- N1*(r1 - a11*N1 - a12*N2)
+  dN2 <- N2*(r2 - a22*N2 - a21*N1)
+  return(list(c(dN1, dN2)))
+ })
+}
+
+# Parameters
+coexitence <- c(r1 = 2, r2 = 2, a11 = 2.2 ,a22 = 2, a12 = 1.2, a21 = 1)
+exclusionN1 <- c(r1 = 2, r2 = 2, a11 = 2.2 ,a22 = 1.2, a12 = 2, a21 = 1)
+exclusionN2 <- c(r1 = 2, r2 = 2, a11 = 1.2 ,a22 = 2, a12 = 1, a21 = 2.2)
+exclusionr1 <- c(r1 = 1, r2 = 2, a11 = 1 ,a22 = 1, a12 = 2, a21 = 2)
+exclusionr2 <- c(r1 = 2, r2 = 1, a11 = 1 ,a22 = 1, a12 = 2, a21 = 2)
+
+# Initial conditions and time steps
+initial_conditions <- c(N1 = 2, N2 = 2)
+time <- seq(0, 100, by = 1)
+
+# Simulations
+coex <- ode(initial_conditions, time, LV2, coexitence)
+exN1 <- ode(initial_conditions, time, LV2, exclusionN1)
+exN2 <- ode(initial_conditions, time, LV2, exclusionN2)
+exr1 <- ode(initial_conditions, time, LV2, exclusionr1)
+exr2 <- ode(initial_conditions, time, LV2, exclusionr2)
+
+# Coexistence of both populations
+matplot(x = coex[ , 1], y = coex[ , 2:3], type = "l",
+        xlab = "Time", ylab = "Population",
+        main = "Coexistence", lwd = 2,lty=1)
+legend("topright", c("N1", "N2"), col = 1:2,lty=1)
+
+# N2 excludes N1
+matplot(x = exN1[ , 1], y = exN1[ , 2:3], type = "l",
+        xlab = "Time", ylab = "Population",
+        main = "N2 excludes N1", lwd = 2,lty=1)
+legend("topright", c("N1", "N2"), col = 1:2,lty=1)
+
+# N1 excludes N2
+matplot(x = exN2[ , 1], y = exN2[ , 2:3], type = "l",
+        xlab = "Time", ylab = "Population",
+        main = "N1 excludes N2", lwd = 2,lty=1)
+legend("topright", c("N1", "N2"), col = 1:2,lty=1)
+
+# N2 excludes N1 by initial conditions
+matplot(x = exr1[ , 1], y = exr1[ , 2:3], type = "l",
+        xlab = "Time", ylab = "Population",
+        main = "r1<r2", lwd = 2,lty=1)
+legend("topright", c("N1", "N2"), col = 1:2,lty=1)
+
+# N1 excludes N2 by initial conditions
+matplot(x = exr2[ , 1], y = exr2[ , 2:3], type = "l",
+        xlab = "Time", ylab = "Population",
+        main = "r1>r2", lwd = 2,lty=1)
+legend("topright", c("N1", "N2"), col = 1:2,lty=1)
+```
+
+## Generalized Lotka-Volterra model {-}
+
+If we consider a community of N species, we use the generalized Lotka-Volterra model, that represents all possible interactions (positive, negative and neutral) between the species.
+
+$$ \frac{dx_{i}}{dt} = x_{i} (r - \alpha_{ii}x_{i} - \sum_{j = 1; j \neq i}^{N}{\alpha_{ij}x_{j}}) $$
+
+First, we must build an interaction matrix that represents the interactions between all species of the community.
+
+```{r}
+int_matrix<-function(N, aii, nep, pop){
+   # Number of neutral interactions
+   nep<-round(N*N*nep, 0)
+   # Number of positive interactions
+   pop<-round(N*N*pop, 0)
+   # Stochastic negative interactions
+   v<-runif(N*N, -1, 0)
+   # Positive interactions
+   positives<-v[sample(1:length(v), pop)]
+   v[which(v %in% positives)]<-v[which(v %in% positives)]*(-1)
+   # Negative interactions
+   v[sample(1:length(v), nep)]<-0
+   v[seq(1, length(v), N+1)]<-aii*(-1)
+   # Interaction matrix
+   mat<-matrix(v, N, N)
+   return(mat)
+}
+# Let's apply the function
+mat<-int_matrix(N = 10, aii = 0.5, nep = 0.4, pop = 0.2)
+dim(mat)
+```
+
+Now we can simulate the system
+
+```{r}
+# Number of species
+N<-ncol(mat)
+# Growing rates
+ri<-runif(N)
+# Initial abundances
+y<-runif(N)
+# Parameters
+parms<-cbind(ri, mat)
+# Time steps
+times<-seq(1, 100, by=1)
+# gLV function
+glv_solver<-function(t, y, parms){
+  N<-nrow(parms)
+  ri<-parms[,1]
+  mat<-parms[,-1]
+  glv<-y*(ri + mat %*% y)
+  list(glv)
+}
+# Let's solve the function
+sim_glv<-ode(y, times, glv_solver, parms)
+# Time serie plot
+sim_glv<-t(sim_glv[,-1])
+colnames(sim_glv)<-times
+matplot(x = times, y = t(sim_glv), type = "l",
+        xlab = "Time", ylab = "Population",
+        main = "Generalized Lotka-Volterra", lwd = 2,lty=1)
+```
+
+Let's add a perturbation to the system by changing the weights of interactions
+
+```{r}
+# We simulate another interaction matrix
+mat_pert<-int_matrix(N = 10, aii = 0.5, nep = 0.4, pop = 0.2)
+parms_pert<-cbind(ri, mat_pert)
+# We simulate the model again using the new interaction matrix and the last abundances obtain in the previous simulation as initial abundances
+times_pert<-seq(1, 30, by = 1)
+sim_glv_pert<-ode(y = sim_glv[,ncol(sim_glv)], times=times_pert,
+                    glv_solver, parms = parms_pert)
+sim_glv_pert<-t(sim_glv_pert[,-1])
+sim_glv_new<-cbind(sim_glv, sim_glv_pert)
+# And now we re-establish the previous conditions
+sim_glv_post<-ode(y = sim_glv_new[,length(times)], times=times,
+                   glv_solver, parms = parms)
+sim_glv_post<-t(sim_glv_post[,-1])
+sim_glv_new<-cbind(sim_glv_new, sim_glv_post)
+
+# Plot
+matplot(x = seq(1:ncol(sim_glv_new)), y = t(sim_glv_new),
+        type = "l", xlab = "Time", ylab = "Population",
+        main = "Generalized Lotka-Volterra", lwd = 2,lty=1)
+```
+
+We compile the previous code into two functions
+
+```{r}
+# Generalized Lotka-Volterra function
+my_glv<-function(mat, ri, y, t_start, t_end, perturb){
+  require(deSolve)
+  if(is.null(perturb)){
+    # Number of species
+    N<-ncol(mat)
+    # We bind the growing rates and the interaction matrix
+    parms<-cbind(ri, mat)
+    # Time points
+    times<-seq(t_start, t_end, by=1)
+    # Simulation by using the glv_solver function
+    sim_glv<-ode(y, times, glv_solver, parms)
+    sim_glv<-t(sim_glv[,-1])
+    colnames(sim_glv)<-times
+    return(sim_glv)
+  } else {
+    N<-ncol(mat)
+    parms<-cbind(ri, mat)
+    # Community behavior before the perturbation
+    times1<-seq(t_start, perturb[[2]]-1, by=1)
+    sim_glv1<-ode(y, times1, glv_solver, parms)
+    sim_glv1<-t(sim_glv1[,-1])
+    # Community behavior during the perturbation
+    times2<-seq(perturb[[2]], perturb[[3]], by=1)
+    parms_p<-cbind(ri, perturb[[1]])
+    # As initial abundances, we use the last abundances given by
+    # the previous simulation 
+    sim_glv2<-ode(sim_glv1[,ncol(sim_glv1)], times2, glv_solver, parms_p)
+    sim_glv2<-t(sim_glv2[,-1])
+    # We bind both simulations
+    sim_glv2<-cbind(sim_glv1, sim_glv2)
+    # Community behavior after the perturbation
+    times3<-seq(perturb[[3]]+1, t_end, by=1)
+    sim_glv3<-ode(sim_glv2[,ncol(sim_glv2)], times3, glv_solver, parms)
+    sim_glv3<-t(sim_glv3[,-1])
+    # We bind the final simulation and add the time points
+    sim_glv_p<-cbind(sim_glv2, sim_glv3)
+    final_time<-seq(1, ncol(sim_glv_p), by = 1)
+    colnames(sim_glv_p)<-final_time
+    return(sim_glv_p)
+  }
+}
+
+# Perturbation function
+perturb<-function(N, aii, nep, pop, strength, from, to){
+   # We make another interaction matrix
+   nep<-round(N*N*nep, 0)
+   pop<-round(N*N*pop, 0)
+   v<-runif(N*N, -1*(strength), 0)
+   positives<-v[sample(1:length(v), pop)]
+   v[which(v %in% positives)]<-v[which(v %in% positives)]*(-1)
+   v[sample(1:length(v), nep)]<-0
+   v[seq(1, length(v), N+1)]<-aii*(-1)
+   mat_p<-matrix(v, N, N)
+   # The function returns the matrix, and the starting and ending
+   # perturbation time points
+   return(list(mat_p, from, to))
+}
+```
+
+Let's apply our functions
+
+```{r}
+N<-10
+mat<-int_matrix(N, aii = 0.5, nep = 0.5, pop = 0.2)
+prt<-perturb(N, aii = 0.5, nep = 0.5, pop = 0.2, strength = 0.5,
+        from = 100, to = 130)
+sim_1<-my_glv(mat, ri = runif(N), y = runif(N), t_start = 1, t_end = 250, NULL)
+matplot(x = seq(1:ncol(sim_1)), y = t(sim_1),
+        type = "l", xlab = "Time", ylab = "Population",
+        main = "Generalized Lotka-Volterra", lwd = 2,lty=1)
+sim_2<-my_glv(mat, ri = runif(N), y = runif(N), t_start = 1, t_end = 250, prt)
+matplot(x = seq(1:ncol(sim_2)), y = t(sim_2),
+        type = "l", xlab = "Time", ylab = "Population",
+        main = "Generalized Lotka-Volterra", lwd = 2, lty=1)
+```
+
+## MacArthur model {-}
+
+The MacArthur consumer-resource model analyses how the populations use the available resources, so Species interactions, therefore, aren't direct. Instead they emerge from the utilization of resources.
+
+To simplify the model, we'll only consider two species competing for a single resource.
+
+```{r}
+dN1<-function(time, y, parms){
+  dN1<-N1*Vl*C1l
+}
+```
