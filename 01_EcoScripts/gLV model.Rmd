@@ -1,0 +1,1403 @@
+## Lotka-Volterra model {-}
+
+The Lotka-Volterra model is based on the positive, negative and neutral interactions between species and the strength of this interactions. It's a deterministic model the doesn't consider the effect of the environment and the metabolism of populations.
+````{r setup, include=FALSE} 
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+library(seqtime)
+library(ggplot2)
+library(reshape2)
+# Number of species
+N = 50
+# Number of samples
+S = 250
+# Interaction matrix, where pep is the proportion of positive interactions (0, 20, 40, 60, 80 and 100%), and c represents the connectivity of the network.
+
+#A0 = generateA(N, "klemm", pep=0, c=0.05)
+#save(A0, file = "A0.RData")
+load("A0.RData")
+#A10 = generateA(N, "klemm", pep=7, c=0.05)
+#save(A10, file = "A10.RData")
+load("A10.RData")
+#A20 = generateA(N, "klemm", pep=14, c=0.05)
+#save(A20, file = "A20.RData")
+load("A20.RData")
+#A30 = generateA(N, "klemm", pep=20, c=0.05)
+#save(A30, file = "A30.RData")
+load("A30.RData")
+#A40 = generateA(N, "klemm", pep=28, c=0.05)
+#save(A40, file = "A40.RData")
+load("A40.RData")
+#A50 = generateA(N, "klemm", pep=35, c=0.05)
+#save(A50, file = "A50.RData")
+load("A50.RData")
+#A60 = generateA(N, "klemm", pep=42, c=0.05)
+#save(A60, file = "A60.RData")
+load("A60.RData")
+#A70 = generateA(N, "klemm", pep=50, c=0.05)
+#save(A70, file = "A70.RData")
+load("A70.RData")
+```
+
+The Klemm-Eguiluz matrix codifies the positive and negative interactions of the network.
+```{r warning = FALSE}
+plotA(A0, header="Klemm-Eguiluz interaction matrix 0%")
+plotA(A10, header="Klemm-Eguiluz interaction matrix 10%")
+plotA(A20, header="Klemm-Eguiluz interaction matrix 20%")
+plotA(A30, header="Klemm-Eguiluz interaction matrix 30%")
+plotA(A40, header="Klemm-Eguiluz interaction matrix 40%")
+plotA(A50, header="Klemm-Eguiluz interaction matrix 50%")
+plotA(A60, header="Klemm-Eguiluz interaction matrix 60%")
+```
+
+Now we can generate the interaction networks for each model, as well as the change of species' abundances over time.
+```{r warning = FALSE}
+# We assign the names on the matrix columns and rows based on their position.
+rownames(A0)=c(1:N)
+colnames(A0)=rownames(A0)
+rownames(A10)=c(1:N)
+colnames(A10)=rownames(A10)
+rownames(A20)=c(1:N)
+colnames(A20)=rownames(A20)
+rownames(A30)=c(1:N)
+colnames(A30)=rownames(A30)
+rownames(A40)=c(1:N)
+colnames(A40)=rownames(A40)
+rownames(A50)=c(1:N)
+colnames(A50)=rownames(A50)
+rownames(A60)=c(1:N)
+colnames(A60)=rownames(A60)
+
+# b corresponds to the growth rates.
+# y corresponds to the initial abundances.
+# tstar is the initial point, and tend is the final one.
+# tstep is the longitude of time steps.
+# runif() generates random numbers from 0 to 1.
+gLV10<-glv(N, A10, b = runif(N, 0, 1), y = runif(N, 0.5, 5),
+           tstart = 0, tend = S, tstep = 1,
+           perturb = NULL)
+# Table normalization
+gLV10<-gLV10/colSums(gLV10)
+tsplot(gLV10, main="Generalized Lotka-Volterra")
+# Generation of a data.frame with sample number and the interaction matrix.
+dataset = melt(gLV10)
+dataset
+```
+
+For introduce a perturbation on the dynamics of the community, we randomly modify for a period the weights of the network's interactions.
+```{r}
+env<-runif(N, -0.01, 0.01)
+pert<-perturbation(times = rep(100, N), durations = rep(30, N),
+                   growthchanges = env)
+gLVp<-glv(N, A10, tstart = 0, tend = S, y = runif(N, 0.5, 5),
+          tstep = 1, perturb = pert)
+dim(as.data.frame(gLVp))
+gLVp<-gLVp/colSums(gLVp)
+tsplot(gLVp, main="Generalized Lotka-Volterra perturbated")
+```
+
+We introduce white noise on the abundance table.
+```{r}
+wn_ab_table<-function(ab_table, sd){
+  ab_vector<-as.vector(ab_table)
+  ab_vector_wn<-c()
+  for(i in 1:length(ab_vector)){
+    ab_vector_wn[i]<-rnorm(n = 1, mean = ab_vector[i], sd = sd)
+  }
+  ab_vector_wn[which(ab_vector_wn<0)]<-ab_vector_wn[which(ab_vector_wn<0)]*(-1)
+  wn_ab_table<-matrix(ab_vector_wn, nrow(ab_table), ncol(ab_table))
+  return(wn_ab_table)
+}
+
+wn_gLVp<-wn_ab_table(gLVp, 0.001)
+tsplot(wn_gLVp, "Perturbated gLV model with white noise")
+```
+
+Now, we iterate the gLV model n times to get statistical significance.
+```{r}
+n_iterated_gLV<-function(I, interaction_matrix, N, S, perturb, white_noise){
+  models_list<-list()
+  for(i in 1:I){
+    models_list[[i]]<-glv(N, interaction_matrix, b = runif(N, 0, 1),
+                          y = runif(N, 0.5, 5),
+                          tstart = 0, tend = S, tstep = 1,
+                          perturb = perturb)
+  }
+  if(white_noise == T){
+    for(i in 1:length(models_list)){
+      models_list[[i]]<-wn_ab_table(models_list[[i]], 0.05)
+    }
+  } else
+  if(white_noise == F){
+    for(i in 1:length(models_list)){
+      ab_vector<-as.vector(models_list[[i]])
+      ab_vector[which(ab_vector<0)]<-ab_vector[which(ab_vector<0)]*(-1)
+      models_list[[i]]<-matrix(ab_vector, nrow(models_list[[i]]),
+                               ncol(models_list[[i]]))
+    }
+  }
+  return(models_list)
+}
+```
+
+Now, let's use the previous function.
+```{r}
+env<-runif(N, -0.01, 0.01)
+pert<-perturbation(times = rep(100, N), durations = rep(30, N),
+                   growthchanges = env)
+models_list_10<-n_iterated_gLV(I = 30, A10, N, S, perturb = pert,
+                               white_noise = T)
+for(i in 1:8){
+  tsplot(models_list_10[[i]])
+}
+```
+
+For compute the diversity on the samples, we used different indices: Shannon diversity, Pielou evenness and Simpson dominance.
+```{r}
+# Shannon diversity
+Div_Shannon <- function(abundancias_ab){
+  abs_rel <- abundancias_ab/sum(abundancias_ab)
+  Shannon <- -sum(abs_rel*log(abs_rel))
+  return(Shannon)
+}
+
+# Simpson dominance
+Dom_Simpson <- function(abundancias_ab){
+  abs_rel <- abundancias_ab/sum(abundancias_ab)
+  Simpson <- sum(abs_rel^2)
+  return(Simpson)
+}
+
+# Pielou evenness
+Eq_Pielou <- function(abundancias_ab){
+  abs_rel <- abundancias_ab/sum(abundancias_ab)
+  Shannon <- -sum(abs_rel*log(abs_rel))
+  Pielou <- Shannon/log(length(abundancias_ab))
+  return(Pielou)
+}
+```
+
+We built a function able to compute different types of diversity measures (Pielou, Shannon and Simpson indices) from a list of models.
+```{r}
+ab_tables_div<-function(ab_tables_list, diversity_type){
+  if(diversity_type == "shannon"){
+    div_list<-list()
+    for(j in 1:length(ab_tables_list)){
+      div_table<-c()
+      for(i in 1:ncol(ab_tables_list[[j]])){
+        div_table[i]<-Div_Shannon(ab_tables_list[[j]][, i])
+      }
+      div_list[[j]]<-div_table
+    }
+  } else
+  if(diversity_type == "simpson"){
+    div_list<-list()
+    for(j in 1:length(ab_tables_list)){
+      div_table<-c()
+      for(i in 1:ncol(ab_tables_list[[j]])){
+        div_table[i]<-Dom_Simpson(ab_tables_list[[j]][, i])
+      }
+      div_list[[j]]<-div_table
+    }
+  } else
+  if(diversity_type == "pielou"){
+    div_list<-list()
+    for(j in 1:length(ab_tables_list)){
+      div_table<-c()
+      for(i in 1:ncol(ab_tables_list[[j]])){
+        div_table[i]<-Eq_Pielou(ab_tables_list[[j]][, i])
+      }
+      div_list[[j]]<-div_table
+    }
+  } else
+  if(diversity_type == "ginisimpson"){
+    div_list<-list()
+    for(j in 1:length(ab_tables_list)){
+      div_table<-c()
+      for(i in 1:ncol(ab_tables_list[[j]])){
+        div_table[i]<-1-Dom_Simpson(ab_tables_list[[j]][, i])
+      }
+      div_list[[j]]<-div_table
+    }
+  }
+  return(div_list)
+}
+```
+
+We can also build a function for compute the diversity, evenness and dominance for a single abundance table.
+```{r}
+ab_table_div<-function(ab_table, diversity_type){
+  require(vegan)
+  if(diversity_type == "shannon"){
+    div_table<-c()
+    for(i in 1:ncol(ab_table)){
+      div_table[i]<-diversity(ab_table[, i])
+    }
+  } else
+  if(diversity_type == "simpson"){
+    div_table<-c()
+    for(i in 1:ncol(ab_table)){
+      div_table[i]<-Dom_Simpson(ab_table[, i])
+    }
+  } else
+  if(diversity_type == "pielou"){
+    div_table<-c()
+    for(i in 1:ncol(ab_table)){
+      S <- length(ab_table[, i])
+      div_table[i] <- diversity(ab_table[, i])/log(S)
+    }
+  } else
+  if(diversity_type == "ginisimpson"){
+    div_table<-c()
+    for(i in 1:ncol(ab_table)){
+      div_table[i]<-1-Dom_Simpson(ab_table[, i])
+    }
+  }
+  return(div_table)
+}
+```
+
+Now let's compute the diversity, evenness and dominance.
+```{r}
+# Gini-Simpson diversity
+shannon_df <- data.frame(
+     "Time" = 1:length(ab_table_div(models_list_10[[2]],
+                                    "ginisimpson")), 
+     "Diversity" = ab_table_div(models_list_10[[2]],
+                                "ginisimpson")
+     )
+ggplot(shannon_df, aes(x = Time, y = Diversity)) + 
+     geom_point() + theme_classic()
+# Simpson dominance
+simpson_df <- data.frame(
+     "Time" = 1:length(ab_table_div(models_list_10[[2]], "simpson")), 
+     "Dominance" = ab_table_div(models_list_10[[2]], "simpson")
+     )
+ggplot(simpson_df, aes(x = Time, y = Dominance)) + 
+     geom_point() + theme_classic()
+# Pielou evenness
+pielou_df <- data.frame(
+     "Time" = 1:length(ab_table_div(models_list_10[[2]], "pielou")), 
+     "Evenness" = ab_table_div(models_list_10[[2]], "pielou")
+     )
+ggplot(pielou_df, aes(x = Time, y = Evenness)) + 
+     geom_point() + theme_classic()
+```
+
+Now we use the previous function to analyse a single abundance table.
+```{r}
+plot(ab_table_div(models_list_10[[2]], "ginisimpson"), xlab = "Time",
+     ylab = "Gini-Simpson", pch = 20)
+plot(ab_table_div(models_list_10[[2]], "simpson"), xlab = "Time",
+     ylab = "Dominace", pch = 20)
+plot(ab_table_div(models_list_10[[2]], "pielou"), xlab = "Time",
+     ylab = "Evenness", pch = 20)
+```
+
+Now, we need to estimate how long it takes for the model to stabilize itself after the initial conditions so that we can discard all the data previous to the models' stability.
+```{r}
+ab_tables<-n_iterated_gLV(30, A10, N, S, NULL, white_noise = F)
+```
+
+Now, let's build a function to determine the standard deviation of n-models' diversity data over time, so that we can estimate when do the models get stability.
+```{r}
+models_sd<-function(ab_tables){
+   div_list<-list()
+ for(i in 1:length(ab_tables)){
+   div_list[[i]]<-ab_table_div(ab_tables[[i]], "shannon")
+ }
+ div_mat<-matrix(unlist(div_list), ncol = 30)
+ mat_sd<-c()
+ for(i in 1:nrow(div_mat)){
+   mat_sd[i]<-sd(div_mat[i,])
+ }
+ return(mat_sd)
+}
+```
+
+Now we plot standard deviation over time.
+```{r}
+par(bg = "gray")
+plot(models_sd(ab_tables), type = "l", lwd = 3, col = "brown",
+     xlab = "Time steps", ylab = "sd")
+```
+
+After identifying at which point the system gets stability, we shall delete the previous data.
+```{r}
+# Function for delete unnecessary data:
+cut_tables<-function(ab_tables, start_p, end_p){
+  cut_tables<-list()
+  for(i in 1:length(ab_tables)){
+    cut_tables[[i]]<-ab_tables[[i]][,start_p:end_p]
+  }
+  return(cut_tables)
+}
+```
+
+We shall also build a function to normalize the tables.
+```{r}
+# Table list normalization
+norm_models<-function(ab_tables){
+  normalized_tables<-list()
+  for(i in 1:length(ab_tables)){
+    normalized_tables[[i]]<-ab_tables[[i]]/colSums(ab_tables[[i]])
+  }
+  return(normalized_tables)
+}
+```
+
+Let's do it for each interaction matrix.
+```{r}
+# For pep 0%
+models_list_0<-n_iterated_gLV(I = 30, A0, N, S, perturb = pert,
+                              white_noise = T)
+models_list_0<-cut_tables(models_list_0, 50, ncol(models_list_0[[1]]))
+models_list_0<-norm_models(models_list_0)
+shannon_A0<-ab_tables_div(models_list_0, "shannon")
+simpson_A0<-ab_tables_div(models_list_0, "simpson")
+pielou_A0<-ab_tables_div(models_list_0, "pielou")
+# For pep 10%
+models_list_10<-n_iterated_gLV(I = 30, A10, N, S, perturb = pert,
+                               white_noise = T)
+models_list_10<-cut_tables(models_list_10, 50, ncol(models_list_10[[1]]))
+models_list_10<-norm_models(models_list_10)
+shannon_A10<-ab_tables_div(models_list_10, "shannon")
+simpson_A10<-ab_tables_div(models_list_10, "simpson")
+pielou_A10<-ab_tables_div(models_list_10, "pielou")
+# For pep 20%
+models_list_20<-n_iterated_gLV(I = 30, A20, N, S, perturb = pert,
+                               white_noise = T)
+models_list_20<-cut_tables(models_list_20, 50, ncol(models_list_20[[1]]))
+models_list_20<-norm_models(models_list_20)
+shannon_A20<-ab_tables_div(models_list_20, "shannon")
+simpson_A20<-ab_tables_div(models_list_20, "simpson")
+pielou_A20<-ab_tables_div(models_list_20, "pielou")
+# For pep 30%
+models_list_30<-n_iterated_gLV(I = 30, A30, N, S, perturb = pert,
+                               white_noise = T)
+models_list_30<-cut_tables(models_list_30, 50, ncol(models_list_30[[1]]))
+models_list_30<-norm_models(models_list_30)
+shannon_A30<-ab_tables_div(models_list_30, "shannon")
+simpson_A30<-ab_tables_div(models_list_30, "simpson")
+pielou_A30<-ab_tables_div(models_list_30, "pielou")
+# For pep 40%
+models_list_40<-n_iterated_gLV(I = 30, A40, N, S, perturb = pert,
+                               white_noise = T)
+models_list_40<-cut_tables(models_list_40, 50, ncol(models_list_40[[1]]))
+models_list_40<-norm_models(models_list_40)
+shannon_A40<-ab_tables_div(models_list_40, "shannon")
+simpson_A40<-ab_tables_div(models_list_40, "simpson")
+pielou_A40<-ab_tables_div(models_list_40, "pielou")
+# For pep 50%
+models_list_50<-n_iterated_gLV(I = 30, A50, N, S, perturb = pert,
+                               white_noise = T)
+models_list_50<-cut_tables(models_list_50, 50, ncol(models_list_50[[1]]))
+models_list_50<-norm_models(models_list_50)
+shannon_A50<-ab_tables_div(models_list_50, "shannon")
+simpson_A50<-ab_tables_div(models_list_50, "simpson")
+pielou_A50<-ab_tables_div(models_list_50, "pielou")
+# For pep 60%
+models_list_60<-n_iterated_gLV(I = 30, A60, N, S, perturb = pert,
+                               white_noise = T)
+models_list_60<-cut_tables(models_list_60, 50, ncol(models_list_60[[1]]))
+models_list_60<-norm_models(models_list_60)
+shannon_A60<-ab_tables_div(models_list_60, "shannon")
+simpson_A60<-ab_tables_div(models_list_60, "simpson")
+pielou_A60<-ab_tables_div(models_list_60, "pielou")
+# For pep 70%
+#models_list_70<-n_iterated_gLV(I = 30, A70, N, S, perturb = pert,
+#                               white_noise = T)
+#models_list_70<-cut_tables(models_list_70, 50, ncol(models_list_70[[1]]))
+#models_list_70<-norm_models(models_list_70)
+#shannon_A70<-ab_tables_div(models_list_70, "shannon")
+#simpson_A70<-ab_tables_div(models_list_70, "simpson")
+#pielou_A70<-ab_tables_div(models_list_70, "pielou")
+```
+
+Shannon diversity plots:
+```{r}
+# So now we can analyse the effect of positive interactions on the diversity
+plot(shannon_A0[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+plot(shannon_A10[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+plot(shannon_A20[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+plot(shannon_A30[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+plot(shannon_A40[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+plot(shannon_A50[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+plot(shannon_A60[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+#plot(shannon_A70[[1]], xlab = "Time", ylab = "Diversity", pch = 20)
+```
+
+Now, we must separate the periods from the main set of tables.
+```{r}
+sep_tables<-function(ab_tables, start_p, end_p){
+  sep_tables<-list()
+  for(i in 1:length(ab_tables)){
+    sep_tables[[i]]<-ab_tables[[i]][,start_p:end_p]
+  }
+  return(sep_tables)
+}
+```
+
+Using the previous function, we extract the different periods from the table and calculate the Shannon index over time as a way to describe the global behavior of the system.
+```{r}
+# Extract the periods from tables
+basal_tables_0<-sep_tables(models_list_0, 1, 50)
+during_pert_tables_0<-sep_tables(models_list_0, 51, 80)
+post_pert_tables_0<-sep_tables(models_list_0, 81, 110)
+recovered_tables_0<-sep_tables(models_list_0, 111,
+                                ncol(models_list_0[[1]]))
+# Compute the diversity of each period
+div_basal_0<-ab_tables_div(basal_tables_0, "shannon")
+div_pert_0<-ab_tables_div(during_pert_tables_0, "shannon")
+div_post_0<-ab_tables_div(post_pert_tables_0, "shannon")
+div_recvrd_0<-ab_tables_div(recovered_tables_0, "shannon")
+
+# Extract the periods from tables
+basal_tables_10<-sep_tables(models_list_10, 1, 50)
+during_pert_tables_10<-sep_tables(models_list_10, 51, 80)
+post_pert_tables_10<-sep_tables(models_list_10, 81, 110)
+recovered_tables_10<-sep_tables(models_list_10, 111,
+                                ncol(models_list_10[[1]]))
+# Compute the diversity of each period
+div_basal_10<-ab_tables_div(basal_tables_10, "shannon")
+div_pert_10<-ab_tables_div(during_pert_tables_10, "shannon")
+div_post_10<-ab_tables_div(post_pert_tables_10, "shannon")
+div_recvrd_10<-ab_tables_div(recovered_tables_10, "shannon")
+
+# Extract the periods from tables
+basal_tables_20<-sep_tables(models_list_20, 1, 50)
+during_pert_tables_20<-sep_tables(models_list_20, 51, 80)
+post_pert_tables_20<-sep_tables(models_list_20, 81, 110)
+recovered_tables_20<-sep_tables(models_list_20, 111,
+                                ncol(models_list_20[[1]]))
+# Compute the diversity of each period
+div_basal_20<-ab_tables_div(basal_tables_20, "shannon")
+div_pert_20<-ab_tables_div(during_pert_tables_20, "shannon")
+div_post_20<-ab_tables_div(post_pert_tables_20, "shannon")
+div_recvrd_20<-ab_tables_div(recovered_tables_20, "shannon")
+
+# Extract the periods from tables
+basal_tables_30<-sep_tables(models_list_30, 1, 50)
+during_pert_tables_30<-sep_tables(models_list_30, 51, 80)
+post_pert_tables_30<-sep_tables(models_list_30, 81, 110)
+recovered_tables_30<-sep_tables(models_list_30, 111,
+                                ncol(models_list_30[[1]]))
+# Compute the diversity of each period
+div_basal_30<-ab_tables_div(basal_tables_30, "shannon")
+div_pert_30<-ab_tables_div(during_pert_tables_30, "shannon")
+div_post_30<-ab_tables_div(post_pert_tables_30, "shannon")
+div_recvrd_30<-ab_tables_div(recovered_tables_30, "shannon")
+
+# Extract the periods from tables
+basal_tables_40<-sep_tables(models_list_40, 1, 50)
+during_pert_tables_40<-sep_tables(models_list_40, 51, 80)
+post_pert_tables_40<-sep_tables(models_list_40, 81, 110)
+recovered_tables_40<-sep_tables(models_list_40, 111,
+                                ncol(models_list_40[[1]]))
+# Compute the diversity of each period
+div_basal_40<-ab_tables_div(basal_tables_40, "shannon")
+div_pert_40<-ab_tables_div(during_pert_tables_40, "shannon")
+div_post_40<-ab_tables_div(post_pert_tables_40, "shannon")
+div_recvrd_40<-ab_tables_div(recovered_tables_40, "shannon")
+
+# Extract the periods from tables
+basal_tables_50<-sep_tables(models_list_50, 1, 50)
+during_pert_tables_50<-sep_tables(models_list_50, 51, 80)
+post_pert_tables_50<-sep_tables(models_list_50, 81, 110)
+recovered_tables_50<-sep_tables(models_list_50, 111,
+                                ncol(models_list_50[[1]]))
+# Compute the diversity of each period
+div_basal_50<-ab_tables_div(basal_tables_50, "shannon")
+div_pert_50<-ab_tables_div(during_pert_tables_50, "shannon")
+div_post_50<-ab_tables_div(post_pert_tables_50, "shannon")
+div_recvrd_50<-ab_tables_div(recovered_tables_50, "shannon")
+
+#Extract the periods from tables
+basal_tables_60<-sep_tables(models_list_60, 1, 50)
+during_pert_tables_60<-sep_tables(models_list_60, 51, 80)
+post_pert_tables_60<-sep_tables(models_list_60, 81, 110)
+recovered_tables_60<-sep_tables(models_list_60, 111,
+                                ncol(models_list_60[[1]]))
+# Compute the diversity of each period
+div_basal_60<-ab_tables_div(basal_tables_60, "shannon")
+div_pert_60<-ab_tables_div(during_pert_tables_60, "shannon")
+div_post_60<-ab_tables_div(post_pert_tables_60, "shannon")
+div_recvrd_60<-ab_tables_div(recovered_tables_60, "shannon")
+```
+
+Let's analyse if the diversity, dominance and evenness differences between periods are statistically significant.
+```{r}
+# Shannon diversity
+P1_s<-unlist(ab_tables_div(basal_tables_10, "shannon"))
+P2_s<-unlist(ab_tables_div(during_pert_tables_10, "shannon"))
+P3_s<-unlist(ab_tables_div(post_pert_tables_10, "shannon"))
+P4_s<-unlist(ab_tables_div(recovered_tables_10, "shannon"))
+P1df_s<-data.frame("Period" = rep("Basal period", length(P1_s)),
+                   "Data" = P1_s)
+P2df_s<-data.frame("Period" = rep("Perturbated period", length(P2_s)),
+                   "Data" = P2_s)
+P3df_s<-data.frame("Period" = rep("Post-perturbation period",
+                                  length(P3_s)), "Data" = P3_s)
+P4df_s<-data.frame("Period" = rep("Recovered period", length(P4_s)),
+                   "Data" = P4_s)
+Pdf_s<-rbind(P1df_s, P2df_s, P3df_s, P4df_s)
+ggplot(Pdf_s, aes(x=Pdf_s$Period, y=Pdf_s$Data)) +
+    geom_violin(fill="darkslategray3", color="black") +
+    geom_boxplot(width=0.15, notch=TRUE,
+                 fill=c("green3", "red3",
+                        "darkorange1", "dodgerblue4"),
+                 color="black") + ggtitle("Shannon diversity") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    xlab("") + ylab("")
+
+# Evenness of Pielou
+P1_p<-unlist(ab_tables_div(basal_tables_10, "pielou"))
+P2_p<-unlist(ab_tables_div(during_pert_tables_10, "pielou"))
+P3_p<-unlist(ab_tables_div(post_pert_tables_10, "pielou"))
+P4_p<-unlist(ab_tables_div(recovered_tables_10, "pielou"))
+P1df_p<-data.frame("Period" = rep("Basal period", length(P1_p)),
+                   "Data" = P1_p)
+P2df_p<-data.frame("Period" = rep("Perturbated period", length(P2_p)),
+                   "Data" = P2_p)
+P3df_p<-data.frame("Period" = rep("Post-perturbation period",
+                                  length(P3_p)), "Data" = P3_p)
+P4df_p<-data.frame("Period" = rep("Recovered period", length(P4_p)),
+                   "Data" = P4_p)
+Pdf_p<-rbind(P1df_p, P2df_p, P3df_p, P4df_p)
+ggplot(Pdf_p, aes(x=Pdf_p$Period, y=Pdf_p$Data)) +
+    geom_violin(fill="darkslategray3", color="black") +
+    geom_boxplot(width=0.15, notch=TRUE,
+                 fill=c("green3", "red3",
+                        "darkorange1", "dodgerblue4"),
+                 color="black") + ggtitle("Pielou evenness") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    xlab("") + ylab("")
+
+# Simpson dominance
+P1_d<-unlist(ab_tables_div(basal_tables_10, "simpson"))
+P2_d<-unlist(ab_tables_div(during_pert_tables_10, "simpson"))
+P3_d<-unlist(ab_tables_div(post_pert_tables_10, "simpson"))
+P4_d<-unlist(ab_tables_div(recovered_tables_10, "simpson"))
+P1df_d<-data.frame("Period" = rep("Basal period", length(P1_d)),
+                   "Data" = P1_d)
+P2df_d<-data.frame("Period" = rep("Perturbated period", length(P2_d)),
+                   "Data" = P2_d)
+P3df_d<-data.frame("Period" = rep("Post-perturbation period",
+                                  length(P3_d)), "Data" = P3_d)
+P4df_d<-data.frame("Data" = P4_d,
+                   "Period" = rep("Recovered period", length(P4_d)))
+Pdf_d<-rbind(P1df_d, P2df_d, P3df_d, P4df_d)
+ggplot(Pdf_d, aes(x=Pdf_d$Period, y=Pdf_d$Data)) +
+    geom_violin(fill="darkslategray3", color="black") +
+    geom_boxplot(width=0.15, notch=TRUE,
+                 fill=c("green3", "red3",
+                        "darkorange1", "dodgerblue4"),
+                 color="black") + ggtitle("Simpson dominance") +
+    theme(plot.title = element_text(hjust = 0.5)) +
+    xlab("") + ylab("")
+```
+
+Significance testing
+```{r}
+# Basic statistical summary
+summary(P1_s)
+summary(P2_s)
+summary(P3_s)
+summary(P4_s)
+# Shapiro-Wilk test identifies if the given data have a normal distribution. If it is true, the 0<W<1 value will be big, and the p-value will be p<0.05
+shapiro.test(P1_s)
+shapiro.test(P2_s)
+shapiro.test(P3_s)
+shapiro.test(P4_s)
+# Mean comparison using t-test. In the p-value<0.05, it means that the samples belong to the same population, so there isn't a significant difference between the means.
+t.test(P1_s, P2_s)
+t.test(P1_s, P3_s)
+t.test(P1_s, P4_s)
+```
+
+Now we make a quadratic model using the training data, and we compare it with the testing data.Normally, predictive power is greater than explanatory power.
+```{r}
+# We take two sets of data, the first one we'll use to train the model, and a second one to test the model.
+pielou_df <- data.frame(
+  "Time" = 1:length(ab_tables_div(models_list_10, "pielou")[[1]]), 
+  "Divesrity_train" = ab_tables_div(models_list_10, "pielou")[[1]],
+  "Divesrity_test" = ab_tables_div(models_list_10, "pielou")[[2]]
+)
+# Using the training data, let's make a quadratic model
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time +
+          I(pielou_df$Time^2), data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+# Now we plot the training data vs. predicted data (red line)
+ggplot(pielou_df, aes(x = pielou_df$Time, y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 2)
+# We can also analyze how far is the prediction model from the training and testing data by computing the residuals
+data.frame(
+  "Time" = 1:length(ab_tables_div(models_list_10, "shannon")[[1]]), 
+  "Divesrity_train" = ab_tables_div(models_list_10, "shannon")[[1]],
+  "Train_residuals" = c(pielou_df$Pred - pielou_df$Divesrity_train),
+  "Divesrity_test" = ab_tables_div(models_list_10, "shannon")[[2]],
+  "Test_residuals" = c(pielou_df$Pred - pielou_df$Divesrity_test)
+)
+# Using caret library, we can now compare the R2 (the percentage of data explained by the model). This R2, most of times, will be bigger for the training data than for the testing data.
+library(caret)
+postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)
+postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)
+```
+
+If we add complexity to the model, the R2 for training data will increase, but if we overfit the model, it will be too good for estimate the training data but it won't be useful to predict the testing data.
+
+Here we plot the training data vs. predicted data (red line). As qe can see, the model matches much better on the training data than on the testing data, so the RSqrd is usually bigger on training data than on testing data.
+```{r}
+library(gridExtra)
+# For k = 1, the model is just the mean of training data.
+pielou_df$Pred <- rep(mean(pielou_df$Divesrity_train),
+                       length(pielou_df$Pred))
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+                           y = pielou_df$Divesrity_train)) + 
+  labs(x = "Time", y = "Diversity") + geom_point() + 
+  geom_hline(yintercept = mean(pielou_df$Divesrity_train), color = "red") +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, label = paste("RSqrd=", Rsq)) +
+  annotate("text", x = 150, y = 0.99, label = "k = 1")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, y = pielou_df$Divesrity_test))   + labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_hline(yintercept = mean(pielou_df$Divesrity_train), color = "red") +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, label = paste("RSqrd=", Rsq))   +
+  annotate("text", x = 150, y = 0.99, label = "k = 1")
+grid.arrange(g1, g2, ncol=2)
+
+# For k = 2
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time, data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 2")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_test)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 2")
+grid.arrange(g1, g2, ncol=2)
+
+# For k = 3
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time +
+          I(pielou_df$Time^2), data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 3")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_test)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 3")
+grid.arrange(g1, g2, ncol=2)
+
+# For k = 4
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time +
+          I(pielou_df$Time^2) + I(pielou_df$Time^3)
+          , data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 4")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_test)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 4")
+grid.arrange(g1, g2, ncol=2)
+
+# For k = 5
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time +
+          I(pielou_df$Time^2) + I(pielou_df$Time^3) +
+          I(pielou_df$Time^4), data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 5")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_test)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 5")
+grid.arrange(g1, g2, ncol=2)
+
+# For k = 6
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time +
+          I(pielou_df$Time^2) + I(pielou_df$Time^3) +
+          I(pielou_df$Time^4) + I(pielou_df$Time^5),
+          data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 6")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_test)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 6")
+grid.arrange(g1, g2, ncol=2)
+
+# For k = 7
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time +
+          I(pielou_df$Time^2) + I(pielou_df$Time^3) +
+          I(pielou_df$Time^4) + I(pielou_df$Time^5) +
+          I(pielou_df$Time^6), data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 7")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_test)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 7")
+grid.arrange(g1, g2, ncol=2)
+
+# For k = 8
+Model<-lm(pielou_df$Divesrity_train ~ pielou_df$Time +
+          I(pielou_df$Time^2) + I(pielou_df$Time^3) +
+          I(pielou_df$Time^4) + I(pielou_df$Time^5) +
+          I(pielou_df$Time^6) + I(pielou_df$Time^7),
+          data = pielou_df)
+pielou_df$Pred <- predict(Model, pielou_df)
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_train)[2]
+g1<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_train)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Training data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 8")
+Rsq<-postResample(pred = pielou_df$Pred, obs = pielou_df$Divesrity_test)[2]
+g2<-ggplot(pielou_df, aes(x = pielou_df$Time, 
+  y = pielou_df$Divesrity_test)) +
+  labs(x = "Time", y = "Diversity") + geom_point() +
+  geom_line(aes(y = Pred), color = "red", lty = 1) +
+  ggtitle("Testing data") +
+  annotate("text", x = 150, y = 0.96, 
+  label = paste("RSqrd=", substr(Rsq, 1, 5))) + 
+  annotate("text", x = 150, y = 0.99, label = "k = 8")
+grid.arrange(g1, g2, ncol=2)
+```
+
+Then, we create training and testing data from n/2 models to increase statistic significance.
+```{r}
+# Let's create a training and testing data base:
+sm<-sample(length(models_list_10), length(models_list_10)/2)
+pielou_training_10<-sample(models_list_10[sm], 5)
+pielou_testing_10<-sample(models_list_10[-sm], 5)
+
+pielou_training_10ab<-ab_tables_div(pielou_training_10, "pielou")
+pielou_testing_10ab<-ab_tables_div(pielou_testing_10, "pielou")
+
+df10_pielou<-data.frame(
+  "Time" = rep(1:length(pielou_testing_10ab[[1]]),
+               length(pielou_testing_10ab)),
+  "Training" = unlist(pielou_training_10ab),
+  "Testing" = unlist(pielou_testing_10ab)
+)
+
+# We used the training data to build the models:
+Model1<-lm(df10_pielou$Training ~ df10_pielou$Time,
+          data = df10_pielou)
+
+Model2<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2), data = df10_pielou)
+
+Model3<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3),
+          data = df10_pielou)
+
+Model4<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4), data = df10_pielou)
+
+Model5<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5),
+          data = df10_pielou)
+
+Model6<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6), data = df10_pielou)
+
+Model7<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7),
+          data = df10_pielou)
+
+Model8<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8), data = df10_pielou)
+
+Model9<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8) + I(df10_pielou$Time^9),
+          data = df10_pielou)
+
+Model10<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8) + I(df10_pielou$Time^9) +
+          I(df10_pielou$Time^10), data = df10_pielou)
+
+Model11<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8) + I(df10_pielou$Time^9) +
+          I(df10_pielou$Time^10) + I(df10_pielou$Time^11),
+          data = df10_pielou)
+
+Model12<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8) + I(df10_pielou$Time^9) +
+          I(df10_pielou$Time^10) + I(df10_pielou$Time^11) +
+          I(df10_pielou$Time^12), data = df10_pielou)
+
+Model13<-lm(df10_pielou$Training ~df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8) + I(df10_pielou$Time^9) +
+          I(df10_pielou$Time^10) + I(df10_pielou$Time^11) +
+          I(df10_pielou$Time^12) + I(df10_pielou$Time^13),
+          data = df10_pielou)
+
+Model14<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8) + I(df10_pielou$Time^9) +
+          I(df10_pielou$Time^10) + I(df10_pielou$Time^11) +
+          I(df10_pielou$Time^12) + I(df10_pielou$Time^13) +
+          I(df10_pielou$Time^14), data = df10_pielou)
+
+Model15<-lm(df10_pielou$Training ~ df10_pielou$Time +
+          I(df10_pielou$Time^2) + I(df10_pielou$Time^3) +
+          I(df10_pielou$Time^4) + I(df10_pielou$Time^5) +
+          I(df10_pielou$Time^6) + I(df10_pielou$Time^7) +
+          I(df10_pielou$Time^8) + I(df10_pielou$Time^9) +
+          I(df10_pielou$Time^10) + I(df10_pielou$Time^11) +
+          I(df10_pielou$Time^12) + I(df10_pielou$Time^13) +
+          I(df10_pielou$Time^14) + I(df10_pielou$Time^15),
+          data = df10_pielou)
+
+# List of models
+pred_models<-list(Model1, Model2, Model3, Model4, Model5,
+                  Model6, Model7, Model8, Model9, Model10,
+                  Model11, Model12, Model13, Model14, Model15)
+```
+
+We build a function to quantify the value of RSqrd in relation to the number of parameters.
+```{r}
+r_sqrsd<-function(pred_models, obs){
+  predictions <- list()
+  for(i in 1:length(pred_models)){
+    predictions[[i]] <- predict(pred_models[[i]])
+  }
+  RSqrd<-c()
+  for(i in 1:length(predictions)){
+    RSqrd[i]<-postResample(pred = predictions[[i]],
+                           obs = obs)[2]
+  }
+  return(RSqrd)
+}
+```
+
+Let's compute the RSqrd
+```{r}
+r2_train<-r_sqrsd(pred_models, df10_pielou$Training)
+r2_test<-r_sqrsd(pred_models, df10_pielou$Testing)
+par(mfrow=c(1,2))
+plot(r2_train, type="p", pch=19, ylab="R-square", xlab="Model complexity",
+     main = "Training data")
+plot(r2_test, type="p", pch=19, ylab="R-square", xlab="Model complexity",
+     main = "Testing data")
+par(mfrow=c(1,1))
+```
+
+For find the best model, the one that maintains an equilibrium between the predictive and the explanatory power, we'll use the Akaike index ($AIC$). This index is calculated by using the model complexity $k$, defined by the number of adjusted parameters, and the maximum likelihood $ln(L)$. We must remember that the maximum likelihood is a method that estimates the best number of parameters for describe the behavior of a certain set of data, so it punish high number of parameters.
+
+$$AIC=2k-ln(L)$$
+
+In this case we'll use the adjusted Akaike index ($AICc$), that considers the number of observations, so when this $n$ tends to infinity, the result is the same than in the traditional $AIC$ index.
+
+$$AICc=AIC+\frac{2k(k+1)}{n-k-1}$$
+##################################################
+
+###########---REVISAR---##########################
+```{r}
+library(MuMIn)
+akc<-c()
+for(i in 1:length(pred_models)){
+  akc[i]<-AICc(pred_models[[i]])
+}; plot(akc)
+```
+
+For visualize the distribution of species in the community, we can use the rank log-abundance. This method sorts the abundances in decreasing order.
+```{r}
+rank_abs<-function(ab_tables, start_p, end_p){
+  rank_abs<-list()
+  for(j in 1:length(ab_tables)){
+    sum_abs<-c()
+    for(i in 1:nrow(ab_tables[[1]])){
+      sum_abs[i]<-sum(ab_tables[[j]][,start_p:end_p][i,])
+    }
+    rank_abs[[j]]<-sort(sum_abs/nrow(ab_tables[[1]]), decreasing = T)
+  }
+  rank_abs_mat<-matrix(unlist(rank_abs), nrow=length(ab_tables),
+                ncol=nrow(ab_tables[[1]]), byrow=TRUE)
+  return(rank_abs_mat)
+}
+
+rank_abs_mat<-rank_abs(models_list_10, 1, 50)
+
+matplot(x = seq(1:ncol(rank_abs_mat)), y = t(rank_abs_mat),
+        type = "l", xlab = "Species rank", ylab = "Abundance",
+        main = "Rank abundance", lwd = 2, lty=1)
+```
+
+Now we compare all the periods.
+```{r}
+basal<-rank_abs(models_list_10, 20, 50)
+during_pert<-rank_abs(models_list_10, 51, 80)
+post_pert<-rank_abs(models_list_10, 81, 110)
+recovered<-rank_abs(models_list_10, 111, 140)
+full_mat<-rbind(basal, during_pert, post_pert, recovered)
+col1<-rep("green3", 30)
+col2<-rep("red3", 30)
+col3<-rep("darkorange1", 30)
+col4<-rep("dodgerblue4", 30)
+par(mfrow=c(1,2))
+matplot(x = seq(1:ncol(full_mat)), y = t(full_mat),
+        type = "l", xlab = "Species rank", ylab = "Abundance",
+        main = "Rank abundance", lwd = 1, lty=1,
+        col=c(col1, col2, col3, col4))
+matplot(x = seq(1:ncol(full_mat)), y = t(full_mat),
+        type = "l", xlab = "Species rank", ylab = "Abundance",
+        main = "Log-log abundance", lwd = 1, lty=1,
+        col=c(col1, col2, col3, col4),
+        log = "xy")
+par(mfrow=c(1,1))
+```
+
+Rank abundance tendency.
+```{r}
+library(RADanalysis)
+sample_classes <- c(rep(1, 30),rep(2, 30),rep(3, 30), rep(4, 30))
+line_cols <- c("green3","red3","darkorange1", "dodgerblue4")
+# Plot the axis
+plot(1e10,xlim = c(1,50),ylim = c(0,0.05),
+     xlab = "Species rank",ylab = "Abundance",cex.lab = 1.5,axes = FALSE)
+sfsmisc::eaxis(side = 1,at = c(1,10,20,30,40,50))
+sfsmisc::eaxis(side = 2,at = c(0,0.01,0.02,0.03,0.04,0.05),las = 0)
+
+# Plot the curves
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 1),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[1],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 2),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[2],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 3),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[3],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 4),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[4],0.5),
+                        border = NA)
+legend("topright",bty = "n",
+       legend = c("Basal","Perturbated","Post-perturbated",
+                  "Recovered"), col = line_cols,lwd = 3)
+```
+
+Log-log rank abundance
+```{r}
+sample_classes <- c(rep(1, 30),rep(2, 30),rep(3, 30), rep(4, 30))
+line_cols <- c("green3","red3","darkorange1", "dodgerblue4")
+
+# Plot the axis
+plot(1e10,xlim = c(1,50),ylim = c(5e-04,5e-02), log = "xy",
+     xlab = "Species rank",ylab = "Abundance",cex.lab = 1.5,axes = FALSE)
+sfsmisc::eaxis(side = 1,at = c(1,2,5,10,25,50))
+sfsmisc::eaxis(side = 2,at = c(5e-04, 5e-03, 5e-02),las = 0)
+
+# Add colored curves
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 1),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[1],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 2),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[2],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 3),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[3],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_mat,
+                        sample_ids = which(sample_classes == 4),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[4],0.5),
+                        border = NA)
+legend("bottomleft",bty = "n",
+       legend = c("Basal","Perturbated","Post-perturbated",
+                  "Recovered"), col = line_cols,lwd = 3)
+```
+
+Multi-dimensional scaling analysis (MDS analysis).
+```{r}
+# Distance matrix using Manhattan distance
+d <- dist(x = full_mat,method = "manhattan")
+# Ordination using classical multi-dimensional scaling
+mds <- cmdscale(d = d,k = 5,eig = TRUE)
+# Points' plot
+plot(mds$points,xlab = "First coordinate",ylab = "Second coordinate",
+     pch = 19, cex =1,col = line_cols[sample_classes],
+     main = "Multi-Dimensional Scaling plot")
+# Representative points with error bars
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 1),
+                          col = scales::alpha(line_cols[1],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 2),
+                          col = scales::alpha(line_cols[2],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 3),
+                          col = scales::alpha(line_cols[3],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 4),
+                          col = scales::alpha(line_cols[4],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+legend("bottomleft",bty = "n",
+       legend = c("Basal","Perturbated", "Post-perturbated",
+                  "Recovered"), col = line_cols, pch = 19)
+```
+
+Model comparison
+```{r}
+plot(radfit(colSums(basal)/nrow(basal)), pch=20, main="Basal period")
+plot(radfit(colSums(during_pert)/nrow(during_pert)), pch=20,
+     main="Perturbated period")
+plot(radfit(colSums(post_pert)/nrow(post_pert)), pch=20,
+     main="Post-perturbation period")
+plot(radfit(colSums(recovered)/nrow(recovered)), pch=20,
+     main="Recovered period")
+```
+
+Another way to estimate the resistance is by using the next formula, where $S_{R}$ is the reference state of the system, and $S_{X}$ is the the state of the system during the perturbation at the time $t_{p}+x$:
+
+$$Rst=1-\frac{2*|S_{R}-S_{X}|}{S_{R}+|S_{R}-S_{X}|}$$
+
+```{r}
+resistance<-function(Sr, Sx){
+  div_diff<-mean(Sr/length(Sr))-mean(Sx/length(Sx))
+  Rst<-1-(2*abs(div_diff))/(mean(Sr/length(Sr))+
+                                     abs(div_diff))
+  return(Rst)
+}
+
+# For 0%
+rst_0<-c()
+for(i in 1:length(div_basal_0)){
+  rst_0[i]<-resistance(div_basal_0[[i]], div_pert_0[[i]])
+}
+
+# For 10%
+rst_10<-c()
+for(i in 1:length(div_basal_10)){
+  rst_10[i]<-resistance(div_basal_10[[i]], div_pert_10[[i]])
+}
+
+# For 20%
+rst_20<-c()
+for(i in 1:length(div_basal_20)){
+  rst_20[i]<-resistance(div_basal_20[[i]], div_pert_20[[i]])
+}
+
+# For 30%
+rst_30<-c()
+for(i in 1:length(div_basal_30)){
+  rst_30[i]<-resistance(div_basal_30[[i]], div_pert_30[[i]])
+}
+
+# For 40%
+rst_40<-c()
+for(i in 1:length(div_basal_40)){
+  rst_40[i]<-resistance(div_basal_40[[i]], div_pert_40[[i]])
+}
+
+# For 50%
+rst_50<-c()
+for(i in 1:length(div_basal_50)){
+  rst_50[i]<-resistance(div_basal_50[[i]], div_pert_50[[i]])
+}
+
+# For 60%
+rst_60<-c()
+for(i in 1:length(div_basal_60)){
+  rst_60[i]<-resistance(div_basal_60[[i]], div_pert_60[[i]])
+}
+
+
+rst_df<-data.frame(
+  "Resistance" = c(rst_0, rst_10, rst_20, rst_30, rst_40,
+                   rst_50, rst_60),
+  "Pep" = c(rep(0.001, length(rst_0)), rep(0.1, length(rst_10)),
+            rep(0.2, length(rst_20)), rep(0.3, length(rst_30)),
+            rep(0.4, length(rst_40)), rep(0.5, length(rst_50)),
+            rep(0.6, length(rst_60)))
+)
+
+ggplot(rst_df, aes(x=Pep, y=Resistance)) + 
+    geom_point(col="blue") + 
+    geom_violin(aes(x=Pep, group=factor(Pep)), col="black",
+                fill="skyblue") +
+    geom_smooth(method=lm, col="red", se=FALSE)
+```
+
+The resilience is estimated with the next formula. As we've seen before, $S_{R}$ represents the state of reference, meanwhile $S_{0}$ represents the deviation of the system during the perturbation. $S_{Y}$, by other side, is the system's value after an standardized recovering period.
+
+$$Rsl=\frac{2*|S_{R}-S_{X}|}{|S_{R}-S_{X}|+|S_{R}-S_{Y}|}-1$$
+
+```{r}
+resilience<-function(Sr, Sx, Sy){
+  div_diff_a<-mean(Sr/length(Sr))-mean(Sx/length(Sx))
+  div_diff_b<-mean(Sr/length(Sr))-mean(Sy/length(Sy))
+  Rsl<-2*abs(div_diff_a)/(abs(div_diff_a)+abs(div_diff_b))-1
+  return(Rsl)
+}
+
+# For 0%
+rsl_0<-c()
+for(i in 1:length(div_basal_0)){
+  rsl_0[i]<-resilience(div_basal_0[[i]], div_pert_0[[i]],
+                       div_post_0[[i]])
+}
+
+# For 10%
+rsl_10<-c()
+for(i in 1:length(div_basal_10)){
+  rsl_10[i]<-resilience(div_basal_10[[i]], div_pert_10[[i]],
+                       div_post_10[[i]])
+}
+
+# For 20%
+rsl_20<-c()
+for(i in 1:length(div_basal_20)){
+  rsl_20[i]<-resilience(div_basal_20[[i]], div_pert_20[[i]],
+                       div_post_20[[i]])
+}
+
+# For 30%
+rsl_30<-c()
+for(i in 1:length(div_basal_30)){
+  rsl_30[i]<-resilience(div_basal_30[[i]], div_pert_30[[i]],
+                       div_post_30[[i]])
+}
+
+# For 40%
+rsl_40<-c()
+for(i in 1:length(div_basal_40)){
+  rsl_40[i]<-resilience(div_basal_40[[i]], div_pert_40[[i]],
+                       div_post_40[[i]])
+}
+
+# For 50%
+rsl_50<-c()
+for(i in 1:length(div_basal_50)){
+  rsl_50[i]<-resilience(div_basal_50[[i]], div_pert_50[[i]],
+                       div_post_50[[i]])
+}
+
+# For 60%
+rsl_60<-c()
+for(i in 1:length(div_basal_60)){
+  rsl_60[i]<-resilience(div_basal_60[[i]], div_pert_60[[i]],
+                       div_post_60[[i]])
+}
+
+rsl_df<-data.frame(
+  "Resilience" = c(rsl_0, rsl_10, rsl_20, rsl_30, rsl_40,
+                   rsl_50, rsl_60),
+  "Pep" = c(rep(0.001, length(rsl_0)), rep(0.1, length(rsl_10)),
+            rep(0.2, length(rsl_20)), rep(0.3, length(rsl_30)),
+            rep(0.4, length(rsl_40)), rep(0.5, length(rsl_50)),
+            rep(0.6, length(rsl_60)))
+)
+
+ggplot(rsl_df, aes(x=Pep, y=Resilience)) + 
+    geom_point(col="blue") + 
+    geom_violin(aes(x=Pep, group=factor(Pep)), col="black",
+                fill="skyblue") +
+    geom_smooth(method=lm, col="red", se=FALSE)
+```
+
+The recovery can be understood as the similarity between the reference state and the recovered state.
+
+$$rcv=1-\frac{2*|S_{R}-S_{R}'|}{S_{R}+|S_{R}-S_{R}'|}$$
+
+```{r}
+recovery<-function(Sr, Sw){
+  div_diff<-mean(Sr/length(Sr))-mean(Sw/length(Sw))
+  rcv<-1-(2*abs(div_diff))/(mean(Sr/length(Sr))+abs(div_diff))
+  return(rcv)
+}
+
+# For 0%
+rcv_0<-c()
+for(i in 1:length(div_basal_0)){
+  rcv_0[i]<-recovery(div_basal_0[[i]], div_recvrd_0[[i]])
+}
+
+# For 10%
+rcv_10<-c()
+for(i in 1:length(div_basal_10)){
+  rcv_10[i]<-recovery(div_basal_10[[i]], div_recvrd_10[[i]])
+}
+
+# For 20%
+rcv_20<-c()
+for(i in 1:length(div_basal_20)){
+  rcv_20[i]<-recovery(div_basal_20[[i]], div_recvrd_20[[i]])
+}
+
+# For 30%
+rcv_30<-c()
+for(i in 1:length(div_basal_30)){
+  rcv_30[i]<-recovery(div_basal_30[[i]], div_recvrd_30[[i]])
+}
+
+# For 40%
+rcv_40<-c()
+for(i in 1:length(div_basal_40)){
+  rcv_40[i]<-recovery(div_basal_40[[i]], div_recvrd_40[[i]])
+}
+
+# For 50%
+rcv_50<-c()
+for(i in 1:length(div_basal_50)){
+  rcv_50[i]<-recovery(div_basal_50[[i]], div_recvrd_50[[i]])
+}
+
+# For 60%
+rcv_60<-c()
+for(i in 1:length(div_basal_60)){
+  rcv_60[i]<-recovery(div_basal_60[[i]], div_recvrd_60[[i]])
+}
+
+rcv_df<-data.frame(
+  "Recovery" = c(rcv_0, rcv_10, rcv_20, rcv_30, rcv_40,
+                   rcv_50, rcv_60),
+  "Pep" = c(rep(0.001, length(rcv_0)), rep(0.1, length(rcv_10)),
+            rep(0.2, length(rcv_20)), rep(0.3, length(rcv_30)),
+            rep(0.4, length(rcv_40)), rep(0.5, length(rcv_50)),
+            rep(0.6, length(rcv_60)))
+)
+
+ggplot(rcv_df, aes(x=Pep, y=Recovery)) + 
+    geom_point(col="blue") + 
+    geom_violin(aes(x=Pep, group=factor(Pep)), col="black",
+                fill="skyblue") +
+    geom_smooth(method=lm, col="red", se=FALSE)
+```
+
+
+
+
+
+
+
+
