@@ -295,7 +295,7 @@ BAdl_T2Net<-TaxGroup(BAdl_T2Net, tax_bacter, "Phylum", "Genus")
 
 # Multilayer networks
 
-library(muxViz) Hola
+library(muxViz)
 
 ml_BTad<-list(BTad_T2Net, BTad_T1Net, BTad_CtrNet) # Tadpole
 ml_BMet<-list(BMet_T2Net, BMet_T1Net, BMet_CtrNet) # Metamorphic
