@@ -1,0 +1,701 @@
+
+# Dinámica de comunidades microbianas {-}
+
+## Modelaje de poblaciones microbianas {-}
+
+Si tenemos que $\dot{x} = rx$, donde $r>0$, entonces $x(t)=x_{0}e^{rt}$, por lo que el modelo es exponencial, un comportamiento poco realista desde la perspectiva biológica.
+
+Un modelo más realista es el de Verhulst, donde el crecimiento de una población con respecto al tiempo $x(t)$ está limitada por una capacidad de carga del medio $k$.
+
+$$\frac{dx_{i}}{dt}=rx(1-\frac{x}{k})$$
+
+Cuya solución ~~exponencial~~ es:
+
+$$ x(t) = \frac{k}{1+(\frac{k-x_{0}}{x_{0}})e^{-rt}}$$
+
+con $x_0$ la condición inicial y $k$ la capacidad de carga.
+
+### Lotka-Volterra {-}
+
+Sin embargo, este sistema solo aplica condiciones de aislamiento con recursos ilimitados, pues no considera el papel de las interacciones entre poblaciones de distintas especies. La forma más sencilla de simular este comportamiento es mediante el modelo Lotka-Volterra.
+$$\dot{x}=r_{1}x_{1}-\alpha_{11}x^2_{1}-\alpha_{12}x_{1}x_{2}$$
+$$\dot{x}=r_{2}x_{2}-\alpha_{22}x^2_{2}-\alpha_{21}x_{1}x_{2}$$
+
+Donde las interacciones intraespecíficas $\alpha_{ii}$ son siempre *negativas*, pues los organismos de una misma especie ocupan el mismo nicho ecológico, por lo que compiten exactamente por los mismos recursos.
+
+Si ahora asumimos que la tasa de cremiciento *no* es constante, sino que varía en el tiempo $r(t)$, por lo que la tasa de crecimiento aquí está gobernada por las interacciones enterespecíficas.
+
+$$r_{i}(t)=r_{i}(1-\sum_{j}\alpha_{ij}x_{j})$$
+
+Por lo tanto, $r_{i}(t)$ se puede interpretar como una tasa de cambio per-cápita en función del tiempo.
+
+$$\dot{x_{i}}=r_{i}(t)x_{i}$$
+
+Por lo que $r$ puede ser mayor, menor o igual a cero en función del tiempo.
+
+Dado que $a_{ii}$ se puede definir como el inverso de la capacidad de carga $1/k_{i}$, por lo que:
+
+$$rx(1-(\frac{1}{k})x)=rx(1-\alpha x)$$
+
+Ahora debemos encontrar las condiciones para $r_{i}(t)$ que permitan la coexistencia entre especies en el tiempo.
+
+$$r_{i}=r_{i}(1-\alpha_{ij}x_{j}-\alpha_{ii}x_{i})$$
+
+Ahora, $\forall t$, $0<x_{j}<k_{j}$, puesto que ninguna población puede crecer más allá de su capacidad de carga, que limita el tamaño máximo de una población en condiciones óptimas bajo los recursos limitados del medio.
+
+Dado que, para que $i$ pueda coexistir con el resto de especies sin extinguirse, $r_{i}(t)>0$ debe ser un número positvo.
+
+$$r_{i}(t)=r_{i}(1-\frac{\alpha_{ij}}{\alpha{jj}}-\alpha_{ii}x_{i})$$
+Donde $\alpha_{ij}$ está limitado por $\alpha_{jj}$ dado que el máximo crecimiento de la población está definodo por $1/k_{j}$.
+
+Ya que la tasa de crecimiento intrínseca de la población es siempre positiva, $r_{i}>0$, para que la tasa de crecimiento dependiente de las interacciones sea también positiva $r_{i}(t)>0$, debe cumplir la siguiente condición:
+
+$$1-\frac{\alpha_{ij}}{\alpha_{jj}}-\alpha_{ii}x_{i}>0$$
+
+Por lo cual:
+
+$$\frac{\alpha_{ij}}{\alpha_{jj}}+\alpha_{ii}x_{i}<1$$
+
+Si despejamos $x_{i}$, que es la variable en función del tiempo $x(t)$:
+
+$$x_{i}<\frac{1}{\alpha_{ii}}-\frac{\alpha_{ij}}{\alpha_{jj}\alpha_{ii}}$$
+
+Y debido a que $\alpha_{ii}=1/k_{i}$, por lo tanto:
+
+$$x_{i}<k_{i}(1-\frac{\alpha{ij}}{\alpha{jj}})$$
+
+Donde se debe cumplir la condición $1-\alpha_{ij}/\alpha_{jj}>0$ para que $x_{i}$ sea positivo, por lo cual $\alpha_{ij}/\alpha_{jj}<1$, y por ende $\alpha_ij<\alpha_{jj}$.
+
+Por lo cual, para un modelo 2-D, esto se traduce en que $\alpha_{ij}<\alpha_{jj}$ y $\alpha_{ji}<\alpha_{ii}$ para que haya coexistencia entre ambas especies. Es decir, la competencia interespecífica entre la especie $i$ y $j$ debe ser menor que la competencia intraespecífica $\alpha_{jj}$.
+
+$$\alpha_{ij}<\alpha_{jj} \quad \text{y} \quad \alpha_{ji}<\alpha_{ii}$$
+
+Biológicamente esto se traduce en que, para que se de la coexistencia, la competencia entre los miembros de la misma especie competidora $j$, debe ser mayor que la competencia que ejerce sobre la especie $i$, lo cual hace sentido si pensamos que, al ocupar el mismo nicho y por ende, competir por los mismos recursos, las interacciones intraespecíficas suelen ser más fuertes.
+
+Cuando un competidor ejerce una presión mayor sobre los miembros de otra especie que la que ejerce sobre aquellos de su misma especie, entonces hablamos de un escenario donde dicho competidor $j$ eventualmente lleva a la especie $i$ a la extinción. A este fenómeno se le conoce como exclusión competitiva.
+
+$$\alpha_{ij}>\alpha_{jj} \quad \text{y} \quad \alpha_{ji}<\alpha_{ii}$$
+
+#### Método de las isoclinas {-}
+
+El método de las isoclinas es un método alternativo para resolver sistemas de ecuaciones diferenciales. Se trata de una familia de curvas que atraviesan segmentos de pendientes iguales y que permiten aproximar la solución a un sistema de ecuaciones.
+
+Si, por ejemplo, tenemos un sistema con $\dot{x}=f(x_{1}, x_{2})$ y $\dot{x}=g(x_{1}, x_{2})$, podemos aproximar la solución buscando una condición donde ambas poblaciones dejen de cambiar.
+
+Si tenemos que $r_{i}(t)=r_{i}(1-\alpha_{ij}x_{j}-\alpha_{ii}x_{i})$, donde $r_{i}(t)$ no cambia cuando $1-\alpha_{ij}x_{j}-\alpha_{ii}x_{i}=0$ y, por lo tanto, $1=\alpha_{ij}x_{j}+\alpha_{ii}x_{i}$. Si ahora despejamos $x_{i}$ obtenemos que:
+
+$$x_{i}=\frac{1}{\alpha_{ii}}-\frac{\alpha_{ij}}{\alpha_{ii}}x_{j}$$
+
+Por lo que el tamaño de la población corresponde a la capacidad de carga menos el efecto que ejerce la interacción con el competidor ($x_{i}=k_{i}-k_{i}\alpha_{ij}x_{j}$).
+
+Ahora sustituímos $x_{i}$ en la ecuación de $x_{j}$:
+
+$$\alpha_{ji}x_{i}+\alpha_{jj}x_{j}=1$$
+
+$$\alpha_{ji}(\frac{1}{\alpha_{ii}}-\frac{\alpha_{ij}}{\alpha_{ii}}x_{j})+\alpha_{jj}x_{j}=1$$
+
+Para luego despejar la variable $x_{j}$:
+
+$$\frac{\alpha_{ji}}{\alpha_{ii}}-\frac{\alpha_{ji}\alpha_{ij}} {\alpha_{ii}}x_{j}+\alpha_{jj}x_{j}=1$$
+
+$$\frac{\alpha_{ii}-\alpha_{ji}}{\alpha_{ii}}=(\frac{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}}{\alpha_{ii}})x_{j}$$
+
+$$\alpha_{ii}-\alpha_{ji}=(\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})x_{j}$$
+
+$$x_{j}^{*}=\frac{\alpha_{ii}-\alpha_{ji}}{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}}$$
+
+Ahora sustituímos $x_{j}^{*}$ en la ecuación $x_{i}=1/\alpha_{ii}-(\alpha_{ij}/\alpha_{ii})x_{j}$:
+
+$$x_{i}=\frac{1}{\alpha_{ii}}-\frac{\alpha_{ij}}{\alpha_{ii}}(\frac{\alpha_{ii}-\alpha_{ji}}{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}})$$
+
+$$x_{i}=\frac{1}{a_{ii}}-\frac{\alpha_{ij}(\alpha_{ii}-\alpha_{ji})}{\alpha_{ii}(\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})}$$
+
+$$x_{i}=\frac{\alpha_{ii}(\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})-\alpha_{ii}\alpha_{ij}(\alpha_{ii}-\alpha_{ji})}{\alpha_{ii}^{2}(\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})}$$
+
+$$x_{i}=\frac{(\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})-\alpha_{ij}(\alpha_{ii}-\alpha_{ji})}{\alpha_{ii} (\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})}$$
+
+$$x_{i}=\frac{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}-\alpha_{ij}\alpha_{ii}+\alpha_{ij}\alpha_{ji}}{\alpha_{ii} (\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})}$$
+
+$$x_{i}=\frac{\alpha_{jj}\alpha_{ii}- \alpha_{ij}\alpha_{ii}}{\alpha_{ii} (\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})}$$
+
+$$x_{i}^{*}=\frac{\alpha_{jj}-\alpha_{ij}}{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}}$$
+
+Por lo tanto, el punto de equilibrio $(x_{i}^{*}, x_{j}^{*})$ donde ambas especies coexisten, corresponde a:
+
+$$Peq=(\frac{\alpha_{jj}-\alpha_{ij}}{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}}, \frac{\alpha_{ii}-\alpha_{ji}}{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}})$$
+
+```{r}
+library(deSolve)
+# Modelo Lotka-Volterra
+LV2 <- function (time, y, parms) {
+  with(as.list(c(y, parms)), {
+  dN1 <- N1*(r1 - a11*N1 - a12*N2)
+  dN2 <- N2*(r2 - a22*N2 - a21*N1)
+  return(list(c(dN1, dN2)))
+ })
+}
+
+# Parámetros
+r1 = 1; r2 = 1; a11 = 2.2; a22 = 2; a12 = 1.2; a21 = 1
+coexitence <- c(r1, r2, a11, a22, a12, a21)
+
+# Condiciones iniciales
+initial_conditions <- c(N1 = 1, N2 = 1)
+
+# Tiempo
+time <- seq(0, 100, by = 1)
+
+# Simulaciones
+coex <- ode(initial_conditions, time, LV2, coexitence)
+
+x1_eq <- (a22-a12)/(a22*a11-a21*a12)
+x2_eq <- (a11-a21)/(a22*a11-a21*a12)
+
+# Coexistencia
+matplot(x = coex[ , 1], y = coex[ , 2:3], type = "l",
+        xlab = "Tiempo", ylab = "Población",
+        main = "Coexistencia", lwd = 2,lty=1)
+legend("topright", c("N1", "N2"), col = 1:2,lty=1)
+abline(h = x1_eq, lty = "dashed", col = "red")
+abline(h = x2_eq, lty = "dashed", col = "blue")
+```
+
+Ahora buscamos las ecuaciones para las rectas donde $\dot{x}=f(x,y)=0$ y $\dot{y}=g(x,y)=0$. Tomamos como partida las siguientes ecuaciones:
+
+$$\frac{dx_{i}}{dt}=r_{i}x_{i}(\frac{k_{i}-x_{i}-\alpha_{ij}x_{j}}{k_{i}})=0$$
+
+$$\frac{dx_{j}}{dt}=r_{j}x_{j}(\frac{k_{j}-x_{j}-\alpha_{ji}x_{i}}{k_{j}})=0$$
+
+Donde $k_{i}-x_{i}-\alpha_{ij}x_{j}=0$ y $k_{j}-x_{j}-\alpha_{ji}x_{i}=0$, por lo que al despejar las variables obtenemos que $x_{i}=k_{i}-\alpha_{ij}x_{j}$ (eq. 1) y $x_{j}=k_{j}-\alpha_{ji}x_{i}$ (eq. 2).
+
+Despejamos $x_{j}$ en eq. 1:
+
+$$x_{j}=\frac{k_{i}}{\alpha_{ij}}-\frac{x_{i}}{\alpha_{ij}}$$
+
+Si ahora asumimos que $x_{i}=0$ en eq. 1, obtenemos:
+
+$$x_{j}=\frac{k_{i}}{\alpha_{ij}}=\frac{1}{\alpha_{ij}\alpha_{ii}}$$
+
+Asumimos que $x_{j}=0$ en eq. 1:
+
+$$x_{i}=k_{i}=\frac{1}{\alpha_{ii}}$$
+
+Ahora vamos a la eq. 2, donde repetimos el mismo proceso despejando en este caso, $x_{i}$ para luego sustituír:
+
+$$x_{i}=\frac{k_{j}}{\alpha_{ji}}-\frac{x_{j}}{\alpha_{ji}}$$
+
+Cuando $x_{j}=0$ en eq. 2:
+
+$$x_{i}=\frac{k_{j}}{\alpha_{ji}}=\frac{1}{\alpha_{ji}\alpha_{jj}}$$
+
+Cuando $x_{i}=0$ en eq. 2:
+
+$$x_{j}=k_{j}=\frac{1}{\alpha_{jj}}$$
+
+Si $\frac{k_{j}}{\alpha_{ji}}>k_{i}$, entonces $\frac{1}{\alpha_{ji}\alpha_{jj}}>\frac{1}{\alpha_{jj}}$. Por lo tanto se debe cumplir la condición $\alpha_{jj}>\alpha_{ij}\alpha_{ii}$ para que haya coexistencia, y recordemos que previamente hemos demostrado la condición $\alpha_{ij}<\alpha_{jj}$.
+
+Por su parte, cuando $\alpha_{jj}<\alpha_{ii}\alpha_{ij}$, se da la exclusión competitiva, donde una especie extingue a la otra. Pero cuando $\alpha_{jj}<\alpha_{ii}\alpha_{ij}$, la exclusión competitiva pasa a depender de la ventaja que otorguen las condiciones iniciales y las tasas de crecimiento a cada especie.
+
+### Modelo MacArthur de competencia por recursos {-}
+
+A diferencia del modelo Lotka-Volterra, el modelo de MacArthur no se fundamenta en las interacciones, sino en cómo los organismos consumen, aprovechan y transforman los recursos de su entorno, por lo que las relaciones mutualistas y antagónicas emergen del manejo de los recursos por parte de las poblaciones.
+
+$$\dot{N_{1}}=\sum^{n_{R}}_{l}N_{1}V_{l}C_{1l}R_{l}-\mu_{1}N_{1}$$
+
+$$\dot{N_{2}}=\sum^{n_{R}}_{l}N_{2}V_{l}C_{2l}R_{l}-\mu_{2}N_{2}$$
+
+Tomemos entonces dos poblaciones ($N_{1}$ y $N_{2}$) que se encuentran coexistiendo en un medio con una concentración determinada de $l$ recursos ($R_{l}$), mismos que son consumidos por ambas especies a una tasa $C_{il}$, aunque solo una fracción ($V_{l}$) son aprovechados por cada población para aumentar su biomasa. Del mismo modo, asignamos una tasa de muerte $\mu_{i}$ a cada población.
+
+Ya que el modelo se basa en el uso de recursos por parte de las poblaciones, debemos definir una ecuación para describir el cambio en la concentración o abundancia de recursos en función del tiempo.
+
+$$\dot{R}_{l}=R_{l}r^{R}_{l}(1-\alpha^{R}_{l}R_{l})-(N_{1}C_{1l}R_{l}+N_{2}C_{2l}R_{l})$$
+
+Donde $l = 1,2,3,...,n_{R}$ representa el conjunto de recursos disponibles y $r^{R}_{l}$ la tasa de "crecimiento" del recurso $l$, lo que podría definirse como la tasa a la cual ese recurso se incorpora al medio. La tasa de saturación de cada recurso es el inverso de la capacidad de carga asociada al recurso ($\alpha^{R}_{l}=\frac{1}{k^{l}_{R}}$). Por lo tanto, podemos interpretar $k^{R}_{l}=\frac{1}{\alpha^{R}_{l}}$ como el máximo beneficio posible en un medio saturado por el recurso $l$. Esto es entendible si consideramos que, en ausencia de consumidores, la concentración de los recursos aumenta hasta que el medio se satura, presentando por lo tanto, un crecimiento logístico similar al que vimos previamente en el modelo de Verhulst.
+
+$$\dot{R}_{l}=R_{l}r^{R}_{l}(1-\frac{R_{l}}{k^{l}_{R}})$$
+
+Ahora podemos definir un modelo generalizado que considere $m$ consumidores y $n_{R}$ recursos.
+
+$$\dot{N}_{i}=\sum^{n_{R}}_{l=1}N_{i}V_{l}C_{il}R_{l}-\mu_{i}N_{i}$$
+
+$$\dot{R}_{l}=R_{l}r^{R}_{l}(1-\alpha^{R}_{l}R_{l})-\sum^{m}_{i=1} C_{il}R_{l}N_{i}$$
+
+Si modificamos la ecuación de $\dot{N}_{i}$ para estimar la tasa de cambio de las poblaciones en función de los recursos, es decir, la tasa de crecimiento per-cápita de $i$, obtenemos:
+
+$$r_{i}(t)=\frac{\dot{N}_{i}}{N_{i}}= \sum^{n_{R}}_{l=1}V_{l}C_{il}R_{l}-\mu_{i}$$
+
+A partir de aquí podemos obtener cuál sería el máximo aprovechamiento posible de un recurso $l$ por parte de una población $i$. Dado que, como hemos visto con el crecimiento logístico, la máxima concentración que $l$ puede alcanzar corresponde al valor de saturación del medio ($k^{R}_{l}$), entonces:
+
+$$h_{i}=\sum^{n_{R}}_{l=1}V_{l}C_{il}k^{R}_{l}$$
+
+Interpretamos $h_{i}$ como el aprovechamiento máximo que la población $i$ puede obtener del recurso $l$, y que se presenta cuando dicho recurso se encuentra saturado en el medio.
+
+Ahora igualamos a 0 la ecuación $\dot{R}_{l}$ para encontrar el punto de equilibrio de la población:
+
+$$R_{l}r^{R}_{l}(1-\alpha^{R}_{l}R_{l})-\sum^{m}_{i=1} C_{il}R_{l}N_{i}=0$$
+
+$$R_{l}(r^{R}_{l}(1-\alpha^{R}_{l}R_{l})-\sum^{m}_{i=1} C_{il}N_{i})=0$$
+
+Como podemos deducir a partir de esto, uno de los puntos de equilibrio es $R^{*}_{l}=0$, es decir, ausencia de recursos. Sin embargo, es el segundo punto de equilibrio el que nos interesa.
+
+$$r^{R}_{l}(1-\alpha^{R}_{l}R_{l})-\sum^{m}_{i=1} C_{il}N_{i}=0$$
+
+$$r^{R}_{l}-r^{R}_{l}\alpha^{R}_{l}R_{l}-\sum^{m}_{i=1} C_{il}N_{i}=0$$
+
+Si ahora despejamos $R_{l}$ obtenemos:
+
+$$R_{l}=\frac{1}{\alpha^{R}_{l}}-\frac{\sum^{m}_{i=1}C_{il}N_{i}} {r^{R}_{l}\alpha^{R}_{l}}$$
+
+Que podemos simplificar de la forma:
+
+$$R_{l}=k^{R}_{l}-\frac{\sum^{m}_{i=1}C_{il}N_{i}k^{R}_{l}} {r^{R}_{l}}$$
+
+$$R^{*}_{l}=k^{R}_{l}(1-\frac{\sum^{m}_{i=1}C_{il}N_{i}} {r^{R}_{l}})$$
+
+Ahora sustituímos los puntos de equilibrio en la ecuación $r_{i}(t)$, que corresponde a la derivada de la función $\dot{N}_{i}$:
+
+Para $R^{*}_{l}=0$
+
+$$\sum^{n_{R}}_{l=1}V_{l}C_{il}(0)-\mu_{i}=-\mu_{i}$$
+
+Para el segundo punto, sustituímos igualmente en $r_{i}(t)$:
+
+$$r_{i}(t)=\sum^{n_{R}}_{l=1}V_{l}C_{il}(k^{R}_{l}(1-\frac{\sum^{m}_{j=1}C_{jl}N_{j}} {r^{R}_{l}}))-\mu_{i}$$
+
+Recordemos que:
+
+$$h_{i}=\sum^{n_{R}}_{l=1}V_{l}C_{il}k^{R}_{l}$$
+
+Por lo tanto:
+
+$$r_{i}(t)=\sum^{n_{R}}_{l=1}V_{l}C_{il}k^{R}_{l}-\sum^{n_{R}}_{l=1}V_{l}C_{il}k^{R}_{l}(\frac{\sum^{m}_{j=1}C_{jl}N_{j}} {r^{R}_{l}})-\mu_{i}$$
+
+$$r_{i}(t)=h_{i}(1-\frac{\sum^{m}_{j=1}C_{jl}N_{j}} {r^{R}_{l}})-\mu_{i}$$
+
+Si ahora definimos la competencia por recursos entre especies de la siguiente forma:
+
+$$\sigma^{R}_{ij}=\sum C_{il}C_{jl}\frac{V_{l}k^{R}_{l}}{r^{R}_{l}}$$
+
+Entonces tenemos que:
+
+$$\sum^{n_{R}}_{l=1}V_{l}C_{il}k^{R}_{l}(\frac{\sum^{m}_{j=1}C_{jl} N_{j}} {r^{R}_{l}})=\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j}$$
+
+$$r_{i}(t)=h_{i}-\mu_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j}$$
+
+Si consideramos que $r_{i}=h_{i}-\mu_{i}$ es el **fitness** o éxito reproductivo de la especie $i$, podemos entender facilmente que existe una analogía entre el modelo de MacArthur, basado en el consumo de recursos, y el modelo Lotka-Volterra generalizado, que se fundamenta en las interacciones. 
+
+**Modelo de consumo de recursos de MacArthur**
+
+$$\frac{dN_{i}}{dt}=N_{i}(r_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j})$$
+
+**Modelo Lotka-Volterra generalizado**
+
+$$\frac{dN_{i}}{dt}=N_{i}(r_{i}-\sum^{m}_{j=1}\alpha_{ij}N_{j})$$
+
+El hecho de que ambos sistemas sean análogos entre si, se puede entender conceptualmente como que el LVg considera interaccipnes directas, mientras que en el MacArthur, estas interacciones emergen indirectamente de la competencia por recursos entre poblaciones.
+
+Para que la especie $i$ pueda coexistir con el resto de especies, la tasa de cambio debe ser positiva, es decir, la población no debe decrecer ($r_{i}(t)>0$).
+
+$$h_{i}-\mu_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j}>0$$
+
+Por lo que en principio, la tasa máxima de crecimiento, definida por el máximo aprovechamiento de recursos de $i$, debe ser mayor a la tasa de muertes $h_{i}>\mu_{i}$. Ergo:
+
+$$h_{i}>\mu_{i}+\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j}$$
+
+#### Razón relativa de limitación {-}
+
+Partiendo de la idea de que $N_{j}$ es una población competidora que limita el crecimiento de $N_{i}$, la llamada **razón relativa de limitación** es una forma de cuantificar la relación entre qué tanto limita $j$ a $i$ ($\alpha_{ij}$) en contraste con el efecto que la especie $j$ ejerce sobre si misma ($\alpha_{jj}$).
+
+$$\gamma_{ij}=\frac{\alpha_{ij}}{\alpha_{jj}}$$
+
+Por lo que, a partir de esto, podemos entender tres posibles escenarios. Como hemos demostrado previamente, si $\alpha_{ij}<\alpha_{jj}$, implica que $\gamma_{ij}<1$, por lo tanto hay coexistencia entre ambas especies pues $j$ se limita más a si misma de lo que limita a $i$.
+
+Si, por el contrario, $\alpha_{ij}>\alpha_{jj}$, la razón relativa de limitación es $\gamma_{ij}>1$, por lo cual $j$ es un competidor más fuerte para $i$ de lo que lo es para si misma. Esto implica una exclusión competitiva de la especie $i$.
+
+Por ende, la frontera entre la coexistencia y la exclusión competitiva ocurre cuando $\gamma_{ij}=1$ y, por lo tanto, $\alpha_{ij}=\alpha_{jj}$.
+
+Si consideramos que el efecto que ejerce la población $i$ sobre la población $j$, no es necesariamente equivalente al que $j$ ejerce sobre $i$, podemos entonces suponer que las razones relativas de limitación no sean tampoco equivalentes ($\gamma_{ij} \neq \gamma_{ji}$). Por lo tanto, para conocer la magnitud de la interacción entre $i$ y $j$ podemos calcular la *media geométrica* de las razones de limitación. Si teóricamente ambas razones fuesen equivalentes ($\gamma_{ij}=\gamma_{ji}$), la media geométrica seria igual a cualquiera de los dos términos.
+
+$$\rho=\sqrt{\gamma_{ij}\gamma_{ji}}$$
+
+$$\rho=\sqrt{(\frac{\alpha_{ij}}{\alpha_{jj}}) (\frac{\alpha_{ji}}{\alpha_{ii}})}=\sqrt{\frac{\alpha_{ij}\alpha_{ji}} {\alpha_{jj}\alpha_{ii}}}$$
+
+Donde, si ponemos atención a la expresión, se traduce en una razón entre las interacciones interespecíficas (numerador) y las intraespecíficas (denominador). Por consiguiente, si $\rho<1$ podemos deducir que las interacciones intraespecíficas tienen mayor peso que las interespecíficas, mientras que cuando $\rho>1$ la situación se invierte y ahora las interacciones interespecíficas sominan. Si $\rho=1$, significa que el peso de ambos tipos de interacción es equivalente. La coexistencia, por lo tanto, solo es posible cuando las interacciones intraespefíficas dominan $\rho<1$, pues es en este escenario donde la presión que las poblaciones ejercen sobre si mismas al competir por los mismos recursos, dado que sus miembros ocupan el mismo nicho, es mayor a la que ejercen sobre otras poblaciones. Es decir, que los nichos no se traslapan y por ende, a pesar de que compitan entre ellas por recursos, las especies pueden aprovechar los recursos del medio sin excluirse en el proceso.
+
+Esta razón estpa relacionada con el llamado promedio relativo del **fitness** ($\kappa_{i}$) asociado a cada especie.
+
+Nota: **No confundir con la capacidad de carga** ($k_{i}$).
+
+$$\frac{\kappa_{j}}{\kappa_{i}}=\sqrt{\frac{\gamma_{ij}}{\gamma_{ji}}}$$
+
+Que a su vez, está relacionada con la razón relativa de limitación.
+
+$$\gamma_{ij}=\frac{\kappa_{j}}{\kappa_{i}}\rho$$
+
+Demostramos esta relación, sustituyendo a ambos lados de la ecuación:
+
+$$\gamma_{ij}=\frac{\alpha_{ij}}{\alpha_{jj}}=\frac{\kappa_{j}}{\kappa_{i}}\rho=\sqrt{\frac{\gamma_{ij}}{\gamma_{jj}}}*\sqrt{\frac{\alpha_{ij}\alpha_{ji}}{\alpha_{jj}\alpha_{ii}}}$$
+
+Ergo: 
+
+$$\frac{\alpha_{ij}}{\alpha_{jj}}=\sqrt{\frac{\gamma_{ij}}{\gamma_{jj}}}*\sqrt{\frac{\alpha_{ij}\alpha_{ji}}{\alpha_{jj}\alpha_{ii}}}$$
+
+$$\frac{\alpha_{ij}}{\alpha_{jj}}=\sqrt{\frac{(\alpha_{ij}/\alpha_{jj})} {(\alpha_{ji}/\alpha_{ii})}}*\sqrt{\frac{\alpha_{ij}\alpha_{ji}} {\alpha_{jj}\alpha_{ii}}}$$
+
+$$\frac{\alpha_{ij}}{\alpha_{jj}}=\sqrt{\frac{(\alpha_{ij}/\alpha_{jj})} {(\alpha_{ji}/\alpha_{ii})}}*\sqrt{\frac{\alpha_{ij}\alpha_{ji}} {\alpha_{jj}\alpha_{ii}}}$$
+
+$$(\frac{\alpha_{ij}}{\alpha_{jj}})^2=\frac{\alpha_{ij}\alpha_{ii}} {\alpha_{jj}\alpha_{ji}}*\frac{\alpha_{ij}\alpha_{ji}} {\alpha_{jj}\alpha_{ii}}$$
+
+$$(\frac{\alpha_{ij}}{\alpha_{jj}})^2=\frac{\alpha_{ij}} {\alpha_{jj}}*\frac{\alpha_{ij}} {\alpha_{jj}}$$
+
+$$\frac{\alpha_{ij}}{\alpha_{jj}}=\frac{\alpha_{ij}} {\alpha_{jj}}$$
+
+Demostrada esta equivalencia, y ya que la coexistencia, como previamente hemos visto, solo ocurre cuando $\gamma_{ij}<1$, debido a que solo aquí se cumple la condición donde $\alpha_{ij}<\alpha_{jj}$, podemos deducir que:
+
+$$\frac{\kappa_{j}}{\kappa_{i}}\rho<1$$
+
+Entonces:
+
+$$\frac{\kappa_{i}}{\kappa_{j}}>\rho$$
+
+Recordemos que la tasa de crecimiento en el modelo de MacArthur está definida por la competencia por recursos.
+
+$$r_{i}(t)=h_{i}-\mu_{i}-\sum_{j=1}^{m}\sigma^{R}_{ij}N_{j}$$
+
+Donde:
+
+$$\alpha_{ij}=\sigma^{R}_{ij}=\sum_{l}C_{il}C_{jl}\frac{V_{l}k^{R}_{l}} {r^{R}_{l}}$$
+
+$$\rho=\sqrt{\gamma_{ij}\gamma_{ji}}=\sqrt{\frac{\alpha_{ij}\alpha_{ji}} {\alpha_{jj}\alpha_{ii}}}$$
+
+Si ahora asumimos que las interacciones son equivalentes: $\alpha_{ij}=\alpha_{ji}$, y por lo tanto $\sigma^{R}_{ij}=\sigma^{R}_{ji}$.
+
+$$\sqrt{\gamma_{ij}\gamma_{ji}}=\frac{\sigma^{R}_{ij}} {\sqrt{\sigma^{R}_{jj}\sigma^{R}_{ii}}}$$
+
+#### MacArthur con enemigos naturales {-}
+
+Ahora consideramos un escenario donde las poblaciones poseen enemigos naturales, es decir, organismos que repercuten negativamente en el crecimiento de una población. Si hablamos de comunidades microbianas, podríamos referirnos a protozoarios que se alimentan de bacterias (como es el caso de *Paramecium*), o bacterias que fagociten a otras (como sucede con las llamas vampirobacterias).
+
+$$\dot{N}_{i}=N_{i}\sum^{n_{R}}_{l=1}V_{l}C_{il}R_{l}-\mu_{i}N_{i}- \sum^{n_{R}}_{m=1}\alpha_{im}P_{m}N_{i}$$
+
+Aquí, al igual que en el modelo Lotka-Volterra, se asume la existencia de interacciones antagónicas directas entre $m$ enemigos naturales con la población $i$, donde $\alpha_{im}$ determina la fuerza de la interacción interespecífífica de $P_{m}N_{i}$. Al tratarse de interacciones directas y no mediadas por recursos, la función $\dot{R}_{l}$ permanece igual.
+
+Dado que los enemigos naturales poseen, obviamente, su propia dinámica de crecimiento, debemos definir también una función para describir sus poblaciones:
+
+$$\dot{P}_{m}=r^{R}_{m}P_{m}(1-\alpha^{P}_{m}P_{m})+ \sum^{n}_{i=1}\alpha_{im}N_{i}P_{m}$$
+
+Donde, en ausencia de otras especies de cuya presencia se vean beneficiadas, los enemigos naturales presenten un crecimiento logístico limitado por la capacidad de carga del medio, debido a que $\alpha^{P}_{m}=1/k^{P}_{m}$.
+
+Si ahora definimos que la tasa de crecimiento en función del tiempo ($r_{i}(t)$) no solo se ve afectada no solo por la competencia por recursos, sino también por el efecto de los enemigos naturales, tenemos que:
+
+$$r_{i}(t)=\frac{\dot{N}_{i}}{N_{i}}=h_{i}-\mu_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j}-\sum^{n_{P}}_{m=1}\alpha_{im}P_{m}$$
+
+#### Ecuación del replicador {-}
+
+Concideremos un escenario con dos especies competidoras. Al tratarse de un modelo discreto, imaginemos una retícula de $nxn$ dimenciones, cuyas casillas pueden o no estar ocupadas por miembros de la especie $i$ o de la especie $j$. Si un miembro de alguna de las dos especies muere, deja por lo tanto, una casilla vacía por la que ambas especies deben competir por ocupar.
+
+En este modelo, emplearemos una matriz $H$ para codificar las interacciones entre poblaciones, por lo que cada valor $H_{ij}$ correspondería a la probabilidad de que $i$ gane a $j$ en ocupar una casilla. Ya que, $\forall H_{ij}$, la probabilidad debe ser un valor cualquiera entre $0 \leq H_{ij} \leq 1$, esto significa que la suma de las probabilidades de las especies competidoras es siempre constante ($H_{ij}+H_{ji}=1$). Por consiguiente, si dos miembros de la misma especie compiten por ocupar una casilla, las probabilidades de que uno u otro lo consiga son iguales ($H_{ii}+H_{ii}=1$), por lo que $H_{ii}=1/2$.
+
+Se considera que el modelo es *neutro* cuando $H_{ij}=H_{ji}$, porque al ser las interacciones equivalentes entre si, estas no tienen un efecto sobre la proliferación de las poblaciones, que se ven ahora determinadas por la estocasticidad. En el caso contrario, cuando una especie posee una dominancia completa y, por ende, tiene el 100% de probabilidades de triunfar sobre la otra, el resultado de tener ($H_{ij}, H_{ji}$) solo puede ser ($1,0$) o ($0,1$).
+
+Si ahora consideramos un sistema con $n$ especies, podemos describir su comportamiento de la siguiente forma:
+
+$$\frac{dx_{i}}{dt}=x_{i}(t)2\sum_{j}H_{ij}x_{j}(t)-x_{i}(t)$$
+
+Donde $-x_{i}(t)$ modela el proceso de muerte, y dado que, por cada casilla, solo se puede perder un individuo por cada iteración del sistema, se puede decir que posee una $\mu=1$. Además, en $x_{i}(t)2H_{ij}x_{j}(t)$, el factor 2 se refiere a que, al momento de iterar el sistema, podemos escojer primero a la especie $i$ o a su especie competidora $j$ para ocupar la casilla, con una probabilidad $H_{ij}$ o $H_{ji}$ de que la colonicen exitosamente, y obteniendo un resultado indiferente al dar igual cuál escojamos primero. Es decir, cualquiera de las dos especies puede llegar primero al sitio y colonizarlo o no con éxito.
+
+Si tenemos solamente dos poblaciones ($x_{A}, x_{B}$), podemos describir su comportamiento de la forma:
+
+$$\dot{x}_{A}=f_{A}(\vec{x})x_{A}-\phi x_{A}=x_{A}(f_{A}(\vec{x})-\phi)$$
+
+$$\dot{x}_{B}=f_{B}(\vec{x})x_{B}-\phi x_{B}=x_{B}(f_{B}(\vec{x})-\phi)$$
+
+Donde $f_{i}$ representa la tasa de fecundidad de la población y $\phi$ la tasa de mortalidad. Bajo esta concepción, las interacciones se representan por medio de un vector de densidades $\vec{x}$ que contiene el tamaño de las poblaciones que componen el sistema, donde $0 \leq X_{A,B} \leq 1$. Al descomponer el vector de demsidades en cualquiera de las funciones, obtenemos que:
+
+$$\dot{x}_{i}=f_{A}x_{A}x_{A}+f_{A}x_{A}x_{B}-\phi x_{A}$$
+
+Aquí el **fitness** no posee un valor constante, sino que actúa como una función, por lo que la relación entre las variables puede ser lineal, como se muestra arriba, pero también tener cualquier otro tipo de comportamiento, como el de una función cuadrática o una exponencial.
+
+Dado que la sumatoria de las densidades de las poblaciones constituyentes es siempre constante, pues $\forall t \Rightarrow x_{A}+x_{B}=1$, podemos entender estos valores como la probabilidad de que la especie $i$ esté presente. En consecuencia, y debido a que el total de individios de todas las poblaciones es siempre el mismo ($\sum^{n}_{i=1}x_{i}=1$), por lo cual $\dot{x}_{A}+\dot{x}_{B}=0$. Podemos interpretar esto como que el crecimiento de cualquiera de las poblaciones ocurre a costa del resto de poblaciones.
+
+$$\dot{x}_{A}+\dot{x}_{B}=f_{A}(\vec{x})x_{A}-\phi x_{A} + f_{B}(\vec{x})x_{B}-\phi x_{B}=0$$
+
+$$\dot{x}_{A}+\dot{x}_{B}=f_{A}(\vec{x})x_{A}+f_{B}(\vec{x})x_{B}- \phi(x_{A}+x_{B})=0$$
+
+Recordemos que $x_{A}+x_{B}=1$, por lo tanto:
+
+$$\phi=f_{A}(\vec{x})x_{A}+f_{B}(\vec{x})x_{B}=\bar{f}$$
+
+Donde $\bar{f}$ puede traducirse como el **fitness** promedio de todas las especies, y que irónicamente es equivalente a la tasa de mortalidad.
+
+Si ahora despejamos cualquiera de las dos poblaciones, obtenemos que $x_{A}=1-x_{B}$, expresión que ahora podemos sustituir para redurcir el sistema de ecuaciones de 2-D a 1-D. Para ello, tomamos cualquiera de las dos ecuaciones, en este caso: $\dot{x}_{A}=x_{A}(f_{A}(\vec{x})-\phi)$
+
+$$\dot{x}_{A}=x_{A}(f_{A}(\vec{x})-(f_{A}(\vec{x})x_{A}+f_{B}(\vec{x})x_{B}))$$
+
+Recordemos que $x_{B}=1-x_{A}$
+
+$$\dot{x}_{A}=x_{A}(f_{A}(x_{A})-f_{A}(x_{A})x_{A}-f_{B}(x_{A})(1-x_{A}))$$
+
+Ahora que $\dot{x}_{A}$ solo depende de $x_{A}$, podemos eliminar el vector de densidades $\vec{x}$ y sustituírlo en la función $f_{A}(x_{A})$.
+
+$$\dot{x}_{A}=x_{A}(f_{A}(x_{A})(1-x_{A})-f_{B}(x_{A})(1-x_{A}))$$
+
+Notemos que realmente no importa si la función está formulada con resoecto a $x_{A}$ o a $x_{B}$, pues ambas son simétricas.
+
+$$\dot{x}=x(1-x)(f_{A}(x)-f_{B}(x))$$
+
+A partir de aquí, podemos obtener los puntos de equilibrio de la función $\dot{x}$: $x_{1}^{*}=0$, $x_{2}^{*}=1$, y $x_{3}^{*}=f_{A}(x^{*})-f_{B}(x^{*})$. Para que $x_{3}^{*}=0$, se debe cumplir que $f_{A}(x^{*})=f_{B}(x^{*})$.
+
+Derivamos la función para obtener las estabilidades.
+
+$$\frac{df}{dx}=(1-x)(f_{A}(x)-f_{B}(x))-x(f_{A}(x)-f_{B}(x))+ x(1-x)(f_{A}'(x)-f_{B}'(x))$$
+
+Para $x_{1}^{*}=0$:
+
+$$\frac{df}{dx}=f_{A}(0)-f_{B}(0)$$
+
+Por lo que solo puede ser estable si $f_{A}(0)<f_{B}(0)$
+
+Para $x_{2}^{*}=1$:
+
+$$\frac{df}{dx}=f_{A}(1)-f_{B}(1)$$
+
+Solo es estable cuando $f_{A}(1)<f_{B}(1)$
+
+Para $x_{3}^{*}=f_{A}(x^{*})=f_{B}(x^{*})$:
+
+$$\frac{df}{dx}=x^{*}(1-x^{*})(f_{A}'(x^{*})-f_{B}'(x^{*}))$$
+
+Que solo es estable si $f_{A}'(x^{*})<f_{B}'(x^{*})$
+
+Hagamos un breve paréntesis para entender de mejor manera el tercer punto. Como hemos visto previamente, podemos codificar las interacciones en una matriz de pagos que defina las estrategias de juego para las poblaciones involucradas.
+
+$$\begin{matrix}
+ & A & B \\ 
+A & a & b \\ 
+B & c & d
+\end{matrix}$$
+
+Donde si $A$ o $B$ se encuentran con sigo mismas, entonces la estrategia puede ser $a$ o $d$, respectivamente. Pero si cualquiera de las dos especies se encuentra con la otra población, entonces la estrategia puede ser $b$ o $c$. Ya que, como se puede inferir, estas estrategias representan las interacciones, podemos descomponer las fuctiones $f_{i}(\vec{x})$, en este caso, bajo una relación lineal.
+
+$$f_{A}=ax_{A}+bx_{B} \quad \text{y} \quad f_{B}=cx_{A}+dx_{B}$$
+
+Si tomamos la función $\dot{x}=x(1-x)(f_{A}(x)-f_{B}(x))$ y sustituímos en ella las funciones de la forma que previamente hemos desarrollado, tenemos que:
+
+$$\dot{x}=x(1-x)(ax+b(1-x)-cx-d(1-x))$$
+
+$$\dot{x}=x(1-x)((a-b-c+d)x+b-d)$$
+
+Donde, si recapitulamos, el tercer punto de equilibrio existe cuando $(a-b-c+d)x+b-d=0$, por lo cual:
+
+$$x_{3}^{*}=\frac{d-b}{a-b-c+d}$$
+
+Si ahora sustituímos en $x^{*}(1-x^{*})(f_{A}'(x^{*})-f_{B}'(x^{*}))$.
+
+$$\frac{df}{dx}=(\frac{d-b}{a-b-c+d})(1-\frac{d-b}{a-b-c+d}) (a-c)$$
+
+Tomando en cuenta que los primeros dos términos den como resultado un valor positivo debido a que $0<x_{3}^{*}<1$, la estabilidad del punto depende de que se cumpla la condición $a<c$.
+
+Al poner atención a los escenarios previos, podemos entender que los puntos de equilibrio $x_{1}^{*}=0$ y $x_{2}^{*}=1$ implican escenarios de exclusión competitiva donde $(H_{ij}, H_{ji})$ comprendería $(0,1)$ y $(1,0)$, respectivamente. Por lo cual, $x_{1}^{*}<x_{2}^{*}<x_{3}^{*}$ donde los extremos sean estables o inestables, y por lo tanto, $x_{3}^{*}$ sea inestable o estable, respectivamente. En cualquier escenario, $x_{3}^{*}$ estaría representando un escenario de coexistencia entre ambas especies.
+
+
+## Catástrofes {-}
+
+Las transiciones de un sistema de un estado al otro pueden ocurrir repentinamente al variar sus parámetros por encima o por debajo de sus valores críticos. Tomemos como ejemplo la ecuación $\dot{x}=x(\mu-x^{2})=0$, cuyos puntos de equilibrio son $x_{1}=0$ y $x_{2,3}=\pm \sqrt{\mu}$, donde el primero es inestable mientras los segundos son estables.
+
+```{r}
+x=seq(-5,5,0.2)
+m<-2
+fx<-m*x-x^3
+plot(x,fx, main=NULL, xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+```
+
+Al derivar la función obtenemos que $x^*_{1}=0$, sustituído en la derivada, equivale a $\mu$ y por ende es inestable, mientras que para $x_{2,3}=\pm \sqrt{\mu}$ obtenemos $-2\mu$, siendo ambos puntos estables.
+
+$$\frac{df}{dx}=\mu-3x^{2}$$
+
+Al considerar $\mu$ como un parámetro variable, la estabilidad de los puntos se ve alterada, por lo que el escenario anterior solo ocurre cuando $\mu>0$.
+
+```{r}
+par(mfrow=c(1,3))
+x=seq(-5,5,0.2)
+# Cuando mu>0
+m<-2
+fx<-m*x-x^3
+plot(x,fx, main="mu>0", xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando mu=0
+m<-0
+fx<-m*x-x^3
+plot(x,fx, main="mu=0", xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando mu<0
+m<--2
+fx<-m*x-x^3
+plot(x,fx, main="mu<0", xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+par(mfrow=c(1,1))
+```
+
+Para valores de $\mu<0$, solo hay un punto estable, mientras que para valores de $\mu>0$ hay tres puntos de equilibrio, siendo los de los extremos estables y aquel donde $x^{*}=0$ inestable.
+```{r}
+m<-seq(0,2,0.1)
+x1<-sqrt(m)
+x2<--sqrt(m)
+plot(m,x1, main="Estabilidad", xlab="mu", ylab="x*",
+     col="blue", type="l", ylim = c(-2, 2), lwd=3)
+abline(h=0, col="blue", lwd=2)
+abline(v=0, col="red", lwd=2)
+lines(m,x2, col="blue", lwd=3)
+par(mfrow=c(1,1))
+```
+
+### Potencial {-}
+
+Para visualizar cómo se comporta el potencial de la función debemos obtener el inverso de la integral de dicha función.
+
+$$\phi_{\mu}(x)=-\int{f(x)}dx$$
+
+Esto pude ser entendido como un potencial, donde los puntos de equilibrio estables corresponderían a los estados de mínima energía del sistema. Podemos entenderlo haciendo una analogía entre la energía cinética y la energía potencial, donde el punto de máximo potencial de un sistema corresponde a su posición de inicio, donde su velocidad y, por ende, su energía cinética, es mínima. Por lo tanto, el mínimo del inverso de la función de potencial, corresponde también con el punto o los puntos de mínima energía del sistema.
+
+$$\int(\mu x-x^{3})dx=\mu \int(x)dx-\int(x^{3})dx= \frac{x^{2}(2\mu-x^{2})}{4}$$
+
+Dado que $\phi_{\mu}(x)=-\int f(x)dx$, entonces:
+
+$$\phi_{\mu}(x)=-\frac{x^{2}(2\mu-x^{2})}{4}$$
+
+Cuando mu>0 el sistema es biestable, mientras que cuando mu<0 el sistema tiene un único punto de equilibrio estable.
+
+```{r}
+x=seq(-5,5,0.2)
+par(mfrow=c(1,3))
+# Para mu>0
+m<-2
+phi_x<--x^2*(2*m-x^2)/4
+plot(x,phi_x, main="mu>0", xlab="x", ylab="phi+(x)", col="blue", type="l",
+     ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Para mu=0
+m<-0
+phi_x<--x^2*(2*m-x^2)/4
+plot(x,phi_x, main="mu=0", xlab="x", ylab="phi(x)", col="blue", type="l",
+     ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Para mu<0
+m<--2
+phi_x<--x^2*(2*m-x^2)/4
+plot(x,phi_x, main="mu<0", xlab="x", ylab="phi(x)", col="blue", type="l", ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+par(mfrow=c(1,1))
+```
+
+Si ahora consideramos un segundo parámetro, al que llamaremos $\alpha$, podemos además agregar asimetría al modelo, de modo que podemos variar el tamaño de las cuencas de atracción.
+
+$$\dot{x}=\alpha+\mu x-x^{3}$$
+
+Al modificar el valor de $\alpha$ podemos desplazar la función sobre el eje $y$, variando en consecuencia la estabilidad de los puntos de equilibrio. Debido a esto, existirán dos valores de alfa críticas ($\alpha_{c}$) que limitarán al estado biestable, donde uno de los puntos de equilibrio se volverá neutro al encontrarse en el límite de dicha transición.
+
+Para encontrar las alfa críticas derivamos la función con respecto a la variable para así identificar los puntos donde la pendiente es cero.
+
+$$\frac{df}{dx}=\mu-3x^{2}=0$$
+
+Para lo cual obtenemos que $x_{c_{1,2}}=\pm \sqrt{\mu/3}$. En consecuencia, sustituímos en la función original y despejamos los valores de alfa.
+
+$$\dot{x}=\alpha+\mu(\pm \sqrt{\mu/3})-(\pm \sqrt{\mu/3})^{3}=0$$
+
+$$\alpha=\frac{\mu}{3}(\pm \sqrt{\mu/3})-\mu(\pm \sqrt{\mu/3})$$
+
+A partir de lo cual despejamos ambos valores de alfa crítica
+
+$$\alpha_{c_{1}}=\frac{2}{3}\mu \sqrt{\frac{\mu}{3}} \quad y \quad \alpha_{c_{2}}=-\frac{2}{3}\mu \sqrt{\frac{\mu}{3}}$$
+
+```{r}
+x=seq(-5,5,0.2)
+# Cuando a=0 y mu>0
+m<-2
+a<-0
+fx<-a+m*x-x^3
+plot(x,fx, main="Límite de biestabilidad", xlab="x",
+     ylab="f(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Alfa crítica 1
+abline(h=2/3*m*sqrt(m/3), col="green", lwd=2, lty = "dotted")
+# Alfa crítica 2
+abline(h=-2/3*m*sqrt(m/3), col="green", lwd=2, lty = "dotted")
+```
+
+La función de potencial corresponde a la forma:
+
+$$\phi_{\alpha,\mu}(x)=-\int{f(x)}dx=-\int(\alpha+\mu x-x^{3})dx$$
+
+$$\phi_{\alpha,\mu}(x)=\frac{x^{4}}{4}-\alpha x-\frac{\mu x^{2}}{2}$$
+
+```{r}
+par(mfrow=c(2,3))
+x=seq(-5,5,0.2)
+# Cuando a=0
+m<-2
+a<-0
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a=0", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a=a_c1
+m<-2
+a<-2/3*m*sqrt(m/3)
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a=a_c1", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a=a_c2
+m<-2
+a<--2/3*m*sqrt(m/3)
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a=a_c1", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a>>0
+m<-2
+a<-2
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a>>0", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a<<0
+m<-2
+a<--2
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a<<0", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+par(mfrow=c(1,1))
+```
+
+
+
+
+
+
+
+
+
+
+
