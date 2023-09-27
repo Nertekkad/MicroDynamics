@@ -1,4 +1,4 @@
-setwd("~/EcoModel")
+setwd("~/MicroDynamics/02_Data")
 # Data loading
 library(readxl)
 otu_bacter<-read.csv("1_bacteria.csv")
@@ -158,6 +158,7 @@ degree_df<-degree_df[-which(rowSums(degree_df[,c(2,3,4)])/
 # Plot of degree between layers
 
 library(gridExtra)
+library(ggplot2)
 p1<-ggplot(data=degree_df, aes(x=Species, y=Severe, fill=NULL)) +
   geom_bar(stat="identity")
 p2<-ggplot(data=degree_df, aes(x=Species, y=Moderate, fill=NULL)) +
