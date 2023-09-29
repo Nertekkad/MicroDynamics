@@ -1,9 +1,8 @@
 # Theorical ecology {-}
 
-
 ## Dynamics of microbial comunities {-}
 
-Let's consider an hipothetical population that grows at an $ r $ rate: $ \dot{x} = rx $. If $ r>0 $, the population will increase exponentially $ x(t) = x_{0}e^{rt} $, a model that doens't make any biological sense.
+Let's consider an hipothetical population that grows at an \$ r \$ rate: \$ \dot{x} = rx \$. If \$ r\>0 \$, the population will increase exponentially \$ x(t) = x\_{0}e\^{rt} \$, a model that doens't make any biological sense.
 
 ```{r}
 library(deSolve)
@@ -19,7 +18,7 @@ times <- seq(0, 100, 1)
 plot(ode(y, times, exponential, parms))
 ```
 
-To solve the previous problem, we add intraespecific competition for resources between the members of the population $ x^2 $ and a limit of aviable resources, represented as the medium carrying capasity.
+To solve the previous problem, we add intraespecific competition for resources between the members of the population \$ x\^2 \$ and a limit of available resources, represented as the medium carrying capacity.
 
 ```{r}
 model <- function (time, y, parms) {
