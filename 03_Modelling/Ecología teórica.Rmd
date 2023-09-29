@@ -9,7 +9,7 @@ Un modelo más realista es el de Verhulst, donde el crecimiento de una població
 
 $$\frac{dx_{i}}{dt}=rx(1-\frac{x}{k})$$
 
-Cuya solución ~~exponencial~~ es:
+Cuya solución exponencial es:
 
 $$ x(t) = \frac{k}{1+(\frac{k-x_{0}}{x_{0}})e^{-rt}}$$
 
