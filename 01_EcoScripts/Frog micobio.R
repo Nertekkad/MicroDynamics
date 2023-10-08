@@ -827,11 +827,14 @@ ref.samples <- sample_names(subset_samples(physeq2,
 dysbiosis_2 <- dysbiosisMedianCLV(physeq2,
                                   dist_mat = dist.mat,
                                   reference_samples = ref.samples)
+# We sample the data set identifying as dysbiotic the data under the 90th percentile
 dysbiosis_thres <- quantile(subset(dysbiosis_2, Treatment == "Treatment2")$score, 0.9)
 normobiosis_thres <- quantile(subset(dysbiosis_2, Treatment == "Treatment2")$score, 0.1)
 
 dysbiosis_2 <- dysbiosis_2 |> 
   mutate(isDysbiostic = ifelse(score >= dysbiosis_thres, TRUE, FALSE))
+
+# Dysbiosis plot measures according to CLV method
 p1 <- plotDysbiosis(df=dysbiosis_2,
                     xvar="Treatment",
                     yvar="score",
@@ -843,6 +846,8 @@ p1 <- plotDysbiosis(df=dysbiosis_2,
 p1
  
 
+
+# Degree analysis
 
 degree_df <- data.frame(Species = vertex.attributes(FTad_CtrNet)$name,
                  color = vertex.attributes(FTad_CtrNet)$color,
