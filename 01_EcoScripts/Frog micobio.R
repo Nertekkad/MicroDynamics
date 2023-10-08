@@ -781,15 +781,20 @@ legend("bottomright",bty = "n",legend = c("Treatment 1","Treatment 2","Control")
 
 
 
+# Dysbiosis analysis
 
+# Load required packages
 library(dysbiosisR)
 library(ggplot2)
 library(microbiome)
 library(dplyr)
 library(phyloseq)
+
+# Transform the data into a phyloseq object
 tax_fungi<-as.matrix(hongos[,t1:t2])
 otus_fungi<-as.matrix(hongos[,-(t1:t2)])
 otus_fungi<-otus_fungi[,-1]
+# OTUs IDs as row names and sample IDs as column names
 ID_otus <- otus_fungi[,1]
 otus_fungi<-otus_fungi[,-1]
 samples_fungi<-colnames(otus_fungi)
@@ -798,19 +803,27 @@ otus_fungi<-matrix(as.numeric(otus_fungi),
                    nrow = length(ID_otus))
 colnames(otus_fungi)<-samples_fungi
 rownames(otus_fungi)<-ID_otus
+# OTUs IDs as row names in the taxa table
 rownames(tax_fungi)<-ID_otus
+# Phyloseq objects
 otus_fungi<-otu_table(otus_fungi, taxa_are_rows = TRUE)
 tax_fungi<-tax_table(tax_fungi)
 physeq = phyloseq(otus_fungi, tax_fungi)
+# Sample metadata
 rownames(meta_hongos)<-meta_hongos[,1]
 meta_hongos<-meta_hongos[,-1]
 sample_data<-sample_data(meta_hongos)
+# Merge of phyloseq objects
 physeq2<-merge_phyloseq(physeq, sample_data)
 
+# Dysbiosis analysis
+
+# Bray-Curtis distance matrix
 dist.mat <- phyloseq::distance(physeq2, "bray")
-# get reference samples
+# Get reference samples
 ref.samples <- sample_names(subset_samples(physeq2, 
                                            Treatment == "Treatment2"))
+# Community level variation analysis
 dysbiosis_2 <- dysbiosisMedianCLV(physeq2,
                                   dist_mat = dist.mat,
                                   reference_samples = ref.samples)

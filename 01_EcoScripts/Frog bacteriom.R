@@ -350,7 +350,7 @@ abs_mat<-function(abs.list, g.list, n){
 abs_BTad<-list(BTad_T2, BTad_T1, BTad_Ctr)
 
 # 3D plot for tadpoles
-lay <- layoutMultiplex(ml_BTad, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_BTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BTad, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BTad)),
                  layer.shift.x=0.5, layer.space=2,
@@ -358,38 +358,38 @@ plot_multiplex3D(ml_BTad, layer.layout=lay,
                  node.size.values="auto",
                  node.size.scale=abs_mat(abs_BTad, ml_BTad, 2),
                  node.colors=node_color_mat(ml_BTad, "phylo"),
-                 edge.colors="black",
+                 edge.colors="#838B8B",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
 
 # 3D plot for metamorphics
-lay <- layoutMultiplex(ml_BMet, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_BMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BMet, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BMet)),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(BMet_T1Net)$color, ml_BMet),
-                 edge.colors="black",
+                 edge.colors="#838B8B",
                  node.colors.aggr=mat_colors(V(BMet_T1Net)$color, ml_BMet),
                  show.aggregate=F)
 
 # 3D plot for the adults
-lay <- layoutMultiplex(ml_BAdl, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_BAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BAdl, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BAdl)),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(BAdl_T1Net)$color, ml_BAdl),
-                 edge.colors="black",
+                 edge.colors="#838B8B",
                  node.colors.aggr=mat_colors(V(BAdl_T1Net)$color, ml_BAdl),
                  show.aggregate=F)
 
 # Centrality analysis
 
 # Centrality function
-ctr<-function(g.list, ctr_type){
+ctr_ml<-function(g.list, ctr_type){
   require(igraph)
   if(ctr_type == "degree"){
     for(i in 1:length(g.list)){
@@ -449,43 +449,43 @@ ctr<-function(g.list, ctr_type){
 }
 
 # Degree centrality
-ml_BTad<-ctr(ml_BTad, "degree")
-ml_BMet<-ctr(ml_BMet, "degree")
-ml_BAdl<-ctr(ml_BAdl, "degree")
+ml_BTad<-ctr_ml(ml_BTad, "degree")
+ml_BMet<-ctr_ml(ml_BMet, "degree")
+ml_BAdl<-ctr_ml(ml_BAdl, "degree")
 
 # Degree 3D plot for tadpoles
-lay <- layoutMultiplex(ml_BTad, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_BTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BTad, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BTad)),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values="auto", node.size.scale=abs_mat(),
                  node.colors=node_color_mat(ml_BTad, "phylo"),
-                 edge.colors="black",
+                 edge.colors="#838B8B",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
 
 # Degree 3D plot for metamorphic
-lay <- layoutMultiplex(ml_BMet, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_BMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BMet, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BMet)),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(ml_BMet[[1]])$hl, ml_BMet),
-                 edge.colors="black",
+                 edge.colors="#838B8B",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
 
 # Degree 3D plot for adults
-lay <- layoutMultiplex(ml_BAdl, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_BAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BAdl, layer.layout=lay,
                  layer.colors=rainbow(length(ml_BAdl)),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(ml_BAdl[[1]])$hl, ml_BAdl),
-                 edge.colors="black",
+                 edge.colors="#838B8B",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
 
@@ -550,24 +550,23 @@ ab_table_div<-function(ab_table, diversity_type){
 # Simpson dominance for tadpoles
 T1_s<-ab_table_div(t(BTad_T1), "simpson")
 T2_s<-ab_table_div(t(BTad_T2), "simpson")
-T3_s<-ab_table_div(t(BTad_Ctr), "simpson")
+TC_s<-ab_table_div(t(BTad_Ctr), "simpson")
 
 T1df_s<-data.frame("Period" = rep("Treatment 1", length(T1_s)),
                    "Data" = T1_s)
 T2df_s<-data.frame("Period" = rep("Treatment 2", length(T2_s)),
                    "Data" = T2_s)
-T3df_s<-data.frame("Period" = rep("Control", length(T3_s)),
-                   "Data" = T3_s)
+TCdf_s<-data.frame("Period" = rep("Control", length(TC_s)),
+                   "Data" = TC_s)
 
-Tdf_s<-rbind(T1df_s, T2df_s, T3df_s)
+Tdf_s<-rbind(T2df_s, T1df_s, TCdf_s)
 
 # Violin plot
 library(ggplot2)
 ggplot(Tdf_s, aes(x=Tdf_s$Period, y=Tdf_s$Data)) +
   geom_violin(fill="darkslategray3", color="black") +
   geom_boxplot(width=0.15, notch=TRUE,
-               fill=c("green3", "red3",
-                      "darkorange1"),
+               fill=c("green3", "darkorange1", "red3"),
                color="black") + ggtitle("Simpson dominance") +
   theme(plot.title = element_text(hjust = 0.5)) +
   xlab("") + ylab("")
@@ -575,24 +574,23 @@ ggplot(Tdf_s, aes(x=Tdf_s$Period, y=Tdf_s$Data)) +
 # Simpson dominance for metamorphic
 M1_s<-ab_table_div(t(BMet_T1), "simpson")
 M2_s<-ab_table_div(t(BMet_T2), "simpson")
-M3_s<-ab_table_div(t(BMet_Ctr), "simpson")
+MC_s<-ab_table_div(t(BMet_Ctr), "simpson")
 
 M1df_s<-data.frame("Period" = rep("Treatment 1", length(M1_s)),
                    "Data" = M1_s)
 M2df_s<-data.frame("Period" = rep("Treatment 2", length(M2_s)),
                    "Data" = M2_s)
-M3df_s<-data.frame("Period" = rep("Control", length(M3_s)),
-                   "Data" = M3_s)
+MCdf_s<-data.frame("Period" = rep("Control", length(MC_s)),
+                   "Data" = MC_s)
 
-Mdf_s<-rbind(M1df_s, M2df_s, M3df_s)
+Mdf_s<-rbind(M2df_s, M1df_s, MCdf_s)
 
 # Violin plot
 library(ggplot2)
 ggplot(Mdf_s, aes(x=Mdf_s$Period, y=Mdf_s$Data)) +
   geom_violin(fill="darkslategray3", color="black") +
   geom_boxplot(width=0.15, notch=TRUE,
-               fill=c("green3", "red3",
-                      "darkorange1"),
+               fill=c("green3", "darkorange1", "red3"),
                color="black") + ggtitle("Simpson dominance") +
   theme(plot.title = element_text(hjust = 0.5)) +
   xlab("") + ylab("")
@@ -601,24 +599,23 @@ ggplot(Mdf_s, aes(x=Mdf_s$Period, y=Mdf_s$Data)) +
 # Simpson dominance for adults
 A1_s<-ab_table_div(t(BAdl_T1), "simpson")
 A2_s<-ab_table_div(t(BAdl_T2), "simpson")
-A3_s<-ab_table_div(t(BAdl_Ctr), "simpson")
+AC_s<-ab_table_div(t(BAdl_Ctr), "simpson")
 
 A1df_s<-data.frame("Period" = rep("Treatment 1", length(A1_s)),
                    "Data" = A1_s)
 A2df_s<-data.frame("Period" = rep("Treatment 2", length(A2_s)),
                    "Data" = A2_s)
-A3df_s<-data.frame("Period" = rep("Control", length(A3_s)),
-                   "Data" = A3_s)
+ACdf_s<-data.frame("Period" = rep("Control", length(AC_s)),
+                   "Data" = AC_s)
 
-Adf_s<-rbind(A1df_s, A2df_s, A3df_s)
+Adf_s<-rbind(A2df_s, A1df_s, ACdf_s)
 
 # Violin plot
 library(ggplot2)
 ggplot(Adf_s, aes(x=Adf_s$Period, y=Adf_s$Data)) +
   geom_violin(fill="darkslategray3", color="black") +
   geom_boxplot(width=0.15, notch=TRUE,
-               fill=c("green3", "red3",
-                      "darkorange1"),
+               fill=c("green3", "darkorange1", "red3"),
                color="black") + ggtitle("Simpson dominance") +
   theme(plot.title = element_text(hjust = 0.5)) +
   xlab("") + ylab("")
@@ -628,11 +625,11 @@ ggplot(Adf_s, aes(x=Adf_s$Period, y=Adf_s$Data)) +
 
 # Tadpole
 library(RADanalysis)
-sample_classes <- c(rep(1, length(T1_s)),rep(2, length(T2_s)),
-                    rep(3, length(T3_s)))
-line_cols <- c("darkorange1","red3","green3")
+sample_classes <- c(rep(1, length(T2_s)),rep(2, length(T1_s)),
+                    rep(3, length(TC_s)))
+line_cols <- c("red3","darkorange1","green3")
 
-BTad_mat<-rbind(BTad_T1, BTad_T2, BTad_Ctr)
+BTad_mat<-rbind(BTad_T2, BTad_T1, BTad_Ctr)
 
 # Normalized abundances
 n_BTad_mat<-BTad_mat/rowSums(BTad_mat)
@@ -646,10 +643,10 @@ n_BTad_mat<-matrix(unlist(sorted_abs), nrow=length(sorted_abs),
                    ncol=length(sorted_abs[[1]]), byrow=TRUE)
 
 # Plot the axis
-plot(1e10,xlim = c(1,30),ylim = c(0,0.6),
+plot(1e10,xlim = c(1,30),ylim = c(0,0.4),
      xlab = "Species rank",ylab = "Abundance",cex.lab = 1.5,axes = FALSE)
 sfsmisc::eaxis(side = 1,at = c(1,5,10,15,20,25,30))
-sfsmisc::eaxis(side = 2,at = c(0,0.1,0.2,0.3,0.4,0.5,0.6),las = 0)
+sfsmisc::eaxis(side = 2,at = c(0,0.1,0.2,0.3,0.4),las = 0)
 
 # Rank-abundance colors per treatment
 a <- representative_RAD(norm_rad = n_BTad_mat,sample_ids = which(sample_classes == 1),
@@ -662,16 +659,16 @@ a <- representative_RAD(norm_rad = n_BTad_mat,sample_ids = which(sample_classes 
                         plot = TRUE,confidence = 0.9,with_conf = TRUE,
                         col = scales::alpha(line_cols[3],0.5),border = NA)
 legend("topright",bty = "n",
-       legend = c("Treatment 1","Treatment 2", "Control"),
+       legend = c("Treatment 2","Treatment 1", "Control"),
        col = line_cols, lwd = 3)
 
 
 # Metamorphic
-sample_classes <- c(rep(1, length(M1_s)),rep(2, length(M2_s)),
-                    rep(3, length(M3_s)))
-line_cols <- c("darkorange1","red3","green3")
+sample_classes <- c(rep(1, length(M2_s)),rep(2, length(M1_s)),
+                    rep(3, length(MC_s)))
+line_cols <- c("red3","darkorange1","green3")
 
-BMet_mat<-rbind(BMet_T1, BMet_T2, BMet_Ctr)
+BMet_mat<-rbind(BMet_T2, BMet_T1, BMet_Ctr)
 
 # Normalized abundances
 n_BMet_mat<-BMet_mat/rowSums(BMet_mat)
@@ -685,10 +682,10 @@ n_BMet_mat<-matrix(unlist(sorted_abs), nrow=length(sorted_abs),
                    ncol=length(sorted_abs[[1]]), byrow=TRUE)
 
 # Plot the axis
-plot(1e10,xlim = c(1,30),ylim = c(0,0.6),
+plot(1e10,xlim = c(1,30),ylim = c(0,0.3),
      xlab = "Species rank",ylab = "Abundance",cex.lab = 1.5,axes = FALSE)
 sfsmisc::eaxis(side = 1,at = c(1,5,10,15,20,25,30))
-sfsmisc::eaxis(side = 2,at = c(0,0.1,0.2,0.3,0.4,0.5,0.6),las = 0)
+sfsmisc::eaxis(side = 2,at = c(0,0.1,0.2,0.3),las = 0)
 
 # Rank-abundance colors per treatment
 a <- representative_RAD(norm_rad = n_BMet_mat,sample_ids = which(sample_classes == 1),
@@ -701,13 +698,13 @@ a <- representative_RAD(norm_rad = n_BMet_mat,sample_ids = which(sample_classes 
                         plot = TRUE,confidence = 0.9,with_conf = TRUE,
                         col = scales::alpha(line_cols[3],0.5),border = NA)
 legend("topright",bty = "n",
-       legend = c("Treatment 1","Treatment 2", "Control"),
+       legend = c("Treatment 2","Treatment 1", "Control"),
        col = line_cols, lwd = 3)
 
 # Adults
 sample_classes <- c(rep(1, length(A1_s)),rep(2, length(A2_s)),
-                    rep(3, length(A3_s)))
-line_cols <- c("darkorange1","red3","green3")
+                    rep(3, length(AC_s)))
+line_cols <- c("red3","darkorange1","green3")
 
 BAdl_mat<-rbind(BAdl_T1, BAdl_T2, BAdl_Ctr)
 
@@ -747,11 +744,13 @@ legend("topright",bty = "n",
 # MSD analysis
 
 # Tadpole
-d <- dist(x = n_BTad_mat,method = "manhattan")
+d <- dist(x = BTad_mat,method = "manhattan")
 mds <- cmdscale(d = d,k = 5,eig = TRUE)
 plot(mds$points,xlab = "First coordinate",ylab = "Second coordinate",pch = 19,
      cex =1,col = line_cols[sample_classes],
      main = "MDS plot with representative points \n of each group and error bars")
+sample_classes <- c(rep(1, length(T2_s)),rep(2, length(T1_s)),
+                    rep(3, length(TC_s)))
 a <- representative_point(input = mds$points,ids = which(sample_classes == 1),
                           col = scales::alpha(line_cols[1],0.5),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
@@ -761,15 +760,17 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 2),
 a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
                           col = scales::alpha(line_cols[3],0.5),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
-legend("bottomright",bty = "n",legend = c("Treatment 1","Treatment 2","Control"),
+legend("bottomright",bty = "n",legend = c("Treatment 2","Treatment 1","Control"),
        col = line_cols,pch = 19)
 
 # Metamorphic
 d <- dist(x = n_BMet_mat,method = "manhattan")
 mds <- cmdscale(d = d,k = 5,eig = TRUE)
+sample_classes <- c(rep(1, length(M2_s)),rep(2, length(M1_s)),
+                    rep(3, length(MC_s)))
 plot(mds$points,xlab = "First coordinate",ylab = "Second coordinate",pch = 19,
      cex =1,col = line_cols[sample_classes],
-     main = "MDS plot with representative points \n of each group and error bars")
+     main = "MDS analysis \n ")
 a <- representative_point(input = mds$points,ids = which(sample_classes == 1),
                           col = scales::alpha(line_cols[1],0.5),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
@@ -779,11 +780,32 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 2),
 a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
                           col = scales::alpha(line_cols[3],0.5),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
-legend("bottomright",bty = "n",legend = c("Treatment 1","Treatment 2","Control"),
+legend("bottomright",bty = "n",legend = c("Treatment 2","Treatment 1","Control"),
+       col = line_cols,pch = 19)
+
+# Sub-adults
+d <- dist(x = n_BAdl_mat,method = "manhattan")
+mds <- cmdscale(d = d,k = 5,eig = TRUE)
+sample_classes <- c(rep(1, length(A2_s)),rep(2, length(A1_s)),
+                    rep(3, length(AC_s)))
+plot(mds$points,xlab = "First coordinate",ylab = "Second coordinate",pch = 19,
+     cex =1,col = line_cols[sample_classes],
+     main = "MDS analysis \n Sub-adults")
+a <- representative_point(input = mds$points,ids = which(sample_classes == 1),
+                          col = scales::alpha(line_cols[1],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 2),
+                          col = scales::alpha(line_cols[2],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
+                          col = scales::alpha(line_cols[3],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+legend("bottomright",bty = "n",legend = c("Treatment 2","Treatment 1","Control"),
        col = line_cols,pch = 19)
 
 
 # Networks' connectivity analysis
+
 
 degree_df <- data.frame(Species = vertex.attributes(BTad_CtrNet)$name,
                         color = vertex.attributes(BTad_CtrNet)$color,
@@ -815,3 +837,4 @@ grid.arrange(p1 + coord_flip() +
                      legend.position="bottom", legend.box = "horizontal") +
                ylab("Treatment 2"),
              ncol=3)
+

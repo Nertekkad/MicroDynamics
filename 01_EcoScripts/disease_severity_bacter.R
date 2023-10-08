@@ -1,7 +1,7 @@
 setwd("~/MicroDynamics/02_Data")
 # Data loading
 library(readxl)
-otu_bacter<-read.csv("1_bacteria.csv")
+otu_bacter<-read.csv("1_Bacteria.csv")
 meta_data<-read.csv("clin_attr_long.csv")
 
 # Severe patient's data
