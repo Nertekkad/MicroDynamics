@@ -352,7 +352,7 @@ abs_BTad<-list(BTad_T2, BTad_T1, BTad_Ctr)
 # 3D plot for tadpoles
 lay <- layoutMultiplex(ml_BTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BTad, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_BTad)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values="auto",
@@ -365,7 +365,7 @@ plot_multiplex3D(ml_BTad, layer.layout=lay,
 # 3D plot for metamorphics
 lay <- layoutMultiplex(ml_BMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BMet, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_BMet)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
@@ -377,7 +377,7 @@ plot_multiplex3D(ml_BMet, layer.layout=lay,
 # 3D plot for the adults
 lay <- layoutMultiplex(ml_BAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BAdl, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_BAdl)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
@@ -456,7 +456,7 @@ ml_BAdl<-ctr_ml(ml_BAdl, "degree")
 # Degree 3D plot for tadpoles
 lay <- layoutMultiplex(ml_BTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BTad, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_BTad)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values="auto", node.size.scale=abs_mat(),
@@ -468,7 +468,7 @@ plot_multiplex3D(ml_BTad, layer.layout=lay,
 # Degree 3D plot for metamorphic
 lay <- layoutMultiplex(ml_BMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BMet, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_BMet)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
@@ -480,7 +480,7 @@ plot_multiplex3D(ml_BMet, layer.layout=lay,
 # Degree 3D plot for adults
 lay <- layoutMultiplex(ml_BAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BAdl, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_BAdl)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
