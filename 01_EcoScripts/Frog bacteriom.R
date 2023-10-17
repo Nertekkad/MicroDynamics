@@ -348,6 +348,8 @@ abs_mat<-function(abs.list, g.list, n){
 
 # Abundance tables list
 abs_BTad<-list(BTad_T2, BTad_T1, BTad_Ctr)
+abs_BMet<-list(BMet_T2, BMet_T1, BMet_Ctr)
+abs_BAdl<-list(BAdl_T2, BAdl_T1, BAdl_Ctr)
 
 # 3D plot for tadpoles
 lay <- layoutMultiplex(ml_BTad, layout="kk", ggplot.format=F, box=T)
@@ -367,11 +369,12 @@ lay <- layoutMultiplex(ml_BMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BMet, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
-                 node.size.values=10, node.size.scale=0.6,
-                 node.colors=mat_colors(V(BMet_T1Net)$color, ml_BMet),
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_BMet, ml_BMet, 2),
+                 node.colors=node_color_mat(ml_BMet, "phylo"),
                  edge.colors="#838B8B",
-                 node.colors.aggr=mat_colors(V(BMet_T1Net)$color, ml_BMet),
+                 node.colors.aggr=NULL,
                  show.aggregate=F)
 
 # 3D plot for the adults
@@ -379,11 +382,12 @@ lay <- layoutMultiplex(ml_BAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BAdl, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
-                 node.size.values=10, node.size.scale=0.6,
-                 node.colors=mat_colors(V(BAdl_T1Net)$color, ml_BAdl),
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_BAdl, ml_BMet, 2),
+                 node.colors=node_color_mat(ml_BAdl, "phylo"),
                  edge.colors="#838B8B",
-                 node.colors.aggr=mat_colors(V(BAdl_T1Net)$color, ml_BAdl),
+                 node.colors.aggr=NULL,
                  show.aggregate=F)
 
 # Centrality analysis
@@ -459,8 +463,9 @@ plot_multiplex3D(ml_BTad, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
-                 node.size.values="auto", node.size.scale=abs_mat(),
-                 node.colors=node_color_mat(ml_BTad, "phylo"),
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_BTad, ml_BMet, 2),
+                 node.colors=node_color_mat(ml_BTad, "centrality"),
                  edge.colors="#838B8B",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
@@ -470,9 +475,10 @@ lay <- layoutMultiplex(ml_BMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BMet, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
-                 node.size.values=10, node.size.scale=0.6,
-                 node.colors=mat_colors(V(ml_BMet[[1]])$hl, ml_BMet),
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_BMet, ml_BMet, 2),
+                 node.colors=node_color_mat(ml_BMet, "centrality"),
                  edge.colors="#838B8B",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
@@ -482,9 +488,10 @@ lay <- layoutMultiplex(ml_BAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_BAdl, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
-                 node.size.values=10, node.size.scale=0.6,
-                 node.colors=mat_colors(V(ml_BAdl[[1]])$hl, ml_BAdl),
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_BAdl, ml_BMet, 2),
+                 node.colors=node_color_mat(ml_BAdl, "centrality"),
                  edge.colors="#838B8B",
                  node.colors.aggr=NULL,
                  show.aggregate=F)
@@ -826,11 +833,11 @@ p3<-ggplot(data=degree_df, aes(x=Species, y=T2_degree, fill=Phylum)) +
   geom_bar(stat="identity")
 
 grid.arrange(p1 + coord_flip() +
-               theme(axis.text.y = element_text(size = 0.01),
-                     legend.position = "none") + ylab("Control"),
+              theme(axis.text.y = element_text(size = 0.01),
+                    legend.position = "none") + ylab("Control"),
              p2 + coord_flip() +
                theme(axis.text.y = element_text(size = 0.01),
-                     legend.position = "none") + ylab("Treatment 1"),
+                    legend.position = "none") + ylab("Treatment 1"),
              p3 + coord_flip() +
                theme(axis.text.y = element_text(size = 0.01),
                      legend.text = element_text(size = 6),
