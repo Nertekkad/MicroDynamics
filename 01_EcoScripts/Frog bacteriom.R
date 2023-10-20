@@ -845,3 +845,151 @@ grid.arrange(p1 + coord_flip() +
                ylab("Treatment 2"),
              ncol=3)
 
+
+
+degree_df <- data.frame(Species = vertex.attributes(BTad_CtrNet)$name,
+                        color = vertex.attributes(BTad_CtrNet)$color,
+                        Phylum = vertex.attributes(BTad_CtrNet)$Taxon,
+                        Ctr_degree = degree(BTad_CtrNet),
+                        T1_degree = degree(BTad_T1Net),
+                        T2_degree = degree(BTad_T2Net))
+
+
+
+# Phylum degree importance
+
+# Control
+phyla<-unique(degree_df$Phylum)
+
+phyl_d<-c()
+for(i in 1:length(phyla)){
+  phyl_d[i]<-sum(degree_df$Ctr_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+
+degree_phylaCtrl<-data.frame(
+  Phylum=phyla,
+  Degree=phyl_d
+)
+
+degree_phylaCtrl<-degree_phylaCtrl[-which(degree_phylaCtrl$Degree == 0),]
+
+ggplot(degree_phylaCtrl, aes(x = reorder(Phylum, -Degree), y = Degree)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Phyla importance by degree \n Control") +
+  xlab("Phylum") + ylab("Degree") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Treatment 1
+phyla<-unique(degree_df$Phylum)
+
+phyl_d<-c()
+for(i in 1:length(phyla)){
+  phyl_d[i]<-sum(degree_df$T1_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+
+degree_phylaT1<-data.frame(
+  Phylum=phyla,
+  Degree=phyl_d
+)
+
+degree_phylaT1<-degree_phylaT1[-which(degree_phylaT1$Degree == 0),]
+
+ggplot(degree_phylaT1, aes(x = reorder(Phylum, -Degree), y = Degree)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Phyla importance by degree \n Treatment 1") +
+  xlab("Phylum") + ylab("Degree") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+# Treatment 2
+phyla<-unique(degree_df$Phylum)
+
+phyl_d<-c()
+for(i in 1:length(phyla)){
+  phyl_d[i]<-sum(degree_df$T2_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+
+degree_phylaT2<-data.frame(
+  Phylum=phyla,
+  Degree=phyl_d
+)
+
+degree_phylaT2<-degree_phylaT2[-which(degree_phylaT2$Degree == 0),]
+
+ggplot(degree_phylaT2, aes(x = reorder(Phylum, -Degree), y = Degree)) +
+  geom_bar(stat = "identity") +
+  labs(title = "Phyla importance by degree \n Treatment 2") +
+  xlab("Phylum") + ylab("Degree") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+
+# Log-fold change analysis
+
+# Let's create the vectors for degree contrality for each layer
+phyl_dC<-c()
+for(i in 1:length(phyla)){
+  phyl_dC[i]<-sum(degree_df$Ctr_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+phyl_dT1<-c()
+for(i in 1:length(phyla)){
+  phyl_dT1[i]<-sum(degree_df$T1_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+phyl_dT2<-c()
+for(i in 1:length(phyla)){
+  phyl_dT2[i]<-sum(degree_df$T2_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+
+
+# Degree data.frame
+degree_phyla<-data.frame(
+  Phylum=phyla,
+  Control=phyl_dC,
+  Treatment1=phyl_dT1,
+  Treatment2=phyl_dT2
+)
+
+
+# Log-fold change estimation considering the difference magnitud between
+# each treatment with the control
+T1logFC<-log((degree_phyla$Treatment1+1)/(degree_phyla$Control+1), 2)
+T2logFC<-log((degree_phyla$Treatment2+1)/(degree_phyla$Control+1), 2)
+
+logFC_df<-data.frame(
+  Phylum=phyla,
+  T1=T1logFC,
+  T2=T2logFC
+)
+
+# Log-fold change plot
+
+library(ggpubr)
+
+p1<-ggbarplot(logFC_df, x = "Phylum", y = "T1",
+              fill = "Phylum",
+              color = "white",
+              palette = viridis(length(phyla)),
+              sort.val = "desc",
+              sort.by.groups = FALSE,
+              x.text.angle = 90,
+              ylab = "Log-fold change",
+              rotate = TRUE,
+              ggtheme = theme_minimal()) +
+  theme(legend.position = "none")
+
+p2<-ggbarplot(logFC_df, x = "Phylum", y = "T2",
+              fill = "Phylum",
+              color = "white",
+              palette = viridis(length(phyla)),
+              sort.val = "desc",
+              sort.by.groups = FALSE,
+              x.text.angle = 90,
+              ylab = "Log-fold change",
+              rotate = TRUE,
+              ggtheme = theme_minimal()) +
+  theme(legend.position = "none")
+
+grid.arrange(p1 + ggtitle("Treatment 1"),
+             p2 + ggtitle("Treatment 2"),
+             ncol=2)
+
+

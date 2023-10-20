@@ -135,7 +135,7 @@ absmat<-matrix(c(log(colSums(severe_data)+2)/20,log(colSums(moderate_data)+2)/20
 # Degree 3D plot
 lay <- layoutMultiplex(bacter_ml, layout="fr", ggplot.format=F, box=T)
 plot_multiplex3D(bacter_ml, layer.layout=lay,
-                 layer.colors=rainbow(length(bacter_ml)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Severe", "Moderate", "Mild"), layer.labels.cex=1.5,
                  node.size.values="auto", node.size.scale=absmat,
