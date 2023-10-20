@@ -296,9 +296,9 @@ FAdl_T2Net<-TaxGroup(FAdl_T2Net, tax_fungi, "Phylum", "Genus")
 
 library(muxViz)
 
-ml_FTad<-list(FTad_T1Net, FTad_T2Net, FTad_CtrNet) # Tadpole
-ml_FMet<-list(FMet_T1Net, FMet_T2Net, FMet_CtrNet) # Metamorphic
-ml_FAdl<-list(FAdl_T1Net, FAdl_T2Net, FAdl_CtrNet) # Adult
+ml_FTad<-list(FTad_T2Net, FTad_T1Net, FTad_CtrNet) # Tadpole
+ml_FMet<-list(FMet_T2Net, FMet_T1Net, FMet_CtrNet) # Metamorphic
+ml_FAdl<-list(FAdl_T2Net, FAdl_T1Net, FAdl_CtrNet) # Adult
 
 # Matrix vertex-color function for multilayer network
 mat_colors<-function(colors, g.list){
@@ -308,11 +308,11 @@ mat_colors<-function(colors, g.list){
 }
   
 # 3D plot for tadpoles
-lay <- layoutMultiplex(ml_FTad, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_FTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FTad, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_FTad)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"),
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"),
                  layer.labels.cex=1.5, node.size.values=10,
                  node.size.scale=0.6,
                  node.colors=mat_colors(V(ml_FTad[[1]])$color, ml_FTad),
@@ -321,11 +321,11 @@ plot_multiplex3D(ml_FTad, layer.layout=lay,
                  show.aggregate=F)
 
 # 3D plot for metamorphics
-lay <- layoutMultiplex(ml_FMet, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_FMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FMet, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_FMet)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(FMet_T1Net)$color, ml_FMet),
                  edge.colors="black",
@@ -333,11 +333,11 @@ plot_multiplex3D(ml_FMet, layer.layout=lay,
                  show.aggregate=F)
 
 # 3D plot for the adults
-lay <- layoutMultiplex(ml_FAdl, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_FAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FAdl, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_FAdl)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(FAdl_T1Net)$color, ml_FAdl),
                  edge.colors="black",
@@ -416,11 +416,11 @@ colmat<-matrix(c(V(ml_FTad[[1]])$hl,V(ml_FTad[[2]])$hl,V(ml_FTad[[3]])$hl),
                nrow = length(V(ml_FTad[[1]])), ncol = length(ml_FTad))
 
 # Degree 3D plot for tadpoles
-lay <- layoutMultiplex(ml_FTad, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_FTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FTad, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_FTad)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(ml_FTad[[1]])$hl, ml_FTad),
                  edge.colors="black",
@@ -428,11 +428,11 @@ plot_multiplex3D(ml_FTad, layer.layout=lay,
                  show.aggregate=F)
 
 # Degree 3D plot for metamorphic
-lay <- layoutMultiplex(ml_FMet, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_FMet, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FMet, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_FMet)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(ml_FMet[[1]])$hl, ml_FMet),
                  edge.colors="black",
@@ -440,11 +440,11 @@ plot_multiplex3D(ml_FMet, layer.layout=lay,
                  show.aggregate=F)
 
 # Degree 3D plot for adults
-lay <- layoutMultiplex(ml_FAdl, layout="fr", ggplot.format=F, box=T)
+lay <- layoutMultiplex(ml_FAdl, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FAdl, layer.layout=lay,
-                 layer.colors=rainbow(length(ml_FAdl)),
+                 layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 1", "Treatment 2", "Control"), layer.labels.cex=1.5,
+                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
                  node.size.values=10, node.size.scale=0.6,
                  node.colors=mat_colors(V(ml_FAdl[[1]])$hl, ml_FAdl),
                  edge.colors="black",
