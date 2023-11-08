@@ -822,20 +822,21 @@ physeq2<-merge_phyloseq(physeq, sample_data)
 dist.mat <- phyloseq::distance(physeq2, "bray")
 # Get reference samples
 ref.samples <- sample_names(subset_samples(physeq2, 
-                                           Treatment == "Treatment2"))
+                                           Treatment == "Control"))
 # Community level variation analysis
-dysbiosis_2 <- dysbiosisMedianCLV(physeq2,
+dysbiosis_1 <- dysbiosisMedianCLV(physeq2,
                                   dist_mat = dist.mat,
                                   reference_samples = ref.samples)
 # We sample the data set identifying as dysbiotic the data under the 90th percentile
-dysbiosis_thres <- quantile(subset(dysbiosis_2, Treatment == "Treatment2")$score, 0.9)
-normobiosis_thres <- quantile(subset(dysbiosis_2, Treatment == "Treatment2")$score, 0.1)
+dysbiosis_thres <- quantile(subset(dysbiosis_1, Treatment == "Treatment2")$score, 0.9)
+normobiosis_thres <- quantile(subset(dysbiosis_1, Treatment == "Treatment2")$score, 0.1)
 
-dysbiosis_2 <- dysbiosis_2 |> 
+dysbiosis_1 <- dysbiosis_1 |> 
   mutate(isDysbiostic = ifelse(score >= dysbiosis_thres, TRUE, FALSE))
 
+
 # Dysbiosis plot measures according to CLV method
-p1 <- plotDysbiosis(df=dysbiosis_2,
+p1 <- plotDysbiosis(df=dysbiosis_1,
                     xvar="Treatment",
                     yvar="score",
                     colors=c(Treatment1="red", Treatment2="orange",
@@ -844,8 +845,55 @@ p1 <- plotDysbiosis(df=dysbiosis_2,
   labs(x="", y="Dysbiosis Score") +
   theme_bw(base_size = 14)
 p1
- 
 
+
+# Dysbiosis plot measures according to euclidean method
+dysbiosis_2 <- euclideanDistCentroids(physeq2,
+                                      dist_mat = dist.mat,
+                                      use_squared = TRUE,
+                                      group_col = "Treatment",
+                                      control_label = "Control",
+                                      case_label = "Treatment2")
+
+p2 <- plotDysbiosis(df=dysbiosis_2,
+                    xvar="Treatment",
+                    yvar="CentroidDist_score",
+                    colors=c(Treatment1="red", Treatment2="orange",
+                             Control="green"),
+                    show_points = FALSE) +
+  labs(x="", y="Dysbiosis Score (Centroid)")
+p2
+
+
+# Dysbiosis plot measures according to the Combined alpha-beta diversity based score
+dysbiosis_3 <- combinedShannonJSD(physeq2,
+                                  reference_samples = ref.samples)
+
+
+p3 <- plotDysbiosis(df=dysbiosis_3,
+                    xvar="Treatment",
+                    yvar="ShannonJSDScore",
+                    colors=c(Treatment1="red", Treatment2="orange",
+                             Control="green"),
+                    show_points = FALSE)+
+  labs(x="", y="Shannon-JSD\nDysbiosis Score")
+p3
+
+
+cloud.results <- cloudStatistic(physeq2,
+                                dist_mat = dist.mat,
+                                reference_samples = ref.samples,
+                                ndim=-1,
+                                k_num=5)
+
+p4 <- plotDysbiosis(df=cloud.results,
+                    xvar="Treatment",
+                    yvar="log2Stats",
+                    colors=c(Treatment1="red", Treatment2="orange",
+                             Control="green"),
+                    show_points = FALSE) +
+  labs(x="", y="Dysbiosis CLOUD Score")
+p4
 
 # Degree analysis
 
