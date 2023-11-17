@@ -1,7 +1,7 @@
 setwd("~/MicroDynamics/02_Data")
 # Data loading
 library(readxl)
-otu_bacter<-read.csv("1_Bacteria.csv")
+otu_bacter<-read.csv("3_Fungi.csv")
 meta_data<-read.csv("clin_attr_long.csv")
 
 # Severe patient's data
@@ -60,19 +60,19 @@ mildNet<-as.undirected(mildNet)
 # muxViz object
 library(muxViz)
 library(mlBioNets)
-bacter_ml<-list(severeNet, moderateNet, mildNet)
-bacter_ml<-ctr_ml(bacter_ml, "degree")
-colsmat<-node_color_mat(bacter_ml, "centrality")
+fungi_ml<-list(severeNet, moderateNet, mildNet)
+fungi_ml<-ctr_ml(fungi_ml, "degree")
+colsmat<-node_color_mat(fungi_ml, "centrality")
 abs_data<-list(severe_data, moderate_data, mild_data)
-B_abs_mat<-abs_mat(abs_data, bacter_ml, 20)
+F_abs_mat<-abs_mat(abs_data, fungi_ml, 20)
 
 # Degree 3D plot
-lay <- layoutMultiplex(bacter_ml, layout="fr", ggplot.format=F, box=T)
-plot_multiplex3D(bacter_ml, layer.layout=lay,
+lay <- layoutMultiplex(fungi_ml, layout="fr", ggplot.format=F, box=T)
+plot_multiplex3D(fungi_ml, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=c("Severe", "Moderate", "Mild"), layer.labels.cex=1.5,
-                 node.size.values="auto", node.size.scale=B_abs_mat,
+                 node.size.values="auto", node.size.scale=F_abs_mat,
                  node.colors=colsmat,
                  edge.colors="black",
                  node.colors.aggr=NULL,
@@ -80,10 +80,10 @@ plot_multiplex3D(bacter_ml, layer.layout=lay,
 
 # Networks' connectivity analysis
 
-degree_df <- data.frame(Species = vertex.attributes(bacter_ml[[1]])$name,
-                        Severe = degree(bacter_ml[[1]]),
-                        Moderate = degree(bacter_ml[[2]]),
-                        Mild = degree(bacter_ml[[3]]))
+degree_df <- data.frame(Species = vertex.attributes(fungi_ml[[1]])$name,
+                        Severe = degree(fungi_ml[[1]]),
+                        Moderate = degree(fungi_ml[[2]]),
+                        Mild = degree(fungi_ml[[3]]))
 
 degree_df<-degree_df[-which(rowSums(degree_df[,c(2,3,4)])/
                               mean(rowSums(degree_df[,c(2,3,4)]))<0.9),]
@@ -109,7 +109,6 @@ grid.arrange(p1 + coord_flip() +
                theme(axis.text.y = element_text(size = 0.01),
                      legend.position = "none") + ylab("Mild"),
              ncol=3)
-
 
 # Diversity analysis
 
@@ -169,13 +168,13 @@ ab_table_div<-function(ab_table, diversity_type){
 # Dominance between patients
 dom_severe<-ab_table_div(t(severe_data), "simpson")
 dom_severe<-data.frame("Severity" = rep("Severe", length(dom_severe)),
-                   "Data" = dom_severe)
+                       "Data" = dom_severe)
 dom_moderate<-ab_table_div(t(moderate_data), "simpson")
 dom_moderate<-data.frame("Severity" = rep("Moderate", length(dom_moderate)),
-                       "Data" = dom_moderate)
+                         "Data" = dom_moderate)
 dom_mild<-ab_table_div(t(mild_data), "simpson")
 dom_mild<-data.frame("Severity" = rep("Mild", length(dom_mild)),
-                         "Data" = dom_mild)
+                     "Data" = dom_mild)
 dom_severity<-rbind(dom_severe, dom_moderate, dom_mild)
 
 # Violin plot
@@ -208,7 +207,7 @@ for(i in 1:nrow(n_severity_mat)){
   sorted_abs[[i]]<-sort(n_severity_mat[i,], decreasing = T)
 }
 n_severity_mat<-matrix(unlist(sorted_abs), nrow=length(sorted_abs),
-                   ncol=length(sorted_abs[[1]]), byrow=TRUE)
+                       ncol=length(sorted_abs[[1]]), byrow=TRUE)
 
 # Plot the axis
 plot(1e10,xlim = c(1,15),ylim = c(0,0.8),
@@ -250,8 +249,4 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
 legend("topright",bty = "n",legend = c("Severe","Moderate","Mild"),
        col = line_cols,pch = 19)
-
-
-
-             
 
