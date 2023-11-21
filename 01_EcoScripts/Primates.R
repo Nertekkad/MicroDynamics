@@ -7,6 +7,7 @@ rnames <- abs_bf[,1]
 abs_bf <- abs_bf[,-1]
 rownames(abs_bf)<-rnames
 
+
 # Taxonomic data
 library(readr)
 taxdata <- read_tsv(file = "16S_taxonomy.tsv", col_names = T)
