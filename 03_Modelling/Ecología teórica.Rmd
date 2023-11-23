@@ -93,7 +93,7 @@ Donde $a$, $b$, $c$ son los parámetros del sistema. Cualqier variación en las 
 
 Asumamos la existencia de una población $x$ con una tasa de crecimiento $r$ que crece indefinidamente en el tiempo. Como es evidente, este modelo implica la existancia de una población cuyo tamaño se incrementa de forma exponencial a una tasa constante sin ningún factor que limite su número. Este incremento en el tamaño de la población se describe como $\dot{x}=rt$, de modo que para obtener el tamaño de la población en función del tiempo, debemos integrar la ecuación anterior de la siguiente forma:
 
-$$\frac{dx}{dt}=rx \quad \rightarrow \quad \int\frac{dx}{x}=r\int dt$$
+$$\frac{dx}{dt}=rx \quad \rightarrow \quad \int\frac{dx}{x}=r\int{dt}$$
 
 $$ln(x)+c_{1}=rt+c_{2} \quad \rightarrow \quad ln(x)=rt + c_{3}$$
 
@@ -107,7 +107,71 @@ $$x(t)=x_{0}e^{rt}$$
 
 Si ahora queremos describir una población que está limitada por la competencia intraespecífica, es decir, por la competencia entre los propios individuos de una misma población aislada, podemos emplear el modelo de Verhulst, cuyo comportamiento se ha observado en condiciones de laboratorio.
 
-$$\frac{dx}{dt}=rx(1-\frac{x}{k}) \quad \rightarrow \quad \int\frac{dx}{x(1-\frac{x}{k})}=r\int dt$$
+$$\frac{dx}{dt}=rx(1-\frac{x}{k}) \quad \rightarrow \quad \int\frac{dx}{x(1-\frac{x}{k})}=r\int{dt}$$
+
+Dado que $(ad+cb)/bd = a/b+c/d$, podemos descomponer la primera parte de la integral de la siguiente forma:
+
+$$\frac{1}{x(1-\frac{x}{k})}=\frac{A}{x}+\frac{B}{1-\frac{x}{k}}$$
+
+Por lo tanto, tenemos que:
+
+$$\frac{A(1-\frac{x}{k})+Bx}{x(1-\frac{x}{k})}$$
+
+Donde, para mantener la igualdad, $A(1-\frac{x}{k})+Bx=1$. Ergo, si $B=A/k$ y, por ende, $A=1$, entonces $B=1/k$ de modo que la expresión del numerador es equivalente a 1:
+
+$$A-\frac{Ax}{k}+Bx=1 \quad \rightarrow \quad A-x(\frac{A}{k}-B) = 1-x(\frac{1}{k}-\frac{1}{k})=1$$
+
+Por lo tanto, podemos inferir que:
+
+$$\frac{A}{x}+\frac{B}{1-\frac{x}{k}}=\frac{1}{x}+\frac{1}{k(1-\frac{x}{k})}$$
+
+Ahora podemos aplicar esto para resolver la integral de la expresión completa:
+
+$$\int\frac{dx}{x(1-\frac{x}{k})}=\int\frac{dx}{x}+\frac{1}{k}\int\frac{dx}{1-\frac{x}{k}}=r\int{dt}$$
+
+Para resolver la segunda parte de la integral realizamos una integración por cambio de variable, donde $u=1-x/k$ y $du=-dx/k$, por lo cual $dx=-k*du$. Al reescribirlo nos queda:
+
+$$\int\frac{dx}{x}+\frac{1}{k}(-k)\int\frac{du}{u}=r\int{dt} \quad \rightarrow \quad ln(x)-ln(u)+c_{1}=rt+c_{2}$$
+
+Por propiedad de los logaritmos, podemos reordenar la función de la siguiente forma:
+
+$$ln(x)-ln(1-\frac{x}{k})=rt+c_{3} \quad \rightarrow \quad ln(\frac{x}{1-\frac{x}{k}})=rt+c_{3}$$
+$$\frac{x}{1-\frac{x}{k}}=e^{rt+c_{3}} \quad \rightarrow \quad x=e^{rt+c_{3}}(1-\frac{x}{k}) \quad \rightarrow \quad x=e^{rt+c_{3}}-e^{rt+c_{3}}(\frac{x}{k})$$
+$$x(1+\frac{e^{rt+c_{3}}}{k})=e^{rt+c_{3}} \quad \rightarrow \quad x(t)=\frac{e^{rt+c_{3}}}{1+\frac{e^{rt+c_{3}}}{k}}$$
+
+Donde las condiciones iniciales se definen como $x(0)=e^{c_{3}}/(1+e^{c_{3}}/k)=x_{0}$.
+
+Dado que $n^{a}*n^{-a}=1$, podemos simplificar la expresión de la forma:
+
+$$x(t)=\frac{e^{rt+c_{3}}}{1+\frac{e^{rt+c_{3}}}{k}}(\frac{e^{-(rt+c_{3})}}{e^{-(rt+c_{3})}})=\frac{1}{e^{-(rt+c_{3})}+\frac{1}{k}}$$
+
+Por lo cual, al definir el límite de la función, podemos obtener el valor al cual se aproxima en un tiempo infinito.
+
+$$\lim_{x\rightarrow \infty}x(t)=\frac{1}{e^{-(r(\infty)+c_{3})}+\frac{1}{k}}=\frac{1}{(1/k)}=k$$
+
+```{r}
+# Función
+library(deSolve)
+model <- function (time, y, parms) {
+  with(as.list(c(y, parms)), {
+  dN <- r * N * (1 - N / K)
+  list(dN)
+ })
+}
+
+# Parámetros
+y <- c(N = 0.1)
+r <- 1.5
+k <- 5
+parms <- c(r = r, K = k)
+times <- seq(0, 10, 0.2)
+
+# Gráfico
+plot(ode(y, times, model, parms), type = "l")
+abline(h = k, lty = "dashed", col = "blue")
+```
+
+
 
 ## Modelaje de poblaciones microbianas {-}
 
@@ -117,11 +181,11 @@ Un modelo más realista es el de Verhulst, donde el crecimiento de una població
 
 $$\frac{dx_{i}}{dt}=rx(1-\frac{x}{k})$$
 
-Cuya solución exponencial es:
+Cuya solución es:
 
 $$ x(t) = \frac{k}{1+(\frac{k-x_{0}}{x_{0}})e^{-rt}}$$
 
-con $x_0$ la condición inicial y $k$ la capacidad de carga.
+Siendo $x_0$ la condición inicial y $k$ la capacidad de carga.
 
 ### Lotka-Volterra {-}
 
