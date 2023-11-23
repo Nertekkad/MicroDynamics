@@ -250,8 +250,3 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
 legend("topright",bty = "n",legend = c("Severe","Moderate","Mild"),
        col = line_cols,pch = 19)
-
-
-
-             
-

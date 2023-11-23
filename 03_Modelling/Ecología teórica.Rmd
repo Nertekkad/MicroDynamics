@@ -87,6 +87,28 @@ scatterplot3d(out[,-1], type = "l")
 
 Donde $a$, $b$, $c$ son los parámetros del sistema. Cualqier variación en las condiciones iniciales da lugar a estados divergentes del sistema.
 
+## Modelos ecológicos unidimencionales {-}
+
+### Solución del modelo exponencial {-}
+
+Asumamos la existencia de una población $x$ con una tasa de crecimiento $r$ que crece indefinidamente en el tiempo. Como es evidente, este modelo implica la existancia de una población cuyo tamaño se incrementa de forma exponencial a una tasa constante sin ningún factor que limite su número. Este incremento en el tamaño de la población se describe como $\dot{x}=rt$, de modo que para obtener el tamaño de la población en función del tiempo, debemos integrar la ecuación anterior de la siguiente forma:
+
+$$\frac{dx}{dt}=rx \quad \rightarrow \quad \int\frac{dx}{x}=r\int dt$$
+
+$$ln(x)+c_{1}=rt+c_{2} \quad \rightarrow \quad ln(x)=rt + c_{3}$$
+
+$$x(t)=e^{rt+c_{3}} \quad \rightarrow \quad x(t)=e^{rt}*e^{c_{3}}$$
+
+Dado que $x(0)=x_{0}=e^{c_{3}}$, entonces obtenemos que el tamaño de la población con respecto al tiempo se define como:
+
+$$x(t)=x_{0}e^{rt}$$
+
+### Solución del modelo logístico de Verhulst {-}
+
+Si ahora queremos describir una población que está limitada por la competencia intraespecífica, es decir, por la competencia entre los propios individuos de una misma población aislada, podemos emplear el modelo de Verhulst, cuyo comportamiento se ha observado en condiciones de laboratorio.
+
+$$\frac{dx}{dt}=rx(1-\frac{x}{k}) \quad \rightarrow \quad \int\frac{dx}{x(1-\frac{x}{k})}=r\int dt$$
+
 ## Modelaje de poblaciones microbianas {-}
 
 Si tenemos que $\dot{x} = rx$, donde $r>0$, entonces $x(t)=x_{0}e^{rt}$, por lo que el modelo es exponencial, un comportamiento poco realista desde la perspectiva biológica.
