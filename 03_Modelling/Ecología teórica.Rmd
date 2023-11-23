@@ -1,5 +1,91 @@
 # Dinámica de comunidades microbianas {-}
 
+## Fundamentos de los modelos biológicos basados en ecuaciones diferenciales {-}
+
+Existen múltiples formas de clasificar ecuaciones diferenciales, iniciando por hacer una distinciójn entre aquellas que son continuas, donde $x(t)$ puede adoptar cualquier valor $\mathbb{R}$ en el tiempo $(-\infty, \infty)$. Por su parte, las funciones discretas solo pueden adoptar valores enteros $\mathbb{Z}$ en el tiempo, de modo que cada valor de $x_{t}$ depende del resultado obtenido previamente en $x_{t-1}$. En los modelos continuos, por lo tanto, es posible calcular los límites de la función y definir sus derivadas.
+
+Del mismo modo, podemos diferenciar las funciones que son derivadas totales de una única variable $dx/dt$, como $f(x)$ y $f(g)$. En contraposición, las derivadas parciales se definen en fución de múltiples variables $f(x,y,z,...,t)$, por lo que se deben derivar en función de una variable a la vez de la forma $\frac{\partial f}{\partial x}$.
+
+Las funciones también pueden ser autónomas o no-autónomas, siendo las primeras aquellas donde no existe una dependencia temporal. Un ejemplo clásico de este caso consiste en una masa que oscila en un resorte. En un sistema autónomo, esta oscilación disminuiría en función del tiempo hasta detenerse una vez el sistema haya discipado su energía cinética en forma de calor. Sin embargo, en un sistema no-autónomo se podría agregar un impulso periódico que introdusca energía cinética al sistema cada cierto tiempo.
+
+Las funciones pueden ser deterministas o estocásticas, donde las primeras devuelven siempre el mismo conjunto de valores como resultado dados determinados valores de entrada, mientras que las funciones estocásticas no, dado su caracter aleatorio.
+
+Llegados a este punto, podemos definir que una función de tipo:
+
+$$\dot{x}=\frac{dx(t)}{dt}=f(x(t))$$
+
+Es por lo tanto contínua, ordinaria, autónoma y determinista, donde $x(0)=x_{0}$ en $t=0$, siendo $x_{0}$ las condiciones iniciales del sistema.
+
+Finalmente, podemos destacar que dentro de este grupo, existen funciones lineales, cuya tasa de cambio es siempre constante, y funciones no-lineales. Un ejemplo de las primeras podría ser una población que crece indefinidamente con una tasa $r$ de la forma $\dot{x}=rx$. Sin embargo, este tipo de funciones no suelen definir correctamente los patrones de comportamiento de los fenómenos naturales, por lo que es más común y conveniente el uso de funciones no-lineales, como sucede con el modelo de Verhulst, que limita el crecimiento de una población mediante la capacidad de carga del sistema.
+
+$$\dot{x}=rx(1-\frac{x}{k})$$
+
+La sensibilidad a las condiciones iniciales o caos, es la tendencia de un sistema a tomar un conjunto de valores radicalmente distintos con respecto a si mismo tras haber introducido condiciones iniciales similares. Esto no debe confundirse con la estocasticidad, dado que un sistema caótico es totalmente determinista, sin embargo, cualquier variación sobre las condiciones iniciales, por minúscula que sea, se amplifica en el tiempo dando como resultado una eventual divergencia de los resultados. Un sistema estocástico es, por definición, impredecible. El caos no ha sido reportado en sistemas contínuos unidimencionales, sin embargo, si está presente en funciones discretas, como sucede con el modelo discreto de Verhulst:
+
+$$x_{t+1}=rx_{t}(1-\frac{x_{t}}{k})$$
+
+```{r}
+# Carga la biblioteca para gráficos
+library(graphics)
+
+# Define los parámetros del modelo
+r_values <- seq(0, 4, by = 0.01)
+k <- 1  # Puedes ajustar este valor según tus necesidades
+
+# Inicializa x_values con un valor inicial (por ejemplo, 0.5)
+x_values <- numeric(length(r_values))
+x_values[1] <- 0.5
+
+# Calcula los valores de x_{t+1}
+for (i in 2:length(r_values)) {
+  x_values[i] <- r_values[i] * x_values[i-1] * (1 - x_values[i-1]/k)
+}
+
+# Gráfico de bifurcaciones
+library(ggplot2)
+df <- data.frame(x = r_values, y = x_values)
+ggplot(df, aes(x = x, y = y)) + geom_line(data = df) +
+  labs(x = "r", y = "x_t",
+       title = "Diagrama de bifurcaciones del Modelo Discreto de Verhulst")
+```
+
+En modelos continuos, el caos solo aparece en sistemas de dimención igual o mayor a tres, como sucede con el modelo de convección atmosférica de Lorenz, mismo que dio nombre al atractor de Lorenz con su característica forma de mariposa. Este modelo, de hecho, abrió las puertas al estudio de los sistemas caóticos y su intrigante naturaleza.
+
+$$\dot x = a x +yz$$
+$$\dot y = b(y-z)$$
+$$\dot z = -xy+cy-z $$
+
+```{r}
+## Caos en la atmósfera
+
+library(deSolve)
+## Definimos una función que tiene las ecuaciones
+Lorenz <- function(t, state, parameters) {
+with(as.list(c(state, parameters)), { 
+       # Acá van definidas las ecuaciones
+       dX<- a*X+Y*Z
+       dY<- b*(Y-Z)
+       dZ <- -X * Y + c * Y - Z
+        list(c(dX, dY, dZ))
+      })
+}
+# Acá le damos valores a los parámetros
+parameters <- c(a = -8/3, b = -10, c = 28)
+#Estas son las condiciones iniciales
+state <- c(X = 1, Y = 1, Z = 1)
+#En este vector ponemos el tiempo para evaluar 
+times <- seq(0, 100, by = 0.01)
+#Acá hace todo (ode significa *ordinary differential equation*)
+out <- ode(y = state, times = times, func = Lorenz, parms = parameters)
+#Graficamos las soluciones, una gráfica por cada cooordenada (variable)
+plot(out,col="blue")
+    ## En 3-D
+    library(scatterplot3d)
+
+scatterplot3d(out[,-1], type = "l")
+```
+
+Donde $a$, $b$, $c$ son los parámetros del sistema. Cualqier variación en las condiciones iniciales da lugar a estados divergentes del sistema.
 
 ## Modelaje de poblaciones microbianas {-}
 
