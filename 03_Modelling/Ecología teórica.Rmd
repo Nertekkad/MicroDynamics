@@ -171,7 +171,39 @@ plot(ode(y, times, model, parms), type = "l")
 abline(h = k, lty = "dashed", col = "blue")
 ```
 
+Tomando la función simplificada, podemos entonces inferir que $x(0)=1/(c^{-c_{3}}+1/k)=x_{0}$. Para obtener el valor de la constante $c_{3}$, despejamos en la expresión anterior:
 
+$$x_{0}(e^{-c_{3}}+\frac{1}{k})=1 \quad \rightarrow \quad x_{0}e^{-c_{3}}=1-\frac{x_{0}}{k} \quad \rightarrow \quad e^{-c_{3}}=\frac{(1-\frac{x_{0}}{k})}{x_{0}}$$
+Por lo cual, obtenemos que $c_{3}$ se define como:
+
+$$c_{3}=-ln(\frac{k-x_{0}}{x_{0}k})$$
+
+### Solución para el modelo de Pesca {-}
+
+Asumamos que existe una población de peces $\dot{x}$ que crece a una tasa $r$ y está limitada por una capacidad de carga $k$, y donde asumumos que parte de esa población es capturada a una tasa $0 \leq \eta \leq 1$.
+
+$$\dot{x}=rx(1-\frac{x}{k})-\eta{x}$$
+
+Podemos simplificar esta expresión de la siguiente forma:
+
+$$\dot{x}=rx-r\frac{x^{2}}{k}-\frac{r}{r}\eta{x}= rx(1-\frac{\eta}{r}-\frac{x}{k})=rx(\alpha-\frac{x}{k})$$
+
+Donde $\alpha=1-\eta/r$.
+
+$$\int{\frac{dx}{dt}}=r\int{x(\alpha-\frac{x}{k})} \quad \rightarrow \quad \int{\frac{dx}{x(\alpha-\frac{x}{k})}}=r\int{dt}$$
+Donde, para resolver la primera parte de la integral debemos descomponer la expresión:
+
+$$\frac{1}{x(\alpha-\frac{x}{k})}= \frac{A}{x}+\frac{B}{\alpha-\frac{x}{k}}= \frac{A(\alpha-\frac{x}{k})+B(x)}{x(\alpha-\frac{x}{k})}$$
+
+Donde $A(\alpha-\frac{x}{k})+B(x)=A\alpha-A\frac{x}{k}+Bx=1$.
+
+Por lo tanto, para mantener la equivalencia, $B=A/k$, lo que da como resultado que $A\alpha=1$, ergo $A=1/\alpha$. Si ahora sustituímos $A$ en $B$, obtenemos que $B=1/(\alpha{k})$. A raíz de lo anterior, obtenemos que:
+
+$$\frac{A}{x}+\frac{B}{\alpha-\frac{x}{k}}= \frac{1}{\alpha{x}}+\frac{1}{\alpha{k}(\alpha-\frac{x}{k})}$$
+
+Por lo que ahora podemos reescribir la integral completa:
+
+$$\int{\frac{dx}{x(\alpha-\frac{x}{k})}}= \frac{1}{\alpha}\int\frac{dx}{x}+\frac{1}{\alpha{k}}\int\frac{1} {(\alpha-\frac{x}{k})}=r\int{dt}$$
 
 ## Modelaje de poblaciones microbianas {-}
 
