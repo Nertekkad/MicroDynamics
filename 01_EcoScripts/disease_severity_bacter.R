@@ -250,3 +250,95 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
 legend("topright",bty = "n",legend = c("Severe","Moderate","Mild"),
        col = line_cols,pch = 19)
+
+
+
+
+
+log_fc<-function(g.list, layer_names, control_layer, test_layer){
+  centralities<-list()
+  for(i in 1:length(g.list)){
+    centralities[[i]]<-degree(g.list[[i]])
+  }
+  d_mat<-matrix(unlist(centralities), length(centralities[[1]]),
+                length(centralities))
+  df_degree<-as.data.frame(d_mat)
+  rownames(df_degree)<-vertex.attributes(g.list[[1]])$name
+  colnames(df_degree)<-layer_names
+  control_n<-which(colnames(df_degree)==control_layer)
+  test_n<-which(colnames(df_degree)==test_layer)
+  log_fc<-log((df_degree[,control_n]+1)/(df_degree[,test_n]+1), 2)
+  df_logFC<-data.frame(
+    node_names = vertex.attributes(g.list[[1]])$name,
+    log_fc = log_fc
+  )
+  not_fc <- which(df_logFC$log_fc == 0)
+  df_logFC<-df_logFC[-not_fc,]
+  return(df_logFC)
+}
+
+
+
+
+locentralities<-list()
+for(i in 1:length(bacter_ml)){
+  centralities[[i]]<-degree(bacter_ml[[i]])
+}
+
+log_fc()
+d_mat<-matrix(unlist(centralities), length(centralities[[1]]),
+              length(centralities))
+df_degree<-as.data.frame(d_mat)
+rownames(df_degree)<-vertex.attributes(bacter_ml[[1]])$name
+colnames(df_degree)<-c("Severe", "Moderate", "Mild")
+control_layer<-"Mild"
+control_n<-which(colnames(df_degree)==control_layer)
+test_layer<-"Severe"
+test_n<-which(colnames(df_degree)==test_layer)
+log_fc<-log((df_degree[,control_n]+1)/(df_degree[,test_n]+1), 2); log_fc
+df_logFC<-data.frame(
+  node_names = vertex.attributes(bacter_ml[[1]])$name,
+  log_fc = log_fc
+)
+not_fc <- which(df_logFC$log_fc == 0)
+df_logFC<-df_logFC[-not_fc,]
+which.max(df_logFC$log_fc)
+which.min(df_logFC$log_fc)
+
+
+library(ggpubr)
+ggbarplot(df_logFC, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue4",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+          scale_x_discrete(labels = function(x) str_wrap(x, 1))
+  theme(legend.position = "none")
+
+
+# Let's create the vectors for degree contrality for each layer
+phyl_dC<-c()
+for(i in 1:length(phyla)){
+  phyl_dC[i]<-sum(degree_df$Ctr_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+phyl_dT1<-c()
+for(i in 1:length(phyla)){
+  phyl_dT1[i]<-sum(degree_df$T1_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+phyl_dT2<-c()
+for(i in 1:length(phyla)){
+  phyl_dT2[i]<-sum(degree_df$T2_degree[which(degree_df$Phylum %in% phyla[i])])
+}
+
+
+# Degree data.frame
+degree_phyla<-data.frame(
+  Phylum=phyla,
+  Control=phyl_dC,
+  Treatment1=phyl_dT1,
+  Treatment2=phyl_dT2
+)
