@@ -248,6 +248,7 @@ $$\frac{df}{dx}|_{x_{1}=0}=r\alpha>0 \quad \& \quad \frac{df}{dx}|_{x_{2}=\alpha
 
 Siendo $x_{1}=0$ un punto inestable y $x_{2}=\alpha{k}$ estable, dado que es el valor al cual se aproxima la función.
 
+
 ## Modelaje de poblaciones microbianas {-}
 
 Si tenemos que $\dot{x} = rx$, donde $r>0$, entonces $x(t)=x_{0}e^{rt}$, por lo que el modelo es exponencial, un comportamiento poco realista desde la perspectiva biológica.
