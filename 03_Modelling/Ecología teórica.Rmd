@@ -238,6 +238,16 @@ Ahora podemos estimar el límite hacia el cual se aproxima la función en un tie
 
 $$\lim_{x\rightarrow \infty}x(t)= \frac{\alpha{k}}{e^{-\alpha(r(\infty)+c_{3})}k+1}=\alpha{k}= (1-\frac{\eta}{r})k$$
 
+Si ahora deseamos obtener la estabilidad de este límite, podemos resolverlo derivando la función original $\dot{x}=rx(1-x/k)$ en función de la variable $x$:
+
+$$\frac{df}{dx}(rx\alpha-\frac{r}{k}x^{2})=r\alpha-2\frac{rx}{k}$$
+
+Donde los puntos de equilibrio de $\dot{x}=rx(1-x/k)$ son $x_{1}=0$ y $x_{2}=\alpha{k}$, por lo que al evaluarlos en la derivada de la función con respecto a $x$, obtenemos:
+
+$$\frac{df}{dx}|_{x_{1}=0}=r\alpha>0 \quad \& \quad \frac{df}{dx}|_{x_{2}=\alpha{k}}=-r\alpha<0$$
+
+Siendo $x_{1}=0$ un punto inestable y $x_{2}=\alpha{k}$ estable, dado que es el valor al cual se aproxima la función.
+
 ## Modelaje de poblaciones microbianas {-}
 
 Si tenemos que $\dot{x} = rx$, donde $r>0$, entonces $x(t)=x_{0}e^{rt}$, por lo que el modelo es exponencial, un comportamiento poco realista desde la perspectiva biológica.
