@@ -44,7 +44,7 @@ for (i in 2:length(r_values)) {
 # Gráfico de bifurcaciones
 library(ggplot2)
 df <- data.frame(x = r_values, y = x_values)
-ggplot(df, aes(x = x, y = y)) + geom_line(data = df) +
+ggplot(df, aes(x = x, y = y)) + geom_point(data = df) +
   labs(x = "r", y = "x_t",
        title = "Diagrama de bifurcaciones del Modelo Discreto de Verhulst")
 ```
