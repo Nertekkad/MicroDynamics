@@ -147,7 +147,7 @@ $$x(t)=\frac{e^{rt+c_{3}}}{1+\frac{e^{rt+c_{3}}}{k}}(\frac{e^{-(rt+c_{3})}}{e^{-
 
 Por lo cual, al definir el límite de la función, podemos obtener el valor al cual se aproxima en un tiempo infinito.
 
-$$\lim_{x\rightarrow \infty}x(t)=\frac{1}{e^{-(r(\infty)+c_{3})}+\frac{1}{k}}=\frac{1}{(1/k)}=k$$
+$$\lim_{x\rightarrow \infty}x(t)=\frac{1}{e^{-(r(\infty)+c_{3})}+\frac{1}{k}}= \frac{1}{(1/k)}=k$$
 
 ```{r}
 # Función
@@ -171,12 +171,12 @@ plot(ode(y, times, model, parms), type = "l")
 abline(h = k, lty = "dashed", col = "blue")
 ```
 
-Tomando la función simplificada, podemos entonces inferir que $x(0)=1/(c^{-c_{3}}+1/k)=x_{0}$. Para obtener el valor de la constante $c_{3}$, despejamos en la expresión anterior:
+Y por ende, las condiciones iniciales se definen ahora como:
 
-$$x_{0}(e^{-c_{3}}+\frac{1}{k})=1 \quad \rightarrow \quad x_{0}e^{-c_{3}}=1-\frac{x_{0}}{k} \quad \rightarrow \quad e^{-c_{3}}=\frac{(1-\frac{x_{0}}{k})}{x_{0}}$$
-Por lo cual, obtenemos que $c_{3}$ se define como:
-
-$$c_{3}=-ln(\frac{k-x_{0}}{x_{0}k})$$
+$$x(0)=\frac{1}{e^{-c_{3}}+\frac{1}{k}}=x_{0}$$
+$$x_{0}(e^{-c_{3}}+\frac{1}{k})=1 \quad \rightarrow \quad x_{0}e^{-c_{3}}+\frac{x_{0}}{k}=1 \quad \rightarrow \quad x_{0}e^{-c_{3}}=1-\frac{x_{0}}{k}$$
+$$e^{-c_{3}}=\frac{(1-\frac{x_{0}}{k})}{x_{0}} \quad \rightarrow \quad c_{3}=-ln(\frac{1-\frac{x_{0}}{k}}{x_{0}})=-ln(\frac{k-x_{0}}{x_{0}k})$$
+$$x(t)=\frac{1}{e^{-(rt+c_{3})}+\frac{1}{k}}=\frac{1}{e^{-c_{3}}e^{-rt}+\frac{1}{k}}$$
 
 ### Solución para el modelo de Pesca {-}
 
@@ -205,6 +205,36 @@ Por lo que ahora podemos reescribir la integral completa:
 
 $$\int{\frac{dx}{x(\alpha-\frac{x}{k})}}= \frac{1}{\alpha}\int\frac{dx}{x}+\frac{1}{\alpha{k}}\int\frac{1} {(\alpha-\frac{x}{k})}=r\int{dt}$$
 
+Para resolver la segunda parte de la integral, realizamos una integración por cambio de variable, demodo que obtenemos que $u=\alpha-x/k$ y $du=-dx/k$. Despejando esta última parte, obtenemos que $dx=-kdu$. Por lo tanto:
+
+$$\frac{1}{\alpha}\int{\frac{dx}{x}}+ \frac{-k}{\alpha{k}}\int\frac{du}{u}=r\int{dt}$$
+
+Donde, dada la propiedad de los logaritmos:
+
+$$\frac{ln(x)}{\alpha}-\frac{ln(\alpha-\frac{x}{k})}{\alpha}= \frac{ln(x)-ln(\alpha-\frac{x}{k})}{\alpha}= \frac{ln(\frac{x}{\alpha-\frac{x}{k}})}{\alpha}$$
+
+Por lo que nos queda:
+
+$$\frac{ln(\frac{kx}{\alpha{k-x}})}{\alpha}+c_{1}=rt+c_{2} \quad \rightarrow \quad \frac{kx}{\alpha{k-x}}=e^{\alpha(rt+c_{3})}$$
+
+$$kx=e^{\alpha(rt+c_{3})}(\alpha{k}-x)= e^{\alpha(rt+c_{3})}\alpha{k}-e^{\alpha(rt+c_{3})}x$$
+
+Ahora despejamos $x$:
+
+$$kx+e^{\alpha(rt+c_{3})}x=x(k+e^{\alpha(rt+c_{3})})= e^{\alpha(rt+c_{3})}\alpha{k}$$
+
+Por lo tanto, obtenemos que el tamaño de la población en función del tiempo responde a la forma:
+
+$$x(t)=\frac{e^{\alpha(rt+c_{3})}\alpha{k}} {k+e^{\alpha(rt+c_{3})}}* \frac{e^{-\alpha(rt+c_{3})}}{e^{-\alpha(rt+c_{3})}}= \frac{\alpha{k}}{e^{-\alpha(rt+c_{3})}k+1}$$
+
+Cuyas condiciones iniciales están definidas por:
+
+$$x(0)=\frac{\alpha{k}}{e^{-\alpha{c_{3}}}k+1}=x_{0}$$
+
+Ahora podemos estimar el límite hacia el cual se aproxima la función en un tiempo infinito:
+
+$$\lim_{x\rightarrow \infty}x(t)= \frac{\alpha{k}}{e^{-\alpha(r(\infty)+c_{3})}k+1}=\alpha{k}= (1-\frac{\eta}{r})k$$
+
 ## Modelaje de poblaciones microbianas {-}
 
 Si tenemos que $\dot{x} = rx$, donde $r>0$, entonces $x(t)=x_{0}e^{rt}$, por lo que el modelo es exponencial, un comportamiento poco realista desde la perspectiva biológica.
@@ -215,7 +245,7 @@ $$\frac{dx_{i}}{dt}=rx(1-\frac{x}{k})$$
 
 Cuya solución es:
 
-$$ x(t) = \frac{k}{1+(\frac{k-x_{0}}{x_{0}})e^{-rt}}$$
+$$x(t) = \frac{k}{1+(\frac{k-x_{0}}{x_{0}})e^{-rt}}$$
 
 Siendo $x_0$ la condición inicial y $k$ la capacidad de carga.
 
