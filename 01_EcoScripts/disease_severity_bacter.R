@@ -254,8 +254,7 @@ legend("topright",bty = "n",legend = c("Severe","Moderate","Mild"),
        col = line_cols,pch = 19)
 
 
-
-
+# Log-fold change analysis
 
 log_fc<-function(g.list, layer_names, control_layer, test_layer){
   centralities<-list()
@@ -269,7 +268,7 @@ log_fc<-function(g.list, layer_names, control_layer, test_layer){
   colnames(df_degree)<-layer_names
   control_n<-which(colnames(df_degree)==control_layer)
   test_n<-which(colnames(df_degree)==test_layer)
-  log_fc<-log((df_degree[,control_n]+1)/(df_degree[,test_n]+1), 2)
+  log_fc<--log((df_degree[,control_n]+1)/(df_degree[,test_n]+1), 2)
   df_logFC<-data.frame(
     node_names = vertex.attributes(g.list[[1]])$name,
     log_fc = log_fc
@@ -279,68 +278,89 @@ log_fc<-function(g.list, layer_names, control_layer, test_layer){
   return(df_logFC)
 }
 
+lfc1<-log_fc(bacter_ml, c("Severe", "Moderate", "Mild"), "Mild", "Moderate")
+lfc2<-log_fc(bacter_ml, c("Severe", "Moderate", "Mild"), "Mild", "Severe")
 
-
-
-locentralities<-list()
-for(i in 1:length(bacter_ml)){
-  centralities[[i]]<-degree(bacter_ml[[i]])
-}
-
-log_fc()
-d_mat<-matrix(unlist(centralities), length(centralities[[1]]),
-              length(centralities))
-df_degree<-as.data.frame(d_mat)
-rownames(df_degree)<-vertex.attributes(bacter_ml[[1]])$name
-colnames(df_degree)<-c("Severe", "Moderate", "Mild")
-control_layer<-"Mild"
-control_n<-which(colnames(df_degree)==control_layer)
-test_layer<-"Severe"
-test_n<-which(colnames(df_degree)==test_layer)
-log_fc<-log((df_degree[,control_n]+1)/(df_degree[,test_n]+1), 2); log_fc
-df_logFC<-data.frame(
-  node_names = vertex.attributes(bacter_ml[[1]])$name,
-  log_fc = log_fc
-)
-not_fc <- which(df_logFC$log_fc == 0)
-df_logFC<-df_logFC[-not_fc,]
-which.max(df_logFC$log_fc)
-which.min(df_logFC$log_fc)
-
+# Plot log-fold change
 
 library(ggpubr)
-ggbarplot(df_logFC, x = "node_names", y = "log_fc",
+
+ggbarplot(lfc1, x = "node_names", y = "log_fc",
           fill = "node_names",
-          color = "blue4",
+          color = "blue",
           sort.val = "desc",
           sort.by.groups = FALSE,
           x.text.angle = 90,
           ylab = "Log-fold change",
           rotate = TRUE,
           ggtheme = theme_minimal()) +
-          scale_x_discrete(labels = function(x) str_wrap(x, 1))
-  theme(legend.position = "none")
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
+
+ggbarplot(lfc2, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
 
 
-# Let's create the vectors for degree contrality for each layer
-phyl_dC<-c()
-for(i in 1:length(phyla)){
-  phyl_dC[i]<-sum(degree_df$Ctr_degree[which(degree_df$Phylum %in% phyla[i])])
+# Dominance violin plot
+ggbetweenstats(
+      data  = dom_severity,
+      x     = Severity,
+      y     = Data
+)
+
+
+# Abundances for severe cases
+data_div<-list()
+for(i in 1:ncol(severe_data)){
+  data_div[[i]]<-mean(as.numeric(severe_data[,i]))
 }
-phyl_dT1<-c()
-for(i in 1:length(phyla)){
-  phyl_dT1[i]<-sum(degree_df$T1_degree[which(degree_df$Phylum %in% phyla[i])])
-}
-phyl_dT2<-c()
-for(i in 1:length(phyla)){
-  phyl_dT2[i]<-sum(degree_df$T2_degree[which(degree_df$Phylum %in% phyla[i])])
-}
+# Correlation between abundance and degree
+corr_df <- data.frame(
+  Abundance = unlist(data_div), 
+  Degree = degree(bacter_ml[[1]])
+)
+
+corr_df<-corr_df[-which(corr_df$Degree %in% 0),]
+
+# Plot correlation
+ggscatterstats(
+  data  = corr_df,
+  x     = Degree,
+  y     = Abundance,
+  xlab  = "Degree",
+  ylab  = "Abundance",
+  title = "Relation between connectivity and abundance \n Severe cases"
+)
 
 
-# Degree data.frame
-degree_phyla<-data.frame(
-  Phylum=phyla,
-  Control=phyl_dC,
-  Treatment1=phyl_dT1,
-  Treatment2=phyl_dT2
+# Abundances for moderate cases
+data_div<-list()
+for(i in 1:ncol(moderate_data)){
+  data_div[[i]]<-mean(as.numeric(moderate_data[,i]))
+}
+# Correlation between abundance and degree
+corr_df <- data.frame(
+  Abundance = unlist(data_div), 
+  Degree = degree(bacter_ml[[1]])
+)
+
+corr_df<-corr_df[-which(corr_df$Degree %in% 0),]
+
+# Plot correlation
+ggscatterstats(
+  data  = corr_df,
+  x     = Degree,
+  y     = Abundance,
+  xlab  = "Degree",
+  ylab  = "Abundance",
+  title = "Relation between connectivity and abundance \n Moderate cases"
 )
