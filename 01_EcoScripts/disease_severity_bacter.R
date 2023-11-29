@@ -211,7 +211,27 @@ n_severity_mat<-matrix(unlist(sorted_abs), nrow=length(sorted_abs),
                    ncol=length(sorted_abs[[1]]), byrow=TRUE)
 
 
+# Plot the axis 
+plot(1e10,xlim = c(1,15),ylim = c(0,0.8),
+     xlab = "Species rank",ylab = "Abundance",cex.lab = 1.5,axes = FALSE)
+sfsmisc::eaxis(side = 1,at = c(1,5,10,15))
+sfsmisc::eaxis(side = 2,at = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,0.8),
+               las = 0)
 
+# Rank-abundance colors per disease severity
+a <- representative_RAD(norm_rad = n_severity_mat, sample_ids = which(sample_classes == 1),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[1],0.5),border = NA)
+a <- representative_RAD(norm_rad = n_severity_mat,sample_ids = which(sample_classes == 2),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[2],0.5),border = NA)
+
+a <- representative_RAD(norm_rad = n_severity_mat,sample_ids = which(sample_classes == 3),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[3],0.5),border = NA)
+legend("topright",bty = "n",
+       legend = c("Severe","Moderate", "Mild"),
+       col = line_cols, lwd = 3)
 
 
 # MSD analysis
