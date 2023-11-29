@@ -250,3 +250,65 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
 legend("topright",bty = "n",legend = c("Severe","Moderate","Mild"),
        col = line_cols,pch = 19)
 
+
+# Log-fold change analysis
+
+log_fc<-function(g.list, layer_names, control_layer, test_layer){
+  centralities<-list()
+  for(i in 1:length(g.list)){
+    centralities[[i]]<-degree(g.list[[i]])
+  }
+  d_mat<-matrix(unlist(centralities), length(centralities[[1]]),
+                length(centralities))
+  df_degree<-as.data.frame(d_mat)
+  rownames(df_degree)<-vertex.attributes(g.list[[1]])$name
+  colnames(df_degree)<-layer_names
+  control_n<-which(colnames(df_degree)==control_layer)
+  test_n<-which(colnames(df_degree)==test_layer)
+  log_fc<--log((df_degree[,control_n]+1)/(df_degree[,test_n]+1), 2)
+  df_logFC<-data.frame(
+    node_names = vertex.attributes(g.list[[1]])$name,
+    log_fc = log_fc
+  )
+  not_fc <- which(df_logFC$log_fc == 0)
+  df_logFC<-df_logFC[-not_fc,]
+  return(df_logFC)
+}
+
+lfc1<-log_fc(fungi_ml, c("Severe", "Moderate", "Mild"), "Mild", "Moderate")
+lfc2<-log_fc(fungi_ml, c("Severe", "Moderate", "Mild"), "Mild", "Severe")
+
+# Plot log-fold change
+
+library(ggpubr)
+
+ggbarplot(lfc1, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
+
+ggbarplot(lfc2, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
+
+# Dominance violin plot
+ggbetweenstats(
+  data  = dom_severity,
+  x     = Severity,
+  y     = Data
+)
