@@ -305,7 +305,7 @@ models_sd<-function(ab_tables){
  for(i in 1:length(ab_tables)){
    div_list[[i]]<-ab_table_div(ab_tables[[i]], "shannon")
  }
- div_mat<-matrix(unlist(div_list), ncol = 30)
+ div_mat<-matrix(unlist(div_list), ncol = length(ab_tables))
  mat_sd<-c()
  for(i in 1:nrow(div_mat)){
    mat_sd[i]<-sd(div_mat[i,])
