@@ -1,7 +1,7 @@
 library(miaSim)
 # Number of species ans resources
 n_species <- 6
-n_resources <- 3
+n_resources <- 4
 # Random efficiency matrix for consumer resource model
 matE <- randomE(
   n_species = n_species, n_resources = n_resources,
@@ -17,10 +17,10 @@ tse <- simulateConsumerResource(
   x0 = rep(0.001, n_species), resources = resources_c,
   growth_rates = runif(n_species),
   error_variance = 0.001,
-  t_end = 5000,
+  t_end = 10000,
   t_step = 1,
-  t_external_events = 3000,
-  t_external_durations = 50,
+  t_external_events = 5000,
+  t_external_durations = 1000,
   sigma_external = 0.05,
   stochastic = T
 )
@@ -101,7 +101,7 @@ for(i in 1:3){
     names_resources = paste0("res", LETTERS[seq_len(n_resources)]), E = MatE,
     x0 = rep(0.001, n_species), resources = resources_c,
     growth_rates = runif(n_species),
-    t_end = 5000,
+    t_end = 10000,
     t_step = 1,
   )
 }
@@ -111,8 +111,157 @@ tse_models<-list()
 for(i in 1:length(tse_list)){
   tse_models[[i]]<-as.matrix(assay(tse_list[[i]]))
 }
-# Plot standard deviation of the shannon diversity of the obtanied abundance tables
+# Plot standard deviation of the Shannon diversity of the obtanied abundance tables
 plot(models_sd(tse_models), type = "l", lwd = 3, col = "brown",
      xlab = "Time steps", ylab = "sd")
 
+
+# n-iterated model
+CRsims <- list()
+for(i in 1:3){
+  CRsims[[i]] <- simulateConsumerResource(
+    n_species = n_species,
+    n_resources = n_resources, names_species = letters[seq_len(n_species)],
+    names_resources = paste0("res", LETTERS[seq_len(n_resources)]), E = matE,
+    x0 = rep(0.001, n_species), resources = resources_c,
+    growth_rates = runif(n_species),
+    error_variance = 0.001,
+    t_end = 10000,
+    t_step = 1,
+    t_external_events = 5000,
+    t_external_durations = 50,
+    sigma_external = 0.05,
+    stochastic = T
+  )
+}
+
+# Function for estimate the diversity variance over time
+ab_tables_div<-function(ab_tables_list, diversity_type){
+  if(diversity_type == "shannon"){
+    div_list<-list()
+    for(j in 1:length(ab_tables_list)){
+      div_table<-c()
+      for(i in 1:ncol(ab_tables_list[[j]])){
+        div_table[i]<-Div_Shannon(ab_tables_list[[j]][, i])
+      }
+      div_list[[j]]<-div_table
+    }
+  } else
+    if(diversity_type == "simpson"){
+      div_list<-list()
+      for(j in 1:length(ab_tables_list)){
+        div_table<-c()
+        for(i in 1:ncol(ab_tables_list[[j]])){
+          div_table[i]<-Dom_Simpson(ab_tables_list[[j]][, i])
+        }
+        div_list[[j]]<-div_table
+      }
+    } else
+      if(diversity_type == "pielou"){
+        div_list<-list()
+        for(j in 1:length(ab_tables_list)){
+          div_table<-c()
+          for(i in 1:ncol(ab_tables_list[[j]])){
+            div_table[i]<-Eq_Pielou(ab_tables_list[[j]][, i])
+          }
+          div_list[[j]]<-div_table
+        }
+      } else
+        if(diversity_type == "ginisimpson"){
+          div_list<-list()
+          for(j in 1:length(ab_tables_list)){
+            div_table<-c()
+            for(i in 1:ncol(ab_tables_list[[j]])){
+              div_table[i]<-1-Dom_Simpson(ab_tables_list[[j]][, i])
+            }
+            div_list[[j]]<-div_table
+          }
+        }
+  return(div_list)
+}
+
+# Shannon diversity
+Div_Shannon <- function(abundancias_ab){
+  abs_rel <- abundancias_ab/sum(abundancias_ab)
+  Shannon <- -sum(abs_rel*log(abs_rel))
+  return(Shannon)
+}
+
+# Simpson dominance
+Dom_Simpson <- function(abundancias_ab){
+  abs_rel <- abundancias_ab/sum(abundancias_ab)
+  Simpson <- sum(abs_rel^2)
+  return(Simpson)
+}
+
+# Pielou evenness
+Eq_Pielou <- function(abundancias_ab){
+  abs_rel <- abundancias_ab/sum(abundancias_ab)
+  Shannon <- -sum(abs_rel*log(abs_rel))
+  Pielou <- Shannon/log(length(abundancias_ab))
+  return(Pielou)
+}
+
+# Extract abundance tables
+CRsims_T<-list()
+for(i in 1:length(CRsims)){
+  CRsims_T[[i]]<-as.matrix(assay(CRsims[[i]]))
+}
+
+# Diversity over time
+pielou_df <- data.frame(
+  "Time" = 1:length(ab_tables_div(CRsims_T, "pielou")[[1]]), 
+  "Diversity" = ab_tables_div(CRsims_T, "pielou")[[1]]
+)
+ggplot(pielou_df, aes(x = Time, y = Diversity)) + 
+  geom_point() + theme_classic()
+
+# Separate the data
+sep_tables<-function(ab_tables, start_p, end_p){
+  sep_tables<-list()
+  for(i in 1:length(ab_tables)){
+    sep_tables[[i]]<-ab_tables[[i]][,start_p:end_p]
+  }
+  return(sep_tables)
+}
+
+basal_tables <- sep_tables(CRsims_T, 400, 499)
+pert_tables <- sep_tables(CRsims_T, 500, 599)
+post_tables <- sep_tables(CRsims_T, 600, 699)
+recovered_tables <- sep_tables(CRsims_T, 700, 1000)
+
+# Pielou diversity
+pielou_basal<-unlist(ab_tables_div(basal_tables, "pielou"))
+pielou_pert<-unlist(ab_tables_div(pert_tables, "pielou"))
+pielou_post<-unlist(ab_tables_div(post_tables, "pielou"))
+pielou_recovered<-unlist(ab_tables_div(recovered_tables, "pielou"))
+
+# Simpson dominance
+simpson_basal<-unlist(ab_tables_div(basal_tables, "simpson"))
+simpson_pert<-unlist(ab_tables_div(pert_tables, "simpson"))
+simpson_post<-unlist(ab_tables_div(post_tables, "simpson"))
+simpson_recovered<-unlist(ab_tables_div(recovered_tables, "simpson"))
+
+df_diversity<-data.frame(
+  Period = c(rep(1, length(pielou_basal)), rep(2, length(pielou_pert)),
+             rep(3, length(pielou_post)), rep(4, length(pielou_recovered))),
+  Pielou =  c(pielou_basal, pielou_pert, pielou_post, pielou_recovered),
+  Simpson = c(simpson_basal, simpson_pert, simpson_post, simpson_recovered)
+)
+
+# Evenness violin plot
+library(ggstatsplot)
+ggbetweenstats(
+  data  = df_diversity,
+  x     = Period,
+  y     = Pielou,
+  title = "Pielou evenness"
+)
+# Dominance violin plot
+ggbetweenstats(
+  data  = df_diversity,
+  x     = Period,
+  y     = Simpson,
+  title = "Simpson dominance"
+)
 
