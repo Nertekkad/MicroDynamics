@@ -22,7 +22,8 @@ tse <- simulateConsumerResource(
   t_external_events = 5000,
   t_external_durations = 1000,
   sigma_external = 0.05,
-  stochastic = T
+  stochastic = T,
+  norm = T
 )
 # Extract abundance and resource tables
 abundances<-as.data.frame(assay(tse))
@@ -42,7 +43,7 @@ matplot(x = times, y = resources, type = "l",
 
 # Before simulate the system, we shall find at which time step it gets stability
 
-# Function for estimate the shannon, pielou and simpson diversity
+# Function for estimate the Shannon, Pielou and Simpson diversity
 ab_table_div<-function(ab_table, diversity_type){
   require(vegan)
   if(diversity_type == "shannon"){
@@ -89,7 +90,7 @@ models_sd<-function(ab_tables){
 }
 # Let's iterate the model 
 tse_list<-list()
-for(i in 1:5){
+for(i in 1:3){
   MatE <- randomE(
     n_species = n_species, n_resources = n_resources,
     mean_consumption = 2, mean_production = 2, maintenance = 0.4
@@ -103,6 +104,7 @@ for(i in 1:5){
     growth_rates = runif(n_species),
     t_end = 10000,
     t_step = 1,
+    norm = T
   )
 }
 
@@ -117,23 +119,31 @@ plot(models_sd(tse_models), type = "l", lwd = 3, col = "brown",
 
 
 # n-iterated model
-CRsims <- list()
-for(i in 1:5){
-  CRsims[[i]] <- simulateConsumerResource(
-    n_species = n_species,
-    n_resources = n_resources, names_species = letters[seq_len(n_species)],
-    names_resources = paste0("res", LETTERS[seq_len(n_resources)]), E = matE,
-    x0 = rep(0.001, n_species), resources = resources_c,
-    growth_rates = runif(n_species),
-    error_variance = 0.001,
-    t_end = 10000,
-    t_step = 1,
-    t_external_events = 5000,
-    t_external_durations = 50,
-    sigma_external = 0.05,
-    stochastic = T
-  )
-}
+#CRsims <- list()
+#for(i in 1:3){
+#  MatE <- randomE(
+#    n_species = n_species, n_resources = n_resources,
+#    mean_consumption = 2, mean_production = 2, maintenance = 0.4
+#  )
+#  resources_c <- rep(100, n_resources)
+#  CRsims[[i]] <- simulateConsumerResource(
+#    n_species = n_species,
+#    n_resources = n_resources, names_species = letters[seq_len(n_species)],
+#    names_resources = paste0("res", LETTERS[seq_len(n_resources)]), E = matE,
+#    x0 = rep(0.001, n_species), resources = resources_c,
+#    growth_rates = runif(n_species),
+#    error_variance = 0.001,
+#    t_end = 10000,
+#    t_step = 1,
+#    t_external_events = 5000,
+#    t_external_durations = 1000,
+#    sigma_external = 0.05,
+#    stochastic = T,
+#    norm = T
+#  )
+#}
+
+load("~/MicroDynamics/02_Data/crm.RData")
 
 # Function for estimate the diversity variance over time
 ab_tables_div<-function(ab_tables_list, diversity_type){
@@ -208,18 +218,8 @@ for(i in 1:length(CRsims)){
   CRsims_T[[i]]<-as.matrix(assay(CRsims[[i]]))
 }
 
-# Tables normalization
-norm_models<-function(ab_tables){
-  normalized_tables<-list()
-  for(i in 1:length(ab_tables)){
-    normalized_tables[[i]]<-ab_tables[[i]]/colSums(ab_tables[[i]])
-  }
-  return(normalized_tables)
-}
-
-CRsims_T<-norm_models(CRsims_T)
-
 # Diversity over time
+library(ggplot2)
 pielou_df <- data.frame(
   "Time" = 1:length(ab_tables_div(CRsims_T, "pielou")[[1]]), 
   "Diversity" = ab_tables_div(CRsims_T, "pielou")[[1]]
@@ -332,3 +332,40 @@ a <- representative_RAD(norm_rad = full_rank,
                         col = scales::alpha(line_cols[4],0.5),
                         border = NA)
 
+
+# Distance matrix using Manhattan distance
+d <- dist(x = full_rank,method = "manhattan")
+# Ordination using classical multi-dimensional scaling
+mds <- cmdscale(d = d,k = 5,eig = TRUE)
+# Points' plot
+plot(mds$points,xlab = "First coordinate",ylab = "Second coordinate",
+     pch = 19, cex =1,col = line_cols[sample_classes],
+     main = "Multi-Dimensional Scaling plot")
+# Representative points with error bars
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 1),
+                          col = scales::alpha(line_cols[1],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 2),
+                          col = scales::alpha(line_cols[2],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 3),
+                          col = scales::alpha(line_cols[3],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+a <- representative_point(input = mds$points,
+                          ids = which(sample_classes == 4),
+                          col = scales::alpha(line_cols[4],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,
+                          pch = 19, cex = 4)
+legend("bottomleft",bty = "n",
+       legend = c("Basal","Perturbated", "Post-perturbated",
+                  "Recovered"), col = line_cols, pch = 19)
+
+
+
+########## p1$layers
