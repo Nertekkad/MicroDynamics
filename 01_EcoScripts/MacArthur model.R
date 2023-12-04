@@ -1,7 +1,7 @@
 library(miaSim)
 # Number of species ans resources
-n_species <- 6
-n_resources <- 4
+n_species <- 10
+n_resources <- 5
 # Random efficiency matrix for consumer resource model
 matE <- randomE(
   n_species = n_species, n_resources = n_resources,
@@ -89,7 +89,7 @@ models_sd<-function(ab_tables){
 }
 # Let's iterate the model 
 tse_list<-list()
-for(i in 1:3){
+for(i in 1:5){
   MatE <- randomE(
     n_species = n_species, n_resources = n_resources,
     mean_consumption = 2, mean_production = 2, maintenance = 0.4
@@ -118,7 +118,7 @@ plot(models_sd(tse_models), type = "l", lwd = 3, col = "brown",
 
 # n-iterated model
 CRsims <- list()
-for(i in 1:3){
+for(i in 1:5){
   CRsims[[i]] <- simulateConsumerResource(
     n_species = n_species,
     n_resources = n_resources, names_species = letters[seq_len(n_species)],
@@ -208,6 +208,17 @@ for(i in 1:length(CRsims)){
   CRsims_T[[i]]<-as.matrix(assay(CRsims[[i]]))
 }
 
+# Tables normalization
+norm_models<-function(ab_tables){
+  normalized_tables<-list()
+  for(i in 1:length(ab_tables)){
+    normalized_tables[[i]]<-ab_tables[[i]]/colSums(ab_tables[[i]])
+  }
+  return(normalized_tables)
+}
+
+CRsims_T<-norm_models(CRsims_T)
+
 # Diversity over time
 pielou_df <- data.frame(
   "Time" = 1:length(ab_tables_div(CRsims_T, "pielou")[[1]]), 
@@ -264,4 +275,60 @@ ggbetweenstats(
   y     = Simpson,
   title = "Simpson dominance"
 )
+
+# Rank abundance analysis
+rank_abs<-function(ab_tables, start_p, end_p){
+  rank_abs<-list()
+  for(j in 1:length(ab_tables)){
+    sum_abs<-c()
+    for(i in 1:nrow(ab_tables[[1]])){
+      sum_abs[i]<-sum(ab_tables[[j]][,start_p:end_p][i,])
+    }
+    rank_abs[[j]]<-sort(sum_abs/nrow(ab_tables[[1]]), decreasing = T)
+  }
+  rank_abs_mat<-matrix(unlist(rank_abs), nrow=length(ab_tables),
+                       ncol=nrow(ab_tables[[1]]), byrow=TRUE)
+  return(rank_abs_mat)
+}
+
+basal_rank <- rank_abs(CRsims_T, 400, 499)
+pert_rank <- rank_abs(CRsims_T, 500, 599)
+post_rank <- rank_abs(CRsims_T, 600, 699)
+recovered_rank <- rank_abs(CRsims_T, 700, 1000)
+full_rank<-rbind(basal_rank, pert_rank, post_rank, recovered_rank)
+full_rank<-full_rank/full_rank[,1][which.max(full_rank[,1])]
+
+# RAD-analysis
+library(RADanalysis)
+
+sample_classes <- c(rep(1, length(CRsims_T)),rep(2, length(CRsims_T)),
+                    rep(3, length(CRsims_T)), rep(4, length(CRsims_T)))
+line_cols <- c("green3","red3","darkorange1", "dodgerblue4")
+# Plot the axis
+plot(1e10,xlim = c(1,20),ylim = c(0,1),
+     xlab = "Species rank",ylab = "Abundance",cex.lab = 1.5,axes = FALSE)
+sfsmisc::eaxis(side = 1,at = c(1,10))
+sfsmisc::eaxis(side = 2,at = c(0,2,4,6,8,10,12,14,16,18,20),las = 0)
+
+# Plot the curves
+a <- representative_RAD(norm_rad = full_rank,
+                        sample_ids = which(sample_classes == 1),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[1],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_rank,
+                        sample_ids = which(sample_classes == 2),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[2],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_rank,
+                        sample_ids = which(sample_classes == 3),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[3],0.5),
+                        border = NA)
+a <- representative_RAD(norm_rad = full_rank,
+                        sample_ids = which(sample_classes == 4),
+                        plot = TRUE,confidence = 0.9,with_conf = TRUE,
+                        col = scales::alpha(line_cols[4],0.5),
+                        border = NA)
 
