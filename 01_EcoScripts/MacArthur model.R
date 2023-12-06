@@ -305,10 +305,10 @@ sample_classes <- c(rep(1, length(CRsims_T)),rep(2, length(CRsims_T)),
                     rep(3, length(CRsims_T)), rep(4, length(CRsims_T)))
 line_cols <- c("green3","red3","darkorange1", "dodgerblue4")
 # Plot the axis
-plot(1e10,xlim = c(1,20),ylim = c(0,1),
+plot(1e10,xlim = c(1,50),ylim = c(0,0.5),
      xlab = "Species rank",ylab = "Abundance",cex.lab = 1.5,axes = FALSE)
-sfsmisc::eaxis(side = 1,at = c(1,10))
-sfsmisc::eaxis(side = 2,at = c(0,2,4,6,8,10,12,14,16,18,20),las = 0)
+sfsmisc::eaxis(side = 1,at = c(1,5,10,15,20,25,30,35,40,45,50))
+sfsmisc::eaxis(side = 2,at = c(0,0.1,0.2,0.3,0.4,0.5),las = 0)
 
 # Plot the curves
 a <- representative_RAD(norm_rad = full_rank,
@@ -331,7 +331,9 @@ a <- representative_RAD(norm_rad = full_rank,
                         plot = TRUE,confidence = 0.9,with_conf = TRUE,
                         col = scales::alpha(line_cols[4],0.5),
                         border = NA)
-
+legend("topright",bty = "n",
+       legend = c("Basal","Perturbated","Post-perturbated",
+                  "Recovered"), col = line_cols,lwd = 3)
 
 # Distance matrix using Manhattan distance
 d <- dist(x = full_rank,method = "manhattan")
@@ -362,10 +364,125 @@ a <- representative_point(input = mds$points,
                           col = scales::alpha(line_cols[4],0.5),
                           plot = TRUE,standard_error_mean = TRUE,
                           pch = 19, cex = 4)
-legend("bottomleft",bty = "n",
+legend("topleft",bty = "n",
        legend = c("Basal","Perturbated", "Post-perturbated",
                   "Recovered"), col = line_cols, pch = 19)
 
 
 
 ########## p1$layers
+
+otumat<-CRsims_T[[1]][,-c(1:399)]
+otumat<-as.matrix(otumat)
+rownames(otumat)<-paste0("OTU", 1:nrow(otumat))
+colnames(otumat)<-paste0("Sample", 1:ncol(otumat))
+
+library(phyloseq)
+otumat <- otu_table(otumat, taxa_are_rows = T)
+
+sampledata <- sample_data(data.frame(
+  Samples = c(rep("basal", 100), rep("pert", 100),
+              rep("post", 100), rep("rec", 301)),
+  Ab_mean = colSums(otu_table(otumat))/length(otu_table(otumat)),
+  row.names = colnames(otu_table(otumat)),
+  stringsAsFactors = F
+))
+
+physeq <- merge_phyloseq(otumat, sampledata)
+
+
+
+
+# Dysbiosis analysis
+
+library(dysbiosisR)
+# Bray-Curtis distance matrix
+dist.mat <- phyloseq::distance(physeq, "bray")
+# Get reference samples
+ref.samples <- sample_names(subset_samples(physeq, 
+                                           Samples == "basal"))
+# Community level variation analysis
+dysbiosis_1 <- dysbiosisMedianCLV(physeq,
+                                  dist_mat = dist.mat,
+                                  reference_samples = ref.samples)
+
+
+# We sample the data set identifying as dysbiotic the data under the 90th percentile
+dysbiosis_thres <- quantile(subset(dysbiosis_1, Samples == "pert")$score, 0.9)
+normobiosis_thres <- quantile(subset(dysbiosis_1, Samples == "pert")$score, 0.1)
+
+library(dplyr)
+dysbiosis_1 <- dysbiosis_1 |> 
+  mutate(isDysbiostic = ifelse(score >= dysbiosis_thres, TRUE, FALSE))
+
+
+# Dysbiosis plot measures according to CLV method
+p1 <- plotDysbiosis(df=dysbiosis_1,
+                    xvar="Samples",
+                    yvar="score",
+                    colors=c(basal="green4", pert="red3",
+                             post="orange3", rec="blue4"),
+                    show_points = F) +
+  labs(x="", y="Dysbiosis Score") +
+  theme_bw(base_size = 14)
+p1
+
+
+# Dysbiosis plot measures according to euclidean method
+dysbiosis_2 <- euclideanDistCentroids(physeq,
+                                      dist_mat = dist.mat,
+                                      use_squared = TRUE,
+                                      group_col = "Samples",
+                                      control_label = "basal",
+                                      case_label = "pert")
+
+p2 <- plotDysbiosis(df=dysbiosis_2,
+                    xvar="Samples",
+                    yvar="CentroidDist_score",
+                    colors=c(basal="green4", pert="red3",
+                             post="orange3", rec="blue4"),
+                    show_points = FALSE) +
+  labs(x="", y="Dysbiosis Score (Centroid)") +
+  theme_bw(base_size = 14)
+p2
+
+# Dysbiosis plot measures according to the Combined alpha-beta diversity based score
+dysbiosis_3 <- combinedShannonJSD(physeq,
+                                  reference_samples = ref.samples)
+
+
+p3 <- plotDysbiosis(df=dysbiosis_3,
+                    xvar="Samples",
+                    yvar="ShannonJSDScore",
+                    colors=c(basal="green4", pert="red3",
+                             post="orange3", rec="blue4"),
+                    show_points = FALSE)+
+  labs(x="", y="Shannon-JSD\nDysbiosis Score") +
+  theme_bw(base_size = 14)
+p3
+
+
+
+library(earlywarnings)
+# Create simulated example data
+x <- (ab_table_div(CRsims_T[[1]], "pielou"))
+param <- seq(0,1,length=length(x)) 
+
+# Run potential analysis
+res <- movpotential_ews(x, param = NULL)
+
+# Visualize
+p <- PlotPotential(res$res, title = '', 
+                   xlab.text = '', ylab.text = '', 
+                   cutoff = 0.5, plot.contours = TRUE, binwidth = 0.2)
+print(p)
+
+
+
+# Potential plot applied to the analysis of diversity over time
+x <- (ab_table_div(CRsims_T[[1]], "pielou"))
+res <- movpotential_ews(x, param = NULL)
+p <- PlotPotential(res$res, title = '', 
+                   xlab.text = '', ylab.text = '', 
+                   cutoff = 0.5, plot.contours = TRUE, binwidth = 0.2)
+print(p)
