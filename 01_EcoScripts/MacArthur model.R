@@ -486,3 +486,4 @@ p <- PlotPotential(res$res, title = '',
                    xlab.text = '', ylab.text = '', 
                    cutoff = 0.5, plot.contours = TRUE, binwidth = 0.2)
 print(p)
+
