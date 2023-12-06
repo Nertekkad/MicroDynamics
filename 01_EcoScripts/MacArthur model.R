@@ -464,21 +464,6 @@ p3
 
 
 library(earlywarnings)
-# Create simulated example data
-x <- (ab_table_div(CRsims_T[[1]], "pielou"))
-param <- seq(0,1,length=length(x)) 
-
-# Run potential analysis
-res <- movpotential_ews(x, param = NULL)
-
-# Visualize
-p <- PlotPotential(res$res, title = '', 
-                   xlab.text = '', ylab.text = '', 
-                   cutoff = 0.5, plot.contours = TRUE, binwidth = 0.2)
-print(p)
-
-
-
 # Potential plot applied to the analysis of diversity over time
 x <- (ab_table_div(CRsims_T[[1]], "pielou"))
 res <- movpotential_ews(x, param = NULL)
