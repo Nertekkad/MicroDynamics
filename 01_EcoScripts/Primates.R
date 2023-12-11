@@ -58,6 +58,7 @@ T_USA <- abs_genus[which(rownames(abs_genus) %in% USA),]
 
 library(minet)
 library(igraph)
+library(mlBioNets)
 
 # Ba Aka humans
 mim <- build.mim(T_BaAka, estimator="spearman")
@@ -159,6 +160,42 @@ legend("topleft",bty = "n",legend = c("Ba Aka","Bantu", "USA"),
        col = line_cols,pch = 19)
 
 
+# Simpson diversity
+T_humans <- list(T_BaAka, T_Bantu, T_USA)
+simpson1 <- c()
+for(i in 1:nrow(T_humans[[1]])){
+  simpson1[i] <- vegan::diversity(T_humans[[1]][i,], "simpson")
+}
+simpson2 <- c()
+for(i in 1:nrow(T_humans[[2]])){
+  simpson2[i] <- vegan::diversity(T_humans[[2]][i,], "simpson")
+}
+simpson3 <- c()
+for(i in 1:nrow(T_humans[[3]])){
+  simpson3[i] <- vegan::diversity(T_humans[[3]][i,], "simpson")
+}
+
+
+
+df_humans<-data.frame(
+  People = c(rep("BaAka", length(simpson1)), rep("Bantu", length(simpson2)),
+             rep("USA", length(simpson3))),
+  Simpson =  c(simpson1, simpson2, simpson3)
+)
+
+# Evenness violin plot
+library(ggstatsplot)
+ggbetweenstats(
+  data  = df_humans,
+  x     = People,
+  y     = Simpson,
+  title = "Dominance between human populations"
+)
+
+
+
+
+
 # Separate data
 
 # Savage chimpanzees
@@ -249,3 +286,32 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 2),
 legend("topleft",bty = "n",legend = c("Wild","Captivity"),
        col = line_cols,pch = 19)
 
+
+
+# Shannon diversity
+T_nonhuman <- list(T_Chimps, T_Captive)
+simpson1 <- c()
+for(i in 1:nrow(T_nonhuman[[1]])){
+  simpson1[i] <- vegan::diversity(T_nonhuman[[1]][i,], "simpson")
+}
+simpson2 <- c()
+for(i in 1:nrow(T_nonhuman[[2]])){
+  simpson2[i] <- vegan::diversity(T_nonhuman[[2]][i,], "simpson")
+}
+
+
+
+
+df_chimps<-data.frame(
+  Chimps = c(rep("Wild", length(shannon1)), rep("Captivity", length(shannon2))),
+  Simpson =  c(simpson1, simpson2)
+)
+
+# Evenness violin plot
+library(ggstatsplot)
+ggbetweenstats(
+  data  = df_chimps,
+  x     = Chimps,
+  y     = Simpson,
+  title = "Diversity between chimpanzees populations"
+)
