@@ -420,8 +420,8 @@ lay <- layoutMultiplex(ml_FTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FTad, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
-                 layer.labels=c("Treatment 2", "Treatment 1", "Control"), layer.labels.cex=1.5,
-                 node.size.values=10, node.size.scale=0.6,
+                 layer.labels=NULL, layer.labels.cex=1.5,
+                 node.size.values="auto", node.size.scale=abs_mat(a, ml_FTad, 20),
                  node.colors=mat_colors(V(ml_FTad[[1]])$hl, ml_FTad),
                  edge.colors="black",
                  node.colors.aggr=NULL,
@@ -839,7 +839,7 @@ dysbiosis_1 <- dysbiosis_1 |>
 p1 <- plotDysbiosis(df=dysbiosis_1,
                     xvar="Treatment",
                     yvar="score",
-                    colors=c(Treatment1="red", Treatment2="orange",
+                    colors=c(Treatment1="orange", Treatment2="red",
                              Control="green"),
                     show_points = FALSE) +
   labs(x="", y="Dysbiosis Score") +
@@ -858,10 +858,11 @@ dysbiosis_2 <- euclideanDistCentroids(physeq2,
 p2 <- plotDysbiosis(df=dysbiosis_2,
                     xvar="Treatment",
                     yvar="CentroidDist_score",
-                    colors=c(Treatment1="red", Treatment2="orange",
+                    colors=c(Treatment1="orange", Treatment2="red",
                              Control="green"),
                     show_points = FALSE) +
-  labs(x="", y="Dysbiosis Score (Centroid)")
+  labs(x="", y="Dysbiosis Score (Centroid)") +
+  theme_bw(base_size = 14)
 p2
 
 
@@ -873,10 +874,11 @@ dysbiosis_3 <- combinedShannonJSD(physeq2,
 p3 <- plotDysbiosis(df=dysbiosis_3,
                     xvar="Treatment",
                     yvar="ShannonJSDScore",
-                    colors=c(Treatment1="red", Treatment2="orange",
+                    colors=c(Treatment1="orange", Treatment2="red",
                              Control="green"),
                     show_points = FALSE)+
-  labs(x="", y="Shannon-JSD\nDysbiosis Score")
+  labs(x="", y="Shannon-JSD\nDysbiosis Score") +
+  theme_bw(base_size = 14)
 p3
 
 

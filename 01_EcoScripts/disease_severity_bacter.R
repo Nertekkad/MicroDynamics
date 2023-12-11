@@ -233,7 +233,6 @@ legend("topright",bty = "n",
        legend = c("Severe","Moderate", "Mild"),
        col = line_cols, lwd = 3)
 
-
 # MSD analysis
 
 d <- dist(x = n_severity_mat,method = "manhattan")
@@ -284,6 +283,7 @@ lfc2<-log_fc(bacter_ml, c("Severe", "Moderate", "Mild"), "Mild", "Severe")
 # Plot log-fold change
 
 library(ggpubr)
+library(stringr)
 
 ggbarplot(lfc1, x = "node_names", y = "log_fc",
           fill = "node_names",
@@ -311,6 +311,7 @@ ggbarplot(lfc2, x = "node_names", y = "log_fc",
 
 
 # Dominance violin plot
+library(ggstatsplot)
 ggbetweenstats(
       data  = dom_severity,
       x     = Severity,
@@ -364,3 +365,33 @@ ggscatterstats(
   ylab  = "Abundance",
   title = "Relation between connectivity and abundance \n Moderate cases"
 )
+
+
+
+
+
+
+df_degree <- data.frame(
+  Degree = c(degree(severeNet), degree(moderateNet), degree(mildNet)),
+  Severity = c(rep("severe", length(degree(severeNet))),
+               rep("moderate", length(degree(moderateNet))),
+               rep("mild", length(degree(mildNet)))),
+  Abundances = c(colSums(severe_data), colSums(moderate_data),
+                 colSums(mild_data))
+)
+
+ggplot(df_degree, aes(x = Degree, fill = Severity)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Degree distribution between layers",
+       x = "Degree",
+       y = "Density") +
+  scale_fill_manual(values = c("severe" = "red", "moderate" = "orange", "mild" = "green")) +
+  facet_wrap(~Severity)
+
+ggplot(df_degree, aes(x = Abundances, fill = Severity)) +
+  geom_density(alpha = 0.5) +
+  labs(title = "Abundance distribution between layers",
+       x = "Abundance",
+       y = "Severity") +
+  scale_fill_manual(values = c("severe" = "red", "moderate" = "orange", "mild" = "green")) +
+  facet_wrap(~Severity)

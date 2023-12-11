@@ -951,8 +951,8 @@ degree_phyla<-data.frame(
 
 # Log-fold change estimation considering the difference magnitud between
 # each treatment with the control
-T1logFC<-log((degree_phyla$Treatment1+1)/(degree_phyla$Control+1), 2)
-T2logFC<-log((degree_phyla$Treatment2+1)/(degree_phyla$Control+1), 2)
+T1logFC<--log((degree_phyla$Treatment1+1)/(degree_phyla$Control+1), 2)
+T2logFC<--log((degree_phyla$Treatment2+1)/(degree_phyla$Control+1), 2)
 
 logFC_df<-data.frame(
   Phylum=phyla,

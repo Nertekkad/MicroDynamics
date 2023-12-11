@@ -465,10 +465,52 @@ p3
 
 library(earlywarnings)
 # Potential plot applied to the analysis of diversity over time
-x <- (ab_table_div(CRsims_T[[1]], "pielou"))
-res <- movpotential_ews(x, param = NULL)
+x <- ab_tables_div(CRsims_T, "pielou")
+
+xmat <- matrix(unlist(x), length(x), length(x[[1]]))
+xmean <- c()
+for(i in 1:ncol(xmat)){
+  xmean[i] <- mean(xmat[,i])
+}; xmean
+
+res <- movpotential_ews(xmean, param = NULL)
 p <- PlotPotential(res$res, title = '', 
                    xlab.text = '', ylab.text = '', 
                    cutoff = 0.5, plot.contours = TRUE, binwidth = 0.2)
 print(p)
+
+
+# Resources analysis
+CRsims_R <- list()
+for(i in 1:length(CRsims)){
+  CRsims_R[[i]] <- t(as.data.frame(metadata(CRsims[[i]])$resources))
+}
+
+# Separate tables
+basal_tablesR <- sep_tables(CRsims_R, 400, 499)
+pert_tablesR <- sep_tables(CRsims_R, 500, 599)
+post_tablesR <- sep_tables(CRsims_R, 600, 699)
+recovered_tablesR <- sep_tables(CRsims_R, 700, 1000)
+
+# Pielou diversity
+pielou_basalR<-unlist(ab_tables_div(basal_tablesR, "pielou"))
+pielou_pertR<-unlist(ab_tables_div(pert_tablesR, "pielou"))
+pielou_postR<-unlist(ab_tables_div(post_tablesR, "pielou"))
+pielou_recoveredR<-unlist(ab_tables_div(recovered_tablesR, "pielou"))
+
+df_diversityR<-data.frame(
+  Period = c(rep(1, length(pielou_basalR)), rep(2, length(pielou_pertR)),
+             rep(3, length(pielou_postR)), rep(4, length(pielou_recoveredR))),
+  Pielou =  c(pielou_basalR, pielou_pertR, pielou_postR, pielou_recoveredR)
+)
+
+# Evenness violin plot
+library(ggstatsplot)
+ggbetweenstats(
+  data  = df_diversityR,
+  x     = Period,
+  y     = Pielou,
+  title = "Pielou evenness of resources"
+)
+
 
