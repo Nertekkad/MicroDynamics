@@ -991,5 +991,3 @@ p2<-ggbarplot(logFC_df, x = "Phylum", y = "T2",
 grid.arrange(p1 + ggtitle("Treatment 1"),
              p2 + ggtitle("Treatment 2"),
              ncol=2)
-
-
