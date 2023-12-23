@@ -99,7 +99,7 @@ library(muxViz)
 g.list<-list(T1_aracne, T2_aracne, T3_aracne)
 g.list<-ctr_ml(g.list, "degree")
 matctr<-node_color_mat(g.list, "centrality")
-matsize<-abs_mat(list(T1_mat, T2_mat, T3_mat), g.list, 20)
+matsize<-abs_mat(list(T1_mat, T2_mat, T3_mat), g.list, 10)
 
 lay <- layoutMultiplex(g.list, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(g.list, layer.layout=lay,
@@ -205,6 +205,128 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
 legend("topright",bty = "n",legend = c("Severe","Moderate","Mild"),
        col = line_cols,pch = 19)
+
+# Phyloseq data
+T_otus <- otu_table(t(T_Collapsed), taxa_are_rows = T)
+
+sampledata <- sample_data(data.frame(
+  Samples = c(rep("basal", nrow(T1_mat)), rep("pert", nrow(T2_mat)),
+              rep("rec", nrow(T3_mat))),
+  Ab_mean = colSums(otu_table(T_otus))/length(otu_table(T_otus)),
+  row.names = colnames(otu_table(T_otus)),
+  stringsAsFactors = F
+))
+
+davidA_physeq <- merge_phyloseq(T_otus, sample_data(sampledata))
+
+# Dysbiosis analysis
+
+library(dysbiosisR)
+# Bray-Curtis distance matrix
+dist.mat <- phyloseq::distance(davidA_physeq, "bray")
+# Get reference samples
+ref.samples <- sample_names(subset_samples(davidA_physeq, 
+                                           Samples == "basal"))
+# Community level variation analysis
+dysbiosis_1 <- dysbiosisMedianCLV(davidA_physeq,
+                                  dist_mat = dist.mat,
+                                  reference_samples = ref.samples)
+
+# We sample the data set identifying as dysbiotic the data under the 90th percentile
+dysbiosis_thres <- quantile(subset(dysbiosis_1, Samples == "pert")$score, 0.9)
+normobiosis_thres <- quantile(subset(dysbiosis_1, Samples == "pert")$score, 0.1)
+
+library(dplyr)
+dysbiosis_1 <- dysbiosis_1 |> 
+  mutate(isDysbiostic = ifelse(score >= dysbiosis_thres, TRUE, FALSE))
+
+# Dysbiosis plot measures according to CLV method
+p1 <- plotDysbiosis(df=dysbiosis_1,
+                    xvar="Samples",
+                    yvar="score",
+                    colors=c(basal="green4", pert="red3",
+                             post="orange3", rec="blue4"),
+                    show_points = F) +
+  labs(x="", y="Dysbiosis Score") +
+  theme_bw(base_size = 14)
+p1
+
+# Dysbiosis plot measures according to euclidean method
+dysbiosis_2 <- euclideanDistCentroids(davidA_physeq,
+                                      dist_mat = dist.mat,
+                                      use_squared = TRUE,
+                                      group_col = "Samples",
+                                      control_label = "basal",
+                                      case_label = "pert")
+
+p2 <- plotDysbiosis(df=dysbiosis_2,
+                    xvar="Samples",
+                    yvar="CentroidDist_score",
+                    colors=c(basal="green4", pert="red3", rec="blue4"),
+                    show_points = FALSE) +
+  labs(x="", y="Dysbiosis Score (Centroid)") +
+  theme_bw(base_size = 14)
+p2
+
+
+# Log-fold change analysis
+
+log_fc<-function(g.list, layer_names, control_layer, test_layer){
+  centralities<-list()
+  for(i in 1:length(g.list)){
+    centralities[[i]]<-degree(g.list[[i]])
+  }
+  d_mat<-matrix(unlist(centralities), length(centralities[[1]]),
+                length(centralities))
+  df_degree<-as.data.frame(d_mat)
+  rownames(df_degree)<-vertex.attributes(g.list[[1]])$name
+  colnames(df_degree)<-layer_names
+  control_n<-which(colnames(df_degree)==control_layer)
+  test_n<-which(colnames(df_degree)==test_layer)
+  log_fc<--log((df_degree[,control_n]+1)/(df_degree[,test_n]+1), 2)
+  df_logFC<-data.frame(
+    node_names = vertex.attributes(g.list[[1]])$name,
+    log_fc = log_fc
+  )
+  not_fc <- which(df_logFC$log_fc == 0)
+  df_logFC<-df_logFC[-not_fc,]
+  return(df_logFC)
+}
+
+lfc1<-log_fc(g.list, c("Basal", "Perturbated", "Recovered"), "Basal", "Perturbated")
+lfc2<-log_fc(g.list, c("Basal", "Perturbated", "Recovered"), "Basal", "Recovered")
+
+# Plot log-fold change
+
+library(ggpubr)
+library(stringr)
+
+ggbarplot(lfc1, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
+
+ggbarplot(lfc2, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
+
+
+
 
 
 
@@ -408,3 +530,102 @@ a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
 legend("topright",bty = "n",legend = c("Severe","Moderate","Mild"),
        col = line_cols,pch = 19)
+
+
+
+# Phyloseq data
+T_otus <- otu_table(t(T_Collapsed), taxa_are_rows = T)
+
+sampledata <- sample_data(data.frame(
+  Samples = c(rep("basal", nrow(T1_mat)), rep("pert", nrow(T2_mat)),
+              rep("rec", nrow(T3_mat))),
+  Ab_mean = colSums(otu_table(T_otus))/length(otu_table(T_otus)),
+  row.names = colnames(otu_table(T_otus)),
+  stringsAsFactors = F
+))
+
+davidA_physeq <- merge_phyloseq(T_otus, sample_data(sampledata))
+
+# Dysbiosis analysis
+
+library(dysbiosisR)
+# Bray-Curtis distance matrix
+dist.mat <- phyloseq::distance(davidA_physeq, "bray")
+# Get reference samples
+ref.samples <- sample_names(subset_samples(davidA_physeq, 
+                                           Samples == "basal"))
+# Community level variation analysis
+dysbiosis_1 <- dysbiosisMedianCLV(davidA_physeq,
+                                  dist_mat = dist.mat,
+                                  reference_samples = ref.samples)
+
+# We sample the data set identifying as dysbiotic the data under the 90th percentile
+dysbiosis_thres <- quantile(subset(dysbiosis_1, Samples == "pert")$score, 0.9)
+normobiosis_thres <- quantile(subset(dysbiosis_1, Samples == "pert")$score, 0.1)
+
+library(dplyr)
+dysbiosis_1 <- dysbiosis_1 |> 
+  mutate(isDysbiostic = ifelse(score >= dysbiosis_thres, TRUE, FALSE))
+
+# Dysbiosis plot measures according to CLV method
+p1 <- plotDysbiosis(df=dysbiosis_1,
+                    xvar="Samples",
+                    yvar="score",
+                    colors=c(basal="green4", pert="red3",
+                             post="orange3", rec="blue4"),
+                    show_points = F) +
+  labs(x="", y="Dysbiosis Score") +
+  theme_bw(base_size = 14)
+p1
+
+# Dysbiosis plot measures according to euclidean method
+dysbiosis_2 <- euclideanDistCentroids(davidA_physeq,
+                                      dist_mat = dist.mat,
+                                      use_squared = TRUE,
+                                      group_col = "Samples",
+                                      control_label = "basal",
+                                      case_label = "pert")
+
+p2 <- plotDysbiosis(df=dysbiosis_2,
+                    xvar="Samples",
+                    yvar="CentroidDist_score",
+                    colors=c(basal="green4", pert="red3", rec="blue4"),
+                    show_points = FALSE) +
+  labs(x="", y="Dysbiosis Score (Centroid)") +
+  theme_bw(base_size = 14)
+p2
+
+
+# Log-fold change analysis
+
+lfc1<-log_fc(g.list, c("Basal", "Perturbated", "Recovered"), "Basal", "Perturbated")
+lfc2<-log_fc(g.list, c("Basal", "Perturbated", "Recovered"), "Basal", "Recovered")
+
+# Plot log-fold change
+
+library(ggpubr)
+library(stringr)
+
+ggbarplot(lfc1, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
+
+ggbarplot(lfc2, x = "node_names", y = "log_fc",
+          fill = "node_names",
+          color = "blue",
+          sort.val = "desc",
+          sort.by.groups = FALSE,
+          x.text.angle = 90,
+          ylab = "Log-fold change",
+          rotate = TRUE,
+          ggtheme = theme_minimal()) +
+  scale_x_discrete(labels = function(x) str_wrap(x, 1)) +
+  guides(fill = F)
