@@ -87,6 +87,63 @@ scatterplot3d(out[,-1], type = "l")
 
 Donde $a$, $b$, $c$ son los parámetros del sistema. Cualqier variación en las condiciones iniciales da lugar a estados divergentes del sistema.
 
+### Método asintótico {-}
+
+Dada la dificultad  que supone encontrar soluciones para ecuaciones diferenciales no-lineales $\dot{x}=f(x)$, se han implementado métodos asintóticos para aproximar el comportamiento de estas funciones cuando $t \rightarrow \infty$ en los puntos donde $f(x)=0$, por lo que podemos conocer la estamilidad del sistema a partir de la estimación del límite.
+
+Para ejemplificar lo anterior, podemos emplear la siguente función que describe el **efecto Allee**, originalmente empleada para modelar poblaciones animales que requieren superar un valor umbral
+mínimo para poder asegurar la supervivencia de la población. De encontrarse dicha población por debajo del umbral, esta decae hasta la extición.
+
+$$\dot{x}=rx(1-\frac{x}{k})(x-\alpha)$$
+
+Donde $0<\alpha<k$, siendo $\alpha$ el umbral de tamaño mínimo que la población $x$ debe superar para poder sobrevivir. Dado que los puntos de equilibrio $x^{*}$ corresponden a los sitios donde $f(x)=0$, siendo estos $x_{1}^{*}=0$, $x_{2}^{*}=k$, y $x_{3}^{*}=\alpha$.
+
+```{r}
+# Efecto Allee
+x=seq(-1,5,0.1)
+r<-2
+a<-2
+k<-3
+fx<-r*x*(1-x/k)*(x-a)
+# Gráfico
+df <- data.frame(x = x, fx = fx)
+library(ggplot2)
+ggplot(df, aes(x = x, y = fx)) +
+  geom_line(color = "salmon", size = 1) +
+  geom_hline(yintercept = 0, color = "black", size = 1) +
+  geom_vline(xintercept = 0, color = "black", size = 1) +
+  geom_point(aes(x = 0, y = 0), color = "blue", size = 2) +
+  geom_point(aes(x = a, y = 0), color = "red", size = 2) +
+  geom_point(aes(x = k, y = 0), color = "blue", size = 2) +
+  labs(title = "Efecto Allee", x = "x", y = "f(x)") +
+  ylim(-4,4)
+```
+
+Al graficar la función podemos visualizar la estabilidad del sistema en $f(x)=0$. Los dos puntos marcados en azul ($x_{1}^{*}=0$, $x_{2}^{*}=k$) poseen pendiente negativa, y por lo tanto son estables; mientras que el punto medio ($x_{3}^{*}=\alpha$) posee una pendiente positiva y es, por lo tanto, inestable.
+
+Si lo analizamos por el método analítico, debemos obtener los valores de las pendientes cuando $f(x)=0$, por lo que debemos evaluar cada uno de los puntos en la derivada de la función.
+
+$$\frac{df}{dx}=r(1-\frac{x}{k})(x-\alpha)+rx(-\frac{1}{k})(x-\alpha)+rx(1-\frac{x}{k})$$
+
+Al evaluar $x_{1}^{*}=0$, la $df/dx=r(-\alpha)=-\alpha{x}<0$, y por lo tanto, estable. En $x_{2}^{*}=k$, obtenemos que $df/dx=rk(-1/k)(k-\alpha)=-r(k-\alpha)<0$, que es estable, tomando en consideración que $k>\alpha$. Para $x_{3}^{*}=\alpha$, obtenemos que $df/dx=r\alpha(1-\alpha/k)>0$, y por ende, inestable.
+
+Como hemos mencionado, los puntos de equilibrio $x_{i}^{*}$ corresponden a los sitios donde una función $f(x)$ cruza por el eje de las abscisas, por lo cual $f(x_{i}^{*})=0$, tal que $\forall{i}=1,2,3,...,n$.
+
+$$
+\frac{df}{dx} |_{x_{i}^{*}}
+\left\{\begin{matrix}
+   >0, \quad x^{*}_{i} \quad es \quad inestable
+\\ =0, \quad x^{*}_{i} \quad es \quad neutro
+\\ <0, \quad x^{*}_{i} \quad es \quad estable
+\end{matrix}\right.
+$$
+
+Para comprender mejor el concepto de estabilidad, observemos qué sucede cuando analizamos la función cerca del punto de equilibrio en $f(x^{*}-\delta) \neq 0$, siendo $\delta>0$. Haciendo una analogía, imaginemos ahora la función como un paisaje de picos y valles. Si colocáramos una canica en las cima de un pico, bastaría con cualquier perturbación para que la canica cayera de cuesta abajo, mientras que si la colocáramos cerca del fondo de un valle, la canica sería inevitablemente atraída al interior de la depresión. Con esto, podemos visualizar de forma más clara cómo se comportaría una función cerca de un punto de equilibrio inestable o **repulsor**, o de un punto de equilibrio inestable o **atractor**.
+
+Si tenemos una $\Delta{f}$ definida por $f(x^{*})-f(x^{*}-\delta)$, siendo $\delta>0$ una perturbación introducida al sistema cerca del punto de equilibrio $x_{i}^{*}$, por lo cual $f(x^{*}-\delta)\neq{0}$; podemos preguntarnos si $\delta$ hace que los valores de la función se aproximen o se alejen de $x_{i}^{*}$, es decir, ¿el punto de equilibrio se está comportando como un atractor o como un repulsor?
+
+Analicemos el comportamiento del punto cerca de
+
 ## Modelos ecológicos unidimencionales {-}
 
 ### Solución del modelo exponencial {-}
