@@ -100,7 +100,7 @@ Donde $0<\alpha<k$, siendo $\alpha$ el umbral de tamaño mínimo que la poblaci�
 
 ```{r}
 # Efecto Allee
-x=seq(-1,5,0.1)
+x=seq(-2,5,0.1)
 r<-2
 a<-2
 k<-3
@@ -138,11 +138,59 @@ $$
 \end{matrix}\right.
 $$
 
-Para comprender mejor el concepto de estabilidad, observemos qué sucede cuando analizamos la función cerca del punto de equilibrio en $f(x^{*}-\delta) \neq 0$, siendo $\delta>0$. Haciendo una analogía, imaginemos ahora la función como un paisaje de picos y valles. Si colocáramos una canica en las cima de un pico, bastaría con cualquier perturbación para que la canica cayera de cuesta abajo, mientras que si la colocáramos cerca del fondo de un valle, la canica sería inevitablemente atraída al interior de la depresión. Con esto, podemos visualizar de forma más clara cómo se comportaría una función cerca de un punto de equilibrio inestable o **repulsor**, o de un punto de equilibrio inestable o **atractor**.
+Para comprender mejor el concepto de estabilidad, observemos qué sucede cuando analizamos la función cerca del punto de equilibrio en $f(x^{*}-\delta) \neq 0$, siendo $\delta>0$. Haciendo una analogía, imaginemos ahora la función como un paisaje de picos y valles. Si colocáramos una canica en las cima de un pico, bastaría con cualquier perturbación para que la canica cayera de cuesta abajo, mientras que si la colocáramos cerca del fondo de un valle, la canica sería inevitablemente atraída al interior de la depresión. Con esto, podemos hacernos una idea de cómo se comportaría una función cerca de un punto de equilibrio inestable o **repulsor**, o de un punto de equilibrio estable o **atractor**.
 
 Si tenemos una $\Delta{f}$ definida por $f(x^{*})-f(x^{*}-\delta)$, siendo $\delta>0$ una perturbación introducida al sistema cerca del punto de equilibrio $x_{i}^{*}$, por lo cual $f(x^{*}-\delta)\neq{0}$; podemos preguntarnos si $\delta$ hace que los valores de la función se aproximen o se alejen de $x_{i}^{*}$, es decir, ¿el punto de equilibrio se está comportando como un atractor o como un repulsor?
 
-Analicemos el comportamiento del punto cerca de
+Podemos describir la dinámica de la perturbación $\Delta(t)=x(t)-x^{*}$ mediante la regla de la cadena, de modo que $\frac{d\Delta{x(t)}}{dt}=\frac{d\Delta{x(t)}}{dx(t)}\frac{dx(t)}{dt}$, así como de la forma:
+
+$$\frac{d\Delta{x(t)}}{dt}=f(\Delta{x(t)}+x^{*})$$
+
+Para aproximar la dinámica de $f(\Delta{x(t)}+x^{*})$ mediante una expansión de Taylor:
+
+$$
+\begin{align*}
+ & f(\Delta{x(t)}+x^{*}) = f(x^{*})+\frac{df(x)}{dx}|_{x^{*}}\Delta{x(t)}+
+\frac{1}{2}\frac{d^{2}f(x)}{dx^{2}}|_{x^{*}}(\Delta{x(t)})^{2}+ \\ 
+ & \frac{1}{6}\frac{d^{3}f(x)}{dx^{3}}|_{x^{*}}(\Delta{x(t)})^{3}+...
+\end{align*}
+$$
+
+Ya que el tamaño de la perturbación es infinitesimalmente pequeño, tal que $\Delta{x(t)}\approx{0}$, y que por definición $f(x^{*})=0$, podemos quedarnos únicamente con el término lineal:
+
+$$\frac{d\Delta{x(t)}}{dt}\approx \frac{df(x)}{dx}|_{x^{*}}\Delta{x(t)}=\alpha\Delta{x(t)}$$
+
+Que es análogo a la función exponencial, por lo cual:
+
+$$\frac{dx}{dt}=\alpha{x} \rightarrow x(t)=e^{\alpha{t}}$$
+
+Por lo que $\Delta{x(t)}=e^{\alpha{t}}$, siendo $\alpha = \frac{df}{dx}|_{x^{*}}$. Entonces, si $\alpha>0$ la perturbación crece exponencialmente, si $\alpha=0$ el sistema se mantiene, y si $\alpha<0$ la perturbación decae.
+
+```{r}
+# Función exponencial bajo distintos valores de alfa
+t=seq(0,1,0.1)
+a<-1
+fx1<-exp(1)^{a*t}
+a<-0
+fx2<-exp(1)^{a*t}
+a<--1
+fx3<-exp(1)^{a*t}
+exp_df<-data.frame(
+  "a=1" = fx1,
+  "a=0" = fx2,
+  "a=-1" = fx3
+)
+
+# Gráfico
+library(ggplot2)
+ggplot(exp_df, aes(x = t)) +
+  geom_line(aes(y = fx1, color = "a=1")) +
+  geom_line(aes(y = fx2, color = "a=0")) +
+  geom_line(aes(y = fx3, color = "a=-1")) +
+  labs(x = "t", color = "Funciones") +
+  ylab("x(t)")
+```
+
 
 ## Modelos ecológicos unidimencionales {-}
 
