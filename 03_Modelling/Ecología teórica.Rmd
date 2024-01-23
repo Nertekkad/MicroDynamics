@@ -1,3 +1,8 @@
+---
+output:
+  word_document: default
+  html_document: default
+---
 # Dinámica de comunidades microbianas {-}
 
 ## Fundamentos de los modelos biológicos basados en ecuaciones diferenciales {-}
@@ -191,6 +196,204 @@ ggplot(exp_df, aes(x = t)) +
   ylab("x(t)")
 ```
 
+## Bifurcaciones {-}
+
+La estabilidad de un sistema de ecuaciones puede verse alterado cuando se varían sus parámetros. Los sitios donde las estabilidades se crean o destruyen se conocen como bifurcaciones.
+
+Si, por ejemplo, evaluamos los puntos de equilibrio para el caso de la función $\dot{x}=\rho+x^{2}$ en la derivada de la función ($df/dx|_{x_{i}^{*}}$), donde $x_{1}^{*}=\sqrt{-\rho}$ y $x_{2}^{*}=-\sqrt{-\rho}$, $x_{1}^{*}$ es inestable y $x_{2}^{*}$ es estable cuando $\rho<0$. Si variamos el parámetro $\rho$, la estabilidad se modifica cuando incrementamos su valor, por lo que cuando $rho=0$ solo existe una estabilidad neutra, misma que desaparece cuando $\rho>0$. En este ejemplo, podemos obervar que la estabilidad del sistema se ve alterada al modificar el valor de sus parámetros, lo que implica una alteración sobre la dinámica del sistema.
+
+
+### Catástrofes {-}
+
+La teoría de catástrofes es una rama dentro del estudio de bifurcaciones en sistemas dinámicos, puntos donde un sistema dinámico sufre cambios en su estabilidad.
+
+Las transiciones de un sistema de un estado al otro pueden ocurrir repentinamente al variar sus parámetros por encima o por debajo de sus valores críticos. Tomemos como ejemplo la ecuación $\dot{x}=x(\mu-x^{2})=0$, cuyos puntos de equilibrio son $x_{1}=0$ y $x_{2,3}=\pm \sqrt{\mu}$, donde el primero es inestable mientras los segundos son estables.
+
+```{r}
+x=seq(-5,5,0.2)
+m<-2
+fx<-m*x-x^3
+plot(x,fx, main=NULL, xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+```
+
+Al derivar la función obtenemos que $x^*_{1}=0$, sustituído en la derivada, equivale a $\mu$ y por ende es inestable, mientras que para $x_{2,3}=\pm \sqrt{\mu}$ obtenemos $-2\mu$, siendo ambos puntos estables.
+
+$$\frac{df}{dx}=\mu-3x^{2}$$
+
+Al considerar $\mu$ como un parámetro variable, la estabilidad de los puntos se ve alterada, por lo que el escenario anterior solo ocurre cuando $\mu>0$.
+
+```{r}
+par(mfrow=c(1,3))
+x=seq(-5,5,0.2)
+# Cuando mu>0
+m<-2
+fx<-m*x-x^3
+plot(x,fx, main="mu>0", xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando mu=0
+m<-0
+fx<-m*x-x^3
+plot(x,fx, main="mu=0", xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando mu<0
+m<--2
+fx<-m*x-x^3
+plot(x,fx, main="mu<0", xlab="x", ylab="f(x)", col="blue", type="l",
+     ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+par(mfrow=c(1,1))
+```
+
+Para valores de $\mu<0$, solo hay un punto estable, mientras que para valores de $\mu>0$ hay tres puntos de equilibrio, siendo los de los extremos estables y aquel donde $x^{*}=0$ inestable.
+```{r}
+m<-seq(0,2,0.1)
+x1<-sqrt(m)
+x2<--sqrt(m)
+plot(m,x1, main="Estabilidad", xlab="mu", ylab="x*",
+     col="blue", type="l", ylim = c(-2, 2), lwd=3)
+abline(h=0, col="blue", lwd=2)
+abline(v=0, col="red", lwd=2)
+lines(m,x2, col="blue", lwd=3)
+par(mfrow=c(1,1))
+```
+
+### Potencial {-}
+
+Para visualizar cómo se comporta el potencial de la función debemos obtener el inverso de la integral de dicha función.
+
+$$\phi_{\mu}(x)=-\int{f(x)}dx$$
+
+Esto pude ser entendido como un potencial, donde los puntos de equilibrio estables corresponderían a los estados de mínima energía del sistema. Podemos entenderlo haciendo una analogía entre la energía cinética y la energía potencial, donde el punto de máximo potencial de un sistema corresponde a su posición de inicio, donde su velocidad y, por ende, su energía cinética, es mínima. Por lo tanto, el mínimo del inverso de la función de potencial, corresponde también con el punto o los puntos de mínima energía del sistema.
+
+$$\int(\mu x-x^{3})dx=\mu \int(x)dx-\int(x^{3})dx= \frac{x^{2}(2\mu-x^{2})}{4}$$
+
+Dado que $\phi_{\mu}(x)=-\int f(x)dx$, entonces:
+
+$$\phi_{\mu}(x)=-\frac{x^{2}(2\mu-x^{2})}{4}$$
+
+Cuando mu>0 el sistema es biestable, mientras que cuando mu<0 el sistema tiene un único punto de equilibrio estable.
+
+```{r}
+x=seq(-5,5,0.2)
+par(mfrow=c(1,3))
+# Para mu>0
+m<-2
+phi_x<--x^2*(2*m-x^2)/4
+plot(x,phi_x, main="mu>0", xlab="x", ylab="phi+(x)", col="blue", type="l",
+     ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Para mu=0
+m<-0
+phi_x<--x^2*(2*m-x^2)/4
+plot(x,phi_x, main="mu=0", xlab="x", ylab="phi(x)", col="blue", type="l",
+     ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Para mu<0
+m<--2
+phi_x<--x^2*(2*m-x^2)/4
+plot(x,phi_x, main="mu<0", xlab="x", ylab="phi(x)", col="blue", type="l", ylim = c(-5, 5), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+par(mfrow=c(1,1))
+```
+
+Si ahora consideramos un segundo parámetro, al que llamaremos $\alpha$, podemos además agregar asimetría al modelo, de modo que podemos variar el tamaño de las cuencas de atracción.
+
+$$\dot{x}=\alpha+\mu x-x^{3}$$
+
+Al modificar el valor de $\alpha$ podemos desplazar la función sobre el eje $y$, variando en consecuencia la estabilidad de los puntos de equilibrio. Debido a esto, existirán dos valores de alfa críticas ($\alpha_{c}$) que limitarán al estado biestable, donde uno de los puntos de equilibrio se volverá neutro al encontrarse en el límite de dicha transición.
+
+Para encontrar las alfa críticas derivamos la función con respecto a la variable para así identificar los puntos donde la pendiente es cero.
+
+$$\frac{df}{dx}=\mu-3x^{2}=0$$
+
+Para lo cual obtenemos que $x_{c_{1,2}}=\pm \sqrt{\mu/3}$. En consecuencia, sustituímos en la función original y despejamos los valores de alfa.
+
+$$\dot{x}=\alpha+\mu(\pm \sqrt{\mu/3})-(\pm \sqrt{\mu/3})^{3}=0$$
+
+$$\alpha=\frac{\mu}{3}(\pm \sqrt{\mu/3})-\mu(\pm \sqrt{\mu/3})$$
+
+A partir de lo cual despejamos ambos valores de alfa crítica
+
+$$\alpha_{c_{1}}=\frac{2}{3}\mu \sqrt{\frac{\mu}{3}} \quad y \quad \alpha_{c_{2}}=-\frac{2}{3}\mu \sqrt{\frac{\mu}{3}}$$
+
+```{r}
+x=seq(-5,5,0.2)
+# Cuando a=0 y mu>0
+m<-2
+a<-0
+fx<-a+m*x-x^3
+plot(x,fx, main="Límite de biestabilidad", xlab="x",
+     ylab="f(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Alfa crítica 1
+abline(h=2/3*m*sqrt(m/3), col="green", lwd=2, lty = "dotted")
+# Alfa crítica 2
+abline(h=-2/3*m*sqrt(m/3), col="green", lwd=2, lty = "dotted")
+```
+
+La función de potencial corresponde a la forma:
+
+$$\phi_{\alpha,\mu}(x)=-\int{f(x)}dx=-\int(\alpha+\mu x-x^{3})dx$$
+
+$$\phi_{\alpha,\mu}(x)=\frac{x^{4}}{4}-\alpha x-\frac{\mu x^{2}}{2}$$
+
+```{r}
+par(mfrow=c(2,3))
+x=seq(-5,5,0.2)
+# Cuando a=0
+m<-2
+a<-0
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a=0", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a=a_c1
+m<-2
+a<-2/3*m*sqrt(m/3)
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a=a_c1", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a=a_c2
+m<-2
+a<--2/3*m*sqrt(m/3)
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a=a_c1", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a>>0
+m<-2
+a<-2
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a>>0", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+# Cuando a<<0
+m<-2
+a<--2
+phi_x<-x^4/4-a*x-m/2*x^2
+plot(x,phi_x, main="a<<0", xlab="x",
+     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
+abline(h=0, col="red", lwd=2)
+abline(v=0, col="red", lwd=2)
+par(mfrow=c(1,1))
+```
 
 ## Modelos ecológicos unidimencionales {-}
 
@@ -850,205 +1053,3 @@ $$\frac{df}{dx}=(\frac{d-b}{a-b-c+d})(1-\frac{d-b}{a-b-c+d}) (a-c)$$
 Tomando en cuenta que los primeros dos términos den como resultado un valor positivo debido a que $0<x_{3}^{*}<1$, la estabilidad del punto depende de que se cumpla la condición $a<c$.
 
 Al poner atención a los escenarios previos, podemos entender que los puntos de equilibrio $x_{1}^{*}=0$ y $x_{2}^{*}=1$ implican escenarios de exclusión competitiva donde $(H_{ij}, H_{ji})$ comprendería $(0,1)$ y $(1,0)$, respectivamente. Por lo cual, $x_{1}^{*}<x_{2}^{*}<x_{3}^{*}$ donde los extremos sean estables o inestables, y por lo tanto, $x_{3}^{*}$ sea inestable o estable, respectivamente. En cualquier escenario, $x_{3}^{*}$ estaría representando un escenario de coexistencia entre ambas especies.
-
-
-## Catástrofes {-}
-
-Las transiciones de un sistema de un estado al otro pueden ocurrir repentinamente al variar sus parámetros por encima o por debajo de sus valores críticos. Tomemos como ejemplo la ecuación $\dot{x}=x(\mu-x^{2})=0$, cuyos puntos de equilibrio son $x_{1}=0$ y $x_{2,3}=\pm \sqrt{\mu}$, donde el primero es inestable mientras los segundos son estables.
-
-```{r}
-x=seq(-5,5,0.2)
-m<-2
-fx<-m*x-x^3
-plot(x,fx, main=NULL, xlab="x", ylab="f(x)", col="blue", type="l",
-     ylim = c(-5, 5), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-```
-
-Al derivar la función obtenemos que $x^*_{1}=0$, sustituído en la derivada, equivale a $\mu$ y por ende es inestable, mientras que para $x_{2,3}=\pm \sqrt{\mu}$ obtenemos $-2\mu$, siendo ambos puntos estables.
-
-$$\frac{df}{dx}=\mu-3x^{2}$$
-
-Al considerar $\mu$ como un parámetro variable, la estabilidad de los puntos se ve alterada, por lo que el escenario anterior solo ocurre cuando $\mu>0$.
-
-```{r}
-par(mfrow=c(1,3))
-x=seq(-5,5,0.2)
-# Cuando mu>0
-m<-2
-fx<-m*x-x^3
-plot(x,fx, main="mu>0", xlab="x", ylab="f(x)", col="blue", type="l",
-     ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Cuando mu=0
-m<-0
-fx<-m*x-x^3
-plot(x,fx, main="mu=0", xlab="x", ylab="f(x)", col="blue", type="l",
-     ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Cuando mu<0
-m<--2
-fx<-m*x-x^3
-plot(x,fx, main="mu<0", xlab="x", ylab="f(x)", col="blue", type="l",
-     ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-par(mfrow=c(1,1))
-```
-
-Para valores de $\mu<0$, solo hay un punto estable, mientras que para valores de $\mu>0$ hay tres puntos de equilibrio, siendo los de los extremos estables y aquel donde $x^{*}=0$ inestable.
-```{r}
-m<-seq(0,2,0.1)
-x1<-sqrt(m)
-x2<--sqrt(m)
-plot(m,x1, main="Estabilidad", xlab="mu", ylab="x*",
-     col="blue", type="l", ylim = c(-2, 2), lwd=3)
-abline(h=0, col="blue", lwd=2)
-abline(v=0, col="red", lwd=2)
-lines(m,x2, col="blue", lwd=3)
-par(mfrow=c(1,1))
-```
-
-### Potencial {-}
-
-Para visualizar cómo se comporta el potencial de la función debemos obtener el inverso de la integral de dicha función.
-
-$$\phi_{\mu}(x)=-\int{f(x)}dx$$
-
-Esto pude ser entendido como un potencial, donde los puntos de equilibrio estables corresponderían a los estados de mínima energía del sistema. Podemos entenderlo haciendo una analogía entre la energía cinética y la energía potencial, donde el punto de máximo potencial de un sistema corresponde a su posición de inicio, donde su velocidad y, por ende, su energía cinética, es mínima. Por lo tanto, el mínimo del inverso de la función de potencial, corresponde también con el punto o los puntos de mínima energía del sistema.
-
-$$\int(\mu x-x^{3})dx=\mu \int(x)dx-\int(x^{3})dx= \frac{x^{2}(2\mu-x^{2})}{4}$$
-
-Dado que $\phi_{\mu}(x)=-\int f(x)dx$, entonces:
-
-$$\phi_{\mu}(x)=-\frac{x^{2}(2\mu-x^{2})}{4}$$
-
-Cuando mu>0 el sistema es biestable, mientras que cuando mu<0 el sistema tiene un único punto de equilibrio estable.
-
-```{r}
-x=seq(-5,5,0.2)
-par(mfrow=c(1,3))
-# Para mu>0
-m<-2
-phi_x<--x^2*(2*m-x^2)/4
-plot(x,phi_x, main="mu>0", xlab="x", ylab="phi+(x)", col="blue", type="l",
-     ylim = c(-5, 5), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Para mu=0
-m<-0
-phi_x<--x^2*(2*m-x^2)/4
-plot(x,phi_x, main="mu=0", xlab="x", ylab="phi(x)", col="blue", type="l",
-     ylim = c(-5, 5), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Para mu<0
-m<--2
-phi_x<--x^2*(2*m-x^2)/4
-plot(x,phi_x, main="mu<0", xlab="x", ylab="phi(x)", col="blue", type="l", ylim = c(-5, 5), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-par(mfrow=c(1,1))
-```
-
-Si ahora consideramos un segundo parámetro, al que llamaremos $\alpha$, podemos además agregar asimetría al modelo, de modo que podemos variar el tamaño de las cuencas de atracción.
-
-$$\dot{x}=\alpha+\mu x-x^{3}$$
-
-Al modificar el valor de $\alpha$ podemos desplazar la función sobre el eje $y$, variando en consecuencia la estabilidad de los puntos de equilibrio. Debido a esto, existirán dos valores de alfa críticas ($\alpha_{c}$) que limitarán al estado biestable, donde uno de los puntos de equilibrio se volverá neutro al encontrarse en el límite de dicha transición.
-
-Para encontrar las alfa críticas derivamos la función con respecto a la variable para así identificar los puntos donde la pendiente es cero.
-
-$$\frac{df}{dx}=\mu-3x^{2}=0$$
-
-Para lo cual obtenemos que $x_{c_{1,2}}=\pm \sqrt{\mu/3}$. En consecuencia, sustituímos en la función original y despejamos los valores de alfa.
-
-$$\dot{x}=\alpha+\mu(\pm \sqrt{\mu/3})-(\pm \sqrt{\mu/3})^{3}=0$$
-
-$$\alpha=\frac{\mu}{3}(\pm \sqrt{\mu/3})-\mu(\pm \sqrt{\mu/3})$$
-
-A partir de lo cual despejamos ambos valores de alfa crítica
-
-$$\alpha_{c_{1}}=\frac{2}{3}\mu \sqrt{\frac{\mu}{3}} \quad y \quad \alpha_{c_{2}}=-\frac{2}{3}\mu \sqrt{\frac{\mu}{3}}$$
-
-```{r}
-x=seq(-5,5,0.2)
-# Cuando a=0 y mu>0
-m<-2
-a<-0
-fx<-a+m*x-x^3
-plot(x,fx, main="Límite de biestabilidad", xlab="x",
-     ylab="f(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Alfa crítica 1
-abline(h=2/3*m*sqrt(m/3), col="green", lwd=2, lty = "dotted")
-# Alfa crítica 2
-abline(h=-2/3*m*sqrt(m/3), col="green", lwd=2, lty = "dotted")
-```
-
-La función de potencial corresponde a la forma:
-
-$$\phi_{\alpha,\mu}(x)=-\int{f(x)}dx=-\int(\alpha+\mu x-x^{3})dx$$
-
-$$\phi_{\alpha,\mu}(x)=\frac{x^{4}}{4}-\alpha x-\frac{\mu x^{2}}{2}$$
-
-```{r}
-par(mfrow=c(2,3))
-x=seq(-5,5,0.2)
-# Cuando a=0
-m<-2
-a<-0
-phi_x<-x^4/4-a*x-m/2*x^2
-plot(x,phi_x, main="a=0", xlab="x",
-     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Cuando a=a_c1
-m<-2
-a<-2/3*m*sqrt(m/3)
-phi_x<-x^4/4-a*x-m/2*x^2
-plot(x,phi_x, main="a=a_c1", xlab="x",
-     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Cuando a=a_c2
-m<-2
-a<--2/3*m*sqrt(m/3)
-phi_x<-x^4/4-a*x-m/2*x^2
-plot(x,phi_x, main="a=a_c1", xlab="x",
-     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Cuando a>>0
-m<-2
-a<-2
-phi_x<-x^4/4-a*x-m/2*x^2
-plot(x,phi_x, main="a>>0", xlab="x",
-     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-# Cuando a<<0
-m<-2
-a<--2
-phi_x<-x^4/4-a*x-m/2*x^2
-plot(x,phi_x, main="a<<0", xlab="x",
-     ylab="phi(x)", col="blue", type="l", ylim = c(-4, 4), lwd=3)
-abline(h=0, col="red", lwd=2)
-abline(v=0, col="red", lwd=2)
-par(mfrow=c(1,1))
-```
-
-
-
-
-
-
-
-
-
-
-
