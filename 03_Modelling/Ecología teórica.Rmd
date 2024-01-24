@@ -579,7 +579,7 @@ $$\dot{x}=r_{2}x_{2}-\alpha_{22}x^2_{2}-\alpha_{21}x_{1}x_{2}$$
 
 Donde las interacciones intraespecíficas $\alpha_{ii}$ son siempre *negativas*, pues los organismos de una misma especie ocupan el mismo nicho ecológico, por lo que compiten exactamente por los mismos recursos.
 
-Si ahora asumimos que la tasa de cremiciento *no* es constante, sino que varía en el tiempo $r(t)$, por lo que la tasa de crecimiento aquí está gobernada por las interacciones enterespecíficas.
+Si ahora asumimos que la tasa de crecimiento *no* es constante, sino que varía en el tiempo $r(t)$, por lo que la tasa de crecimiento aquí está gobernada por las interacciones enterespecíficas.
 
 $$r_{i}(t)=r_{i}(1-\sum_{j}\alpha_{ij}x_{j})$$
 
@@ -1009,7 +1009,7 @@ Partiendo de la idea de que $N_{j}$ es una población competidora que limita el 
 
 $$\gamma_{ij}=\frac{\alpha_{ij}}{\alpha_{jj}}$$
 
-Por lo que, a partir de esto, podemos entender tres posibles escenarios. Como hemos demostrado previamente, si $\alpha_{ij}<\alpha_{jj}$, implica que $\gamma_{ij}<1$, por lo tanto hay coexistencia entre ambas especies pues $j$ se limita más a si misma de lo que limita a $i$.
+Por lo que, a partir de esto, podemos entender tres posibles escenarios. Como hemos demostrado previamente, si $\alpha_{ij}<\alpha_{jj}$, implica que $\gamma_{ij}<1$, por lo tanto, hay coexistencia entre ambas especies pues $j$ se limita más a si misma de lo que limita a $i$.
 
 Si, por el contrario, $\alpha_{ij}>\alpha_{jj}$, la razón relativa de limitación es $\gamma_{ij}>1$, por lo cual $j$ es un competidor más fuerte para $i$ de lo que lo es para si misma. Esto implica una exclusión competitiva de la especie $i$.
 
@@ -1021,15 +1021,15 @@ $$\rho=\sqrt{\gamma_{ij}\gamma_{ji}}$$
 
 $$\rho=\sqrt{(\frac{\alpha_{ij}}{\alpha_{jj}}) (\frac{\alpha_{ji}}{\alpha_{ii}})}=\sqrt{\frac{\alpha_{ij}\alpha_{ji}} {\alpha_{jj}\alpha_{ii}}}$$
 
-Donde, si ponemos atención a la expresión, se traduce en una razón entre las interacciones interespecíficas (numerador) y las intraespecíficas (denominador). Por consiguiente, si $\rho<1$ podemos deducir que las interacciones intraespecíficas tienen mayor peso que las interespecíficas, mientras que cuando $\rho>1$ la situación se invierte y ahora las interacciones interespecíficas sominan. Si $\rho=1$, significa que el peso de ambos tipos de interacción es equivalente. La coexistencia, por lo tanto, solo es posible cuando las interacciones intraespefíficas dominan $\rho<1$, pues es en este escenario donde la presión que las poblaciones ejercen sobre si mismas al competir por los mismos recursos, dado que sus miembros ocupan el mismo nicho, es mayor a la que ejercen sobre otras poblaciones. Es decir, que los nichos no se traslapan y por ende, a pesar de que compitan entre ellas por recursos, las especies pueden aprovechar los recursos del medio sin excluirse en el proceso.
+Donde, si ponemos atención a la expresión, se traduce en una razón entre las interacciones interespecíficas (numerador) y las intraespecíficas (denominador). Por consiguiente, si $\rho<1$ podemos deducir que las interacciones intraespecíficas tienen mayor peso que las interespecíficas, mientras que cuando $\rho>1$ la situación se invierte y ahora las interacciones interespecíficas sominan. Si $\rho=1$, significa que el peso de ambos tipos de interacción es equivalente. La coexistencia, por lo tanto, solo es posible cuando las interacciones intraespefíficas dominan $\rho<1$, pues es en este escenario donde la presión que las poblaciones ejercen sobre si mismas al competir por los mismos recursos, dado que sus miembros ocupan el mismo nicho, es mayor a la que ejercen sobre otras poblaciones. Es decir, que los nichos no se traslapan y, por ende, a pesar de que compitan entre ellas por recursos, las especies pueden aprovechar los recursos del medio sin excluirse en el proceso.
 
-Esta razón estpa relacionada con el llamado promedio relativo del **fitness** ($\kappa_{i}$) asociado a cada especie.
+Esta razón está relacionada con el llamado promedio relativo del **fitness** ($\kappa_{i}$) asociado a cada especie.
 
 Nota: **No confundir con la capacidad de carga** ($k_{i}$).
 
 $$\frac{\kappa_{j}}{\kappa_{i}}=\sqrt{\frac{\gamma_{ij}}{\gamma_{ji}}}$$
 
-Que a su vez, está relacionada con la razón relativa de limitación.
+Que, a su vez, está relacionada con la razón relativa de limitación.
 
 $$\gamma_{ij}=\frac{\kappa_{j}}{\kappa_{i}}\rho$$
 
@@ -1069,7 +1069,7 @@ $$\alpha_{ij}=\sigma^{R}_{ij}=\sum_{l}C_{il}C_{jl}\frac{V_{l}k^{R}_{l}} {r^{R}_{
 
 $$\rho=\sqrt{\gamma_{ij}\gamma_{ji}}=\sqrt{\frac{\alpha_{ij}\alpha_{ji}} {\alpha_{jj}\alpha_{ii}}}$$
 
-Si ahora asumimos que las interacciones son equivalentes: $\alpha_{ij}=\alpha_{ji}$, y por lo tanto $\sigma^{R}_{ij}=\sigma^{R}_{ji}$.
+Si ahora asumimos que las interacciones son equivalentes: $\alpha_{ij}=\alpha_{ji}$, por lo tanto $\sigma^{R}_{ij}=\sigma^{R}_{ji}$.
 
 $$\sqrt{\gamma_{ij}\gamma_{ji}}=\frac{\sigma^{R}_{ij}} {\sqrt{\sigma^{R}_{jj}\sigma^{R}_{ii}}}$$
 
@@ -1093,7 +1093,7 @@ $$r_{i}(t)=\frac{\dot{N}_{i}}{N_{i}}=h_{i}-\mu_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}
 
 #### Ecuación del replicador {-}
 
-Concideremos un escenario con dos especies competidoras. Al tratarse de un modelo discreto, imaginemos una retícula de $nxn$ dimensiones, cuyas casillas pueden o no estar ocupadas por miembros de la especie $i$ o de la especie $j$. Si un miembro de alguna de las dos especies muere, deja por lo tanto, una casilla vacía por la que ambas especies deben competir por ocupar.
+Consideremos un escenario con dos especies competidoras. Al tratarse de un modelo discreto, imaginemos una retícula de $nxn$ dimensiones, cuyas casillas pueden o no estar ocupadas por miembros de la especie $i$ o de la especie $j$. Si un miembro de alguna de las dos especies muere deja, por lo tanto, una casilla vacía por la que ambas especies deben competir por ocupar.
 
 En este modelo, emplearemos una matriz $H$ para codificar las interacciones entre poblaciones, por lo que cada valor $H_{ij}$ correspondería a la probabilidad de que $i$ gane a $j$ en ocupar una casilla. Ya que, $\forall H_{ij}$, la probabilidad debe ser un valor cualquiera entre $0 \leq H_{ij} \leq 1$, esto significa que la suma de las probabilidades de las especies competidoras es siempre constante ($H_{ij}+H_{ji}=1$). Por consiguiente, si dos miembros de la misma especie compiten por ocupar una casilla, las probabilidades de que uno u otro lo consiga son iguales ($H_{ii}+H_{ii}=1$), por lo que $H_{ii}=1/2$.
 
@@ -1141,7 +1141,7 @@ Ahora que $\dot{x}_{A}$ solo depende de $x_{A}$, podemos eliminar el vector de d
 
 $$\dot{x}_{A}=x_{A}(f_{A}(x_{A})(1-x_{A})-f_{B}(x_{A})(1-x_{A}))$$
 
-Notemos que realmente no importa si la función está formulada con resoecto a $x_{A}$ o a $x_{B}$, pues ambas son simétricas.
+Notemos que realmente no importa si la función está formulada con respecto a $x_{A}$ o a $x_{B}$, pues ambas son simétricas.
 
 $$\dot{x}=x(1-x)(f_{A}(x)-f_{B}(x))$$
 
@@ -1191,10 +1191,10 @@ Donde, si recapitulamos, el tercer punto de equilibrio existe cuando $(a-b-c+d)x
 
 $$x_{3}^{*}=\frac{d-b}{a-b-c+d}$$
 
-Si ahora sustituímos en $x^{*}(1-x^{*})(f_{A}'(x^{*})-f_{B}'(x^{*}))$.
+Si ahora sustituimos en $x^{*}(1-x^{*})(f_{A}'(x^{*})-f_{B}'(x^{*}))$.
 
 $$\frac{df}{dx}=(\frac{d-b}{a-b-c+d})(1-\frac{d-b}{a-b-c+d}) (a-c)$$
 
 Tomando en cuenta que los primeros dos términos den como resultado un valor positivo debido a que $0<x_{3}^{*}<1$, la estabilidad del punto depende de que se cumpla la condición $a<c$.
 
-Al poner atención a los escenarios previos, podemos entender que los puntos de equilibrio $x_{1}^{*}=0$ y $x_{2}^{*}=1$ implican escenarios de exclusión competitiva donde $(H_{ij}, H_{ji})$ comprendería $(0,1)$ y $(1,0)$, respectivamente. Por lo cual, $x_{1}^{*}<x_{2}^{*}<x_{3}^{*}$ donde los extremos sean estables o inestables, y por lo tanto, $x_{3}^{*}$ sea inestable o estable, respectivamente. En cualquier escenario, $x_{3}^{*}$ estaría representando un escenario de coexistencia entre ambas especies.
+Al poner atención a los escenarios previos, podemos entender que los puntos de equilibrio $x_{1}^{*}=0$ y $x_{2}^{*}=1$ implican escenarios de exclusión competitiva donde $(H_{ij}, H_{ji})$ comprendería $(0,1)$ y $(1,0)$, respectivamente. Por lo cual, $x_{1}^{*}<x_{2}^{*}<x_{3}^{*}$ donde los extremos sean estables o inestables, por lo tanto, $x_{3}^{*}$ sea inestable o estable, respectivamente. En cualquier escenario, $x_{3}^{*}$ estaría representando un escenario de coexistencia entre ambas especies.
