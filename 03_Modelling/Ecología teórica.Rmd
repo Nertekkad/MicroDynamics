@@ -30,28 +30,34 @@ La sensibilidad a las condiciones iniciales es la tendencia de un sistema a toma
 $$x_{t+1}=rx_{t}(1-\frac{x_{t}}{k})$$
 
 ```{r}
-# Carga la biblioteca para gráficos
-library(graphics)
-
-# Define los parámetros del modelo
-r_values <- seq(0, 4, by = 0.01)
-k <- 1  # Puedes ajustar este valor según tus necesidades
-
-# Inicializa x_values con un valor inicial (por ejemplo, 0.5)
-x_values <- numeric(length(r_values))
-x_values[1] <- 0.5
-
-# Calcula los valores de x_{t+1}
-for (i in 2:length(r_values)) {
-  x_values[i] <- r_values[i] * x_values[i-1] * (1 - x_values[i-1]/k)
+# Function to generate bifurcation diagram for logistic map
+logistic_bifurcation <- function(r, x0, n, m) {
+  x <- numeric(n)
+  x[1] <- x0
+  for (i in 2:n) {
+    x[i] <- r * x[i - 1] * (1 - x[i - 1])
+  }
+  x_m <- x[(n - m):n]
+  r_vals <- rep(r, m + 1)
+  return(data.frame(r = r_vals, x = x_m))
 }
-
-# Gráfico de bifurcaciones
+# Parameters
+r_values <- seq(1, 4, by = 0.01)
+x0 <- 0.5
+n <- 10000
+m <- 100
+# Generate bifurcation data
+bifurcation_data <- data.frame(r = numeric(0), x = numeric(0))
+for (r in r_values) {
+  bif_data <- logistic_bifurcation(r, x0, n, m)
+  bifurcation_data <- rbind(bifurcation_data, bif_data)
+}
+# Plot bifurcation diagram
 library(ggplot2)
-df <- data.frame(x = r_values, y = x_values)
-ggplot(df, aes(x = x, y = y)) + geom_point(data = df) +
-  labs(x = "r", y = "x_t",
-       title = "Diagrama de bifurcaciones del Modelo Discreto de Verhulst")
+ggplot(bifurcation_data, aes(x = r, y = x)) +
+  geom_point(size = 0.1, alpha = 0.5) +
+  labs(x = "r", y = "x") +
+  theme_minimal()
 ```
 
 En modelos continuos, el caos solo aparece en sistemas de dimensión igual o mayor a tres, como sucede con el modelo de convección atmosférica de Lorenz, mismo que dio nombre al atractor de Lorenz con su característica forma de mariposa. Este modelo, de hecho, abrió las puertas al estudio de los sistemas caóticos y su intrigante naturaleza.
