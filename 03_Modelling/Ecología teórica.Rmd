@@ -7,25 +7,25 @@ output:
 
 ## Fundamentos de los modelos biológicos basados en ecuaciones diferenciales {-}
 
-Existen múltiples formas de clasificar ecuaciones diferenciales, iniciando por hacer una distinciójn entre aquellas que son continuas, donde $x(t)$ puede adoptar cualquier valor $\mathbb{R}$ en el tiempo $(-\infty, \infty)$. Por su parte, las funciones discretas solo pueden adoptar valores enteros $\mathbb{Z}$ en el tiempo, de modo que cada valor de $x_{t}$ depende del resultado obtenido previamente en $x_{t-1}$. En los modelos continuos, por lo tanto, es posible calcular los límites de la función y definir sus derivadas.
+Existen múltiples formas de clasificar ecuaciones diferenciales, iniciando por hacer una distinción entre aquellas que son continuas, donde $x(t)$ puede adoptar cualquier valor $\mathbb{R}$ en el tiempo $(-\infty, \infty)$. Por su parte, las funciones discretas solo pueden adoptar valores enteros $\mathbb{Z}$ en el tiempo, de modo que cada valor de $x_{t}$ depende del resultado obtenido previamente en $x_{t-1}$. En los modelos continuos, por lo tanto, es posible calcular los límites de la función y definir sus derivadas.
 
 Del mismo modo, podemos diferenciar las funciones que son derivadas totales de una única variable $dx/dt$, como $f(x)$ y $f(g)$. En contraposición, las derivadas parciales se definen en fución de múltiples variables $f(x,y,z,...,t)$, por lo que se deben derivar en función de una variable a la vez de la forma $\frac{\partial f}{\partial x}$.
 
-Las funciones también pueden ser autónomas o no-autónomas, siendo las primeras aquellas donde no existe una dependencia temporal. Un ejemplo clásico de este caso consiste en una masa que oscila en un resorte. En un sistema autónomo, esta oscilación disminuiría en función del tiempo hasta detenerse una vez el sistema haya discipado su energía cinética en forma de calor. Sin embargo, en un sistema no-autónomo se podría agregar un impulso periódico que introdusca energía cinética al sistema cada cierto tiempo.
+Las funciones también pueden ser autónomas o no-autónomas, siendo las primeras aquellas donde no existe una dependencia temporal. Un ejemplo clásico de este caso consiste en una masa que oscila en un resorte. En un sistema autónomo, esta oscilación disminuiría en función del tiempo hasta detenerse una vez el sistema haya disipado su energía cinética en forma de calor. Sin embargo, en un sistema no-autónomo se podría agregar un impulso periódico que introduzca energía cinética al sistema cada cierto tiempo.
 
-Las funciones pueden ser deterministas o estocásticas, donde las primeras devuelven siempre el mismo conjunto de valores como resultado dados determinados valores de entrada, mientras que las funciones estocásticas no, dado su caracter aleatorio.
+Las funciones pueden ser deterministas o estocásticas, donde las primeras devuelven siempre el mismo conjunto de valores como resultado dados determinados valores de entrada, mientras que las funciones estocásticas no, dado su carácter aleatorio.
 
 Llegados a este punto, podemos definir que una función de tipo:
 
 $$\dot{x}=\frac{dx(t)}{dt}=f(x(t))$$
 
-Es por lo tanto contínua, ordinaria, autónoma y determinista, donde $x(0)=x_{0}$ en $t=0$, siendo $x_{0}$ las condiciones iniciales del sistema.
+Es por lo tanto continua, ordinaria, autónoma y determinista, donde $x(0)=x_{0}$ en $t=0$, siendo $x_{0}$ las condiciones iniciales del sistema.
 
-Finalmente, podemos destacar que dentro de este grupo, existen funciones lineales, cuya tasa de cambio es siempre constante, y funciones no-lineales. Un ejemplo de las primeras podría ser una población que crece indefinidamente con una tasa $r$ de la forma $\dot{x}=rx$. Sin embargo, este tipo de funciones no suelen definir correctamente los patrones de comportamiento de los fenómenos naturales, por lo que es más común y conveniente el uso de funciones no-lineales, como sucede con el modelo de Verhulst, que limita el crecimiento de una población mediante la capacidad de carga del sistema.
+Finalmente, podemos destacar que, dentro de este grupo, existen funciones lineales, cuya tasa de cambio es siempre constante, y funciones no-lineales. Un ejemplo de las primeras podría ser una población que crece indefinidamente con una tasa $r$ de la forma $\dot{x}=rx$. Sin embargo, este tipo de funciones no suelen definir correctamente los patrones de comportamiento de los fenómenos naturales, por lo que es más común y conveniente el uso de funciones no-lineales, como sucede con el modelo de Verhulst, que limita el crecimiento de una población mediante la capacidad de carga del sistema.
 
 $$\dot{x}=rx(1-\frac{x}{k})$$
 
-La sensibilidad a las condiciones iniciales o caos, es la tendencia de un sistema a tomar un conjunto de valores radicalmente distintos con respecto a si mismo tras haber introducido condiciones iniciales similares. Esto no debe confundirse con la estocasticidad, dado que un sistema caótico es totalmente determinista, sin embargo, cualquier variación sobre las condiciones iniciales, por minúscula que sea, se amplifica en el tiempo dando como resultado una eventual divergencia de los resultados. Un sistema estocástico es, por definición, impredecible. El caos no ha sido reportado en sistemas contínuos unidimencionales, sin embargo, si está presente en funciones discretas, como sucede con el modelo discreto de Verhulst:
+La sensibilidad a las condiciones iniciales es la tendencia de un sistema a tomar un conjunto de valores radicalmente distintos con respecto a si mismo tras haber introducido condiciones iniciales muy similares, lo que llamamos caos. Esto no debe confundirse con la estocasticidad, dado que un sistema caótico es totalmente determinista, sin embargo, cualquier variación sobre las condiciones iniciales, por minúscula que sea, se amplifica en el tiempo dando como resultado una eventual divergencia de los resultados. Un sistema estocástico es, por definición, impredecible. El caos no ha sido reportado en sistemas continuos unidimensionales, sin embargo, si está presente en funciones discretas, como sucede con el modelo discreto de Verhulst:
 
 $$x_{t+1}=rx_{t}(1-\frac{x_{t}}{k})$$
 
@@ -54,7 +54,7 @@ ggplot(df, aes(x = x, y = y)) + geom_point(data = df) +
        title = "Diagrama de bifurcaciones del Modelo Discreto de Verhulst")
 ```
 
-En modelos continuos, el caos solo aparece en sistemas de dimención igual o mayor a tres, como sucede con el modelo de convección atmosférica de Lorenz, mismo que dio nombre al atractor de Lorenz con su característica forma de mariposa. Este modelo, de hecho, abrió las puertas al estudio de los sistemas caóticos y su intrigante naturaleza.
+En modelos continuos, el caos solo aparece en sistemas de dimensión igual o mayor a tres, como sucede con el modelo de convección atmosférica de Lorenz, mismo que dio nombre al atractor de Lorenz con su característica forma de mariposa. Este modelo, de hecho, abrió las puertas al estudio de los sistemas caóticos y su intrigante naturaleza.
 
 $$\dot x = a x +yz$$
 $$\dot y = b(y-z)$$
@@ -82,7 +82,7 @@ state <- c(X = 1, Y = 1, Z = 1)
 times <- seq(0, 100, by = 0.01)
 #Acá hace todo (ode significa *ordinary differential equation*)
 out <- ode(y = state, times = times, func = Lorenz, parms = parameters)
-#Graficamos las soluciones, una gráfica por cada cooordenada (variable)
+#Graficamos las soluciones, una gráfica por cada coordenada (variable)
 plot(out,col="blue")
     ## En 3-D
     library(scatterplot3d)
@@ -96,8 +96,8 @@ Donde $a$, $b$, $c$ son los parámetros del sistema. Cualqier variación en las 
 
 Dada la dificultad  que supone encontrar soluciones para ecuaciones diferenciales no-lineales $\dot{x}=f(x)$, se han implementado métodos asintóticos para aproximar el comportamiento de estas funciones cuando $t \rightarrow \infty$ en los puntos donde $f(x)=0$, por lo que podemos conocer la estamilidad del sistema a partir de la estimación del límite.
 
-Para ejemplificar lo anterior, podemos emplear la siguente función que describe el **efecto Allee**, originalmente empleada para modelar poblaciones animales que requieren superar un valor umbral
-mínimo para poder asegurar la supervivencia de la población. De encontrarse dicha población por debajo del umbral, esta decae hasta la extición.
+Para ejemplificar lo anterior, podemos emplear la siguiente función que describe el **efecto Allee**, originalmente empleada para modelar poblaciones animales que requieren superar un valor umbral
+mínimo para poder asegurar la supervivencia de la población. De encontrarse dicha población por debajo del umbral, esta decae hasta la extinción.
 
 $$\dot{x}=rx(1-\frac{x}{k})(x-\alpha)$$
 
@@ -130,7 +130,7 @@ Si lo analizamos por el método analítico, debemos obtener los valores de las p
 
 $$\frac{df}{dx}=r(1-\frac{x}{k})(x-\alpha)+rx(-\frac{1}{k})(x-\alpha)+rx(1-\frac{x}{k})$$
 
-Al evaluar $x_{1}^{*}=0$, la $df/dx=r(-\alpha)=-\alpha{x}<0$, y por lo tanto, estable. En $x_{2}^{*}=k$, obtenemos que $df/dx=rk(-1/k)(k-\alpha)=-r(k-\alpha)<0$, que es estable, tomando en consideración que $k>\alpha$. Para $x_{3}^{*}=\alpha$, obtenemos que $df/dx=r\alpha(1-\alpha/k)>0$, y por ende, inestable.
+Al evaluar $x_{1}^{*}=0$, la $df/dx=r(-\alpha)=-\alpha{x}<0$, por lo tanto, estable. En $x_{2}^{*}=k$, obtenemos que $df/dx=rk(-1/k)(k-\alpha)=-r(k-\alpha)<0$, que es estable, tomando en consideración que $k>\alpha$. Para $x_{3}^{*}=\alpha$, obtenemos que $df/dx=r\alpha(1-\alpha/k)>0$, y por ende, inestable.
 
 Como hemos mencionado, los puntos de equilibrio $x_{i}^{*}$ corresponden a los sitios donde una función $f(x)$ cruza por el eje de las abscisas, por lo cual $f(x_{i}^{*})=0$, tal que $\forall{i}=1,2,3,...,n$.
 
@@ -143,7 +143,7 @@ $$
 \end{matrix}\right.
 $$
 
-Para comprender mejor el concepto de estabilidad, observemos qué sucede cuando analizamos la función cerca del punto de equilibrio en $f(x^{*}-\delta) \neq 0$, siendo $\delta>0$. Haciendo una analogía, imaginemos ahora la función como un paisaje de picos y valles. Si colocáramos una canica en las cima de un pico, bastaría con cualquier perturbación para que la canica cayera de cuesta abajo, mientras que si la colocáramos cerca del fondo de un valle, la canica sería inevitablemente atraída al interior de la depresión. Con esto, podemos hacernos una idea de cómo se comportaría una función cerca de un punto de equilibrio inestable o **repulsor**, o de un punto de equilibrio estable o **atractor**.
+Para comprender mejor el concepto de estabilidad, observemos qué sucede cuando analizamos la función cerca del punto de equilibrio en $f(x^{*}-\delta) \neq 0$, siendo $\delta>0$. Haciendo una analogía, imaginemos ahora la función como un paisaje de picos y valles. Si colocáramos una canica en las cima de un pico, bastaría con cualquier perturbación para que la canica cayera de cuesta abajo, mientras que, si la colocáramos cerca del fondo de un valle, la canica sería inevitablemente atraída al interior de la depresión. Con esto, podemos hacernos una idea de cómo se comportaría una función cerca de un punto de equilibrio inestable o **repulsor**, o de un punto de equilibrio estable o **atractor**.
 
 Si tenemos una $\Delta{f}$ definida por $f(x^{*})-f(x^{*}-\delta)$, siendo $\delta>0$ una perturbación introducida al sistema cerca del punto de equilibrio $x_{i}^{*}$, por lo cual $f(x^{*}-\delta)\neq{0}$; podemos preguntarnos si $\delta$ hace que los valores de la función se aproximen o se alejen de $x_{i}^{*}$, es decir, ¿el punto de equilibrio se está comportando como un atractor o como un repulsor?
 
@@ -271,7 +271,7 @@ Para visualizar cómo se comporta el potencial de la función debemos obtener el
 
 $$\phi_{\mu}(x)=-\int{f(x)}dx$$
 
-Esto pude ser entendido como un potencial, donde los puntos de equilibrio estables corresponderían a los estados de mínima energía del sistema. Podemos entenderlo haciendo una analogía entre la energía cinética y la energía potencial, donde el punto de máximo potencial de un sistema corresponde a su posición de inicio, donde su velocidad y, por ende, su energía cinética, es mínima. Por lo tanto, el mínimo del inverso de la función de potencial, corresponde también con el punto o los puntos de mínima energía del sistema.
+Esto pude ser entendido como un potencial, donde los puntos de equilibrio estables corresponderían a los estados de mínima energía del sistema. Podemos entenderlo haciendo una analogía entre la energía cinética y la energía potencial, donde el punto de máximo potencial de un sistema corresponde a su posición de inicio, donde su velocidad y, por ende, su energía cinética, es mínima. Por lo tanto, el mínimo del inverso de la función de potencial corresponde también con el punto o los puntos de mínima energía del sistema.
 
 $$\int(\mu x-x^{3})dx=\mu \int(x)dx-\int(x^{3})dx= \frac{x^{2}(2\mu-x^{2})}{4}$$
 
@@ -395,11 +395,11 @@ abline(v=0, col="red", lwd=2)
 par(mfrow=c(1,1))
 ```
 
-## Modelos ecológicos unidimencionales {-}
+## Modelos ecológicos unidimensionales {-}
 
 ### Solución del modelo exponencial {-}
 
-Asumamos la existencia de una población $x$ con una tasa de crecimiento $r$ que crece indefinidamente en el tiempo. Como es evidente, este modelo implica la existancia de una población cuyo tamaño se incrementa de forma exponencial a una tasa constante sin ningún factor que limite su número. Este incremento en el tamaño de la población se describe como $\dot{x}=rt$, de modo que para obtener el tamaño de la población en función del tiempo, debemos integrar la ecuación anterior de la siguiente forma:
+Asumamos la existencia de una población $x$ con una tasa de crecimiento $r$ que crece indefinidamente en el tiempo. Como es evidente, este modelo implica la existancia de una población cuyo tamaño se incrementa de forma exponencial a una tasa constante sin ningún factor que limite su número. Este incremento en el tamaño de la población se describe como $\dot{x}=rt$, de modo que, para obtener el tamaño de la población en función del tiempo, debemos integrar la ecuación anterior de la siguiente forma:
 
 $$\frac{dx}{dt}=rx \quad \rightarrow \quad \int\frac{dx}{x}=r\int{dt}$$
 
@@ -508,7 +508,7 @@ $$\frac{1}{x(\alpha-\frac{x}{k})}= \frac{A}{x}+\frac{B}{\alpha-\frac{x}{k}}= \fr
 
 Donde $A(\alpha-\frac{x}{k})+B(x)=A\alpha-A\frac{x}{k}+Bx=1$.
 
-Por lo tanto, para mantener la equivalencia, $B=A/k$, lo que da como resultado que $A\alpha=1$, ergo $A=1/\alpha$. Si ahora sustituímos $A$ en $B$, obtenemos que $B=1/(\alpha{k})$. A raíz de lo anterior, obtenemos que:
+Por lo tanto, para mantener la equivalencia, $B=A/k$, lo que da como resultado que $A\alpha=1$, ergo $A=1/\alpha$. Si ahora sustituimos $A$ en $B$, obtenemos que $B=1/(\alpha{k})$. A raíz de lo anterior, obtenemos que:
 
 $$\frac{A}{x}+\frac{B}{\alpha-\frac{x}{k}}= \frac{1}{\alpha{x}}+\frac{1}{\alpha{k}(\alpha-\frac{x}{k})}$$
 
@@ -516,7 +516,7 @@ Por lo que ahora podemos reescribir la integral completa:
 
 $$\int{\frac{dx}{x(\alpha-\frac{x}{k})}}= \frac{1}{\alpha}\int\frac{dx}{x}+\frac{1}{\alpha{k}}\int\frac{1} {(\alpha-\frac{x}{k})}=r\int{dt}$$
 
-Para resolver la segunda parte de la integral, realizamos una integración por cambio de variable, demodo que obtenemos que $u=\alpha-x/k$ y $du=-dx/k$. Despejando esta última parte, obtenemos que $dx=-kdu$. Por lo tanto:
+Para resolver la segunda parte de la integral, realizamos una integración por cambio de variable, de modo que obtenemos que $u=\alpha-x/k$ y $du=-dx/k$. Despejando esta última parte, obtenemos que $dx=-kdu$. Por lo tanto:
 
 $$\frac{1}{\alpha}\int{\frac{dx}{x}}+ \frac{-k}{\alpha{k}}\int\frac{du}{u}=r\int{dt}$$
 
@@ -626,7 +626,7 @@ Por lo cual, para un modelo 2-D, esto se traduce en que $\alpha_{ij}<\alpha_{jj}
 
 $$\alpha_{ij}<\alpha_{jj} \quad \text{y} \quad \alpha_{ji}<\alpha_{ii}$$
 
-Biológicamente esto se traduce en que, para que se de la coexistencia, la competencia entre los miembros de la misma especie competidora $j$, debe ser mayor que la competencia que ejerce sobre la especie $i$, lo cual hace sentido si pensamos que, al ocupar el mismo nicho y por ende, competir por los mismos recursos, las interacciones intraespecíficas suelen ser más fuertes.
+Biológicamente esto se traduce en que, para que se dé la coexistencia, la competencia entre los miembros de la misma especie competidora $j$, debe ser mayor que la competencia que ejerce sobre la especie $i$, lo cual hace sentido si pensamos que, al ocupar el mismo nicho y, por ende, competir por los mismos recursos, las interacciones intraespecíficas suelen ser más fuertes.
 
 Cuando un competidor ejerce una presión mayor sobre los miembros de otra especie que la que ejerce sobre aquellos de su misma especie, entonces hablamos de un escenario donde dicho competidor $j$ eventualmente lleva a la especie $i$ a la extinción. A este fenómeno se le conoce como exclusión competitiva.
 
@@ -644,7 +644,7 @@ $$x_{i}=\frac{1}{\alpha_{ii}}-\frac{\alpha_{ij}}{\alpha_{ii}}x_{j}$$
 
 Por lo que el tamaño de la población corresponde a la capacidad de carga menos el efecto que ejerce la interacción con el competidor ($x_{i}=k_{i}-k_{i}\alpha_{ij}x_{j}$).
 
-Ahora sustituímos $x_{i}$ en la ecuación de $x_{j}$:
+Ahora sustituimos $x_{i}$ en la ecuación de $x_{j}$:
 
 $$\alpha_{ji}x_{i}+\alpha_{jj}x_{j}=1$$
 
@@ -660,7 +660,7 @@ $$\alpha_{ii}-\alpha_{ji}=(\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij})x_{j}$
 
 $$x_{j}^{*}=\frac{\alpha_{ii}-\alpha_{ji}}{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}}$$
 
-Ahora sustituímos $x_{j}^{*}$ en la ecuación $x_{i}=1/\alpha_{ii}-(\alpha_{ij}/\alpha_{ii})x_{j}$:
+Ahora sustituimos $x_{j}^{*}$ en la ecuación $x_{i}=1/\alpha_{ii}-(\alpha_{ij}/\alpha_{ii})x_{j}$:
 
 $$x_{i}=\frac{1}{\alpha_{ii}}-\frac{\alpha_{ij}}{\alpha_{ii}}(\frac{\alpha_{ii}-\alpha_{ji}}{\alpha_{jj}\alpha_{ii}- \alpha_{ji}\alpha_{ij}})$$
 
@@ -766,7 +766,7 @@ Ya que el modelo se basa en el uso de recursos por parte de las poblaciones, deb
 
 $$\dot{R}_{l}=R_{l}r^{R}_{l}(1-\alpha^{R}_{l}R_{l})-(N_{1}C_{1l}R_{l}+N_{2}C_{2l}R_{l})$$
 
-Donde $l = 1,2,3,...,n_{R}$ representa el conjunto de recursos disponibles y $r^{R}_{l}$ la tasa de "crecimiento" del recurso $l$, lo que podría definirse como la tasa a la cual ese recurso se incorpora al medio. La tasa de saturación de cada recurso es el inverso de la capacidad de carga asociada al recurso ($\alpha^{R}_{l}=\frac{1}{k^{l}_{R}}$). Por lo tanto, podemos interpretar $k^{R}_{l}=\frac{1}{\alpha^{R}_{l}}$ como el máximo beneficio posible en un medio saturado por el recurso $l$. Esto es entendible si consideramos que, en ausencia de consumidores, la concentración de los recursos aumenta hasta que el medio se satura, presentando por lo tanto, un crecimiento logístico similar al que vimos previamente en el modelo de Verhulst.
+Donde $l = 1,2,3,...,n_{R}$ representa el conjunto de recursos disponibles y $r^{R}_{l}$ la tasa de "crecimiento" del recurso $l$, lo que podría definirse como la tasa a la cual ese recurso se incorpora al medio. La tasa de saturación de cada recurso es el inverso de la capacidad de carga asociada al recurso ($\alpha^{R}_{l}=\frac{1}{k^{l}_{R}}$). Por lo tanto, podemos interpretar $k^{R}_{l}=\frac{1}{\alpha^{R}_{l}}$ como el máximo beneficio posible en un medio saturado por el recurso $l$. Esto es entendible si consideramos que, en ausencia de consumidores, la concentración de los recursos aumenta hasta que el medio se satura, presentando, por lo tanto, un crecimiento logístico similar al que vimos previamente en el modelo de Verhulst.
 
 $$\dot{R}_{l}=R_{l}r^{R}_{l}(1-\frac{R_{l}}{k^{l}_{R}})$$
 
@@ -844,17 +844,162 @@ Si consideramos que $r_{i}=h_{i}-\mu_{i}$ es el **fitness** o éxito reproductiv
 
 $$\frac{dN_{i}}{dt}=N_{i}(r_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j})$$
 
+```{r}
+library(miaSim)
+# Number of species ans resources
+n_species <- 10
+n_resources <- 5
+# Random efficiency matrix for consumer resource model
+matE <- randomE(
+  n_species = n_species, n_resources = n_resources,
+  mean_consumption = 2, mean_production = 2, maintenance = 0.4
+)
+# Initial concentrations of resources
+resources_c <- rep(100, n_resources)
+# MacArthur consumer-resource model with a perturbation
+tse <- simulateConsumerResource(
+  n_species = n_species,
+  n_resources = n_resources, names_species = letters[seq_len(n_species)],
+  names_resources = paste0("res", LETTERS[seq_len(n_resources)]), E = matE,
+  x0 = rep(0.001, n_species), resources = resources_c,
+  growth_rates = runif(n_species),
+  error_variance = 0.001,
+  t_end = 10000,
+  t_step = 1,
+  t_external_events = 5000,
+  t_external_durations = 1000,
+  sigma_external = 0.05,
+  stochastic = T,
+  norm = T
+)
+# Extract abundance and resource tables
+abundances<-as.data.frame(assay(tse))
+resources<-as.data.frame(metadata(tse)$resources)
+# Time units
+times<-as.vector(resources$time)
+resources<-resources[,-ncol(resources)]
+# Plot populations
+matplot(x = times, y = t(abundances), type = "l",
+        xlab = "Time", ylab = "Population",
+        main = "McArthur consumer-resource model", lwd = 2, lty = 1)
+# Plot resources
+matplot(x = times, y = resources, type = "l",
+        xlab = "Time", ylab = "Resources",
+        main = "McArthur consumer-resource model", lwd = 2, lty = 1)
+```
+
 **Modelo Lotka-Volterra generalizado**
 
 $$\frac{dN_{i}}{dt}=N_{i}(r_{i}-\sum^{m}_{j=1}\alpha_{ij}N_{j})$$
 
-El hecho de que ambos sistemas sean análogos entre si, se puede entender conceptualmente como que el LVg considera interaccipnes directas, mientras que en el MacArthur, estas interacciones emergen indirectamente de la competencia por recursos entre poblaciones.
+```{r}
+library(deSolve)
+int_matrix<-function(N, aii, nep, pop){
+   # Number of neutral interactions
+   nep<-round(N*N*nep, 0)
+   # Number of positive interactions
+   pop<-round(N*N*pop, 0)
+   # Stochastic negative interactions
+   v<-runif(N*N, -1, 0)
+   # Positive interactions
+   positives<-v[sample(1:length(v), pop)]
+   v[which(v %in% positives)]<-v[which(v %in% positives)]*(-1)
+   # Negative interactions
+   v[sample(1:length(v), nep)]<-0
+   v[seq(1, length(v), N+1)]<-aii*(-1)
+   # Interaction matrix
+   mat<-matrix(v, N, N)
+   return(mat)
+}
 
-Para que la especie $i$ pueda coexistir con el resto de especies, la tasa de cambio debe ser positiva, es decir, la población no debe decrecer ($r_{i}(t)>0$).
+# gLV function
+glv_solver<-function(t, y, parms){
+  N<-nrow(parms)
+  ri<-parms[,1]
+  mat<-parms[,-1]
+  glv<-y*(ri + mat %*% y)
+  list(glv)
+}
+
+# Generalized Lotka-Volterra function
+my_glv<-function(mat, ri, y, t_start, t_end, perturb){
+  require(deSolve)
+  if(is.null(perturb)){
+    # Number of species
+    N<-ncol(mat)
+    # We bind the growing rates and the interaction matrix
+    parms<-cbind(ri, mat)
+    # Time points
+    times<-seq(t_start, t_end, by=1)
+    # Simulation by using the glv_solver function
+    sim_glv<-ode(y, times, glv_solver, parms)
+    sim_glv<-t(sim_glv[,-1])
+    colnames(sim_glv)<-times
+    return(sim_glv)
+  } else {
+    N<-ncol(mat)
+    parms<-cbind(ri, mat)
+    # Community behavior before the perturbation
+    times1<-seq(t_start, perturb[[2]]-1, by=1)
+    sim_glv1<-ode(y, times1, glv_solver, parms)
+    sim_glv1<-t(sim_glv1[,-1])
+    # Community behavior during the perturbation
+    times2<-seq(perturb[[2]], perturb[[3]], by=1)
+    parms_p<-cbind(ri, perturb[[1]])
+    # As initial abundances, we use the last abundances given by
+    # the previous simulation 
+    sim_glv2<-ode(sim_glv1[,ncol(sim_glv1)], times2,
+                  glv_solver, parms_p)
+    sim_glv2<-t(sim_glv2[,-1])
+    # We bind both simulations
+    sim_glv2<-cbind(sim_glv1, sim_glv2)
+    # Community behavior after the perturbation
+    times3<-seq(perturb[[3]]+1, t_end, by=1)
+    sim_glv3<-ode(sim_glv2[,ncol(sim_glv2)], times3, glv_solver, parms)
+    sim_glv3<-t(sim_glv3[,-1])
+    # We bind the final simulation and add the time points
+    sim_glv_p<-cbind(sim_glv2, sim_glv3)
+    final_time<-seq(1, ncol(sim_glv_p), by = 1)
+    colnames(sim_glv_p)<-final_time
+    return(sim_glv_p)
+  }
+}
+
+# Perturbation function
+perturb<-function(N, aii, nep, pop, strength, from, to){
+   # We make another interaction matrix
+   nep<-round(N*N*nep, 0)
+   pop<-round(N*N*pop, 0)
+   v<-runif(N*N, -1*(strength), 0)
+   positives<-v[sample(1:length(v), pop)]
+   v[which(v %in% positives)]<-v[which(v %in% positives)]*(-1)
+   v[sample(1:length(v), nep)]<-0
+   v[seq(1, length(v), N+1)]<-aii*(-1)
+   mat_p<-matrix(v, N, N)
+   # The function returns the matrix, and the starting and ending
+   # perturbation time points
+   return(list(mat_p, from, to))
+}
+
+# Simulation
+N<-20
+mat<-int_matrix(N, aii = 0.5, nep = 0.5, pop = 0.2)
+prt<-perturb(N, aii = 0.5, nep = 0.5, pop = 0.2, strength = 0.5,
+        from = 100, to = 130)
+
+sim_lv<-my_glv(mat, ri = runif(N), y = runif(N), t_start = 1, t_end = 250, prt)
+matplot(x = seq(1:ncol(sim_lv)), y = t(sim_lv),
+        type = "l", xlab = "Time", ylab = "Population",
+        main = "Generalized Lotka-Volterra", lwd = 2, lty=1)
+```
+
+El hecho de que ambos sistemas sean análogos entre sí se puede entender conceptualmente como que el LVg considera interacciones directas, mientras que, en el MacArthur, estas interacciones emergen indirectamente de la competencia por recursos entre poblaciones.
+
+Para que la especie $i$ pueda coexistir con el resto de las especies, la tasa de cambio debe ser positiva, es decir, la población no debe decrecer ($r_{i}(t)>0$).
 
 $$h_{i}-\mu_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j}>0$$
 
-Por lo que en principio, la tasa máxima de crecimiento, definida por el máximo aprovechamiento de recursos de $i$, debe ser mayor a la tasa de muertes $h_{i}>\mu_{i}$. Ergo:
+Por lo que, en principio, la tasa máxima de crecimiento, definida por el máximo aprovechamiento de recursos de $i$, debe ser mayor a la tasa de muertes $h_{i}>\mu_{i}$. Ergo:
 
 $$h_{i}>\mu_{i}+\sum^{m}_{j=1}\sigma^{R}_{ij}N_{j}$$
 
@@ -948,7 +1093,7 @@ $$r_{i}(t)=\frac{\dot{N}_{i}}{N_{i}}=h_{i}-\mu_{i}-\sum^{m}_{j=1}\sigma^{R}_{ij}
 
 #### Ecuación del replicador {-}
 
-Concideremos un escenario con dos especies competidoras. Al tratarse de un modelo discreto, imaginemos una retícula de $nxn$ dimenciones, cuyas casillas pueden o no estar ocupadas por miembros de la especie $i$ o de la especie $j$. Si un miembro de alguna de las dos especies muere, deja por lo tanto, una casilla vacía por la que ambas especies deben competir por ocupar.
+Concideremos un escenario con dos especies competidoras. Al tratarse de un modelo discreto, imaginemos una retícula de $nxn$ dimensiones, cuyas casillas pueden o no estar ocupadas por miembros de la especie $i$ o de la especie $j$. Si un miembro de alguna de las dos especies muere, deja por lo tanto, una casilla vacía por la que ambas especies deben competir por ocupar.
 
 En este modelo, emplearemos una matriz $H$ para codificar las interacciones entre poblaciones, por lo que cada valor $H_{ij}$ correspondería a la probabilidad de que $i$ gane a $j$ en ocupar una casilla. Ya que, $\forall H_{ij}$, la probabilidad debe ser un valor cualquiera entre $0 \leq H_{ij} \leq 1$, esto significa que la suma de las probabilidades de las especies competidoras es siempre constante ($H_{ij}+H_{ji}=1$). Por consiguiente, si dos miembros de la misma especie compiten por ocupar una casilla, las probabilidades de que uno u otro lo consiga son iguales ($H_{ii}+H_{ii}=1$), por lo que $H_{ii}=1/2$.
 
