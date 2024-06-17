@@ -112,6 +112,31 @@ wn_gLVp<-wn_ab_table(gLVp, 0.001)
 tsplot(wn_gLVp, "Perturbated gLV model with white noise")
 ```
 
+Early warnings
+
+```{r}
+library(earlywarnings)
+library(EWS)
+library(EWSmethods)
+library(codyn)
+library(vegan)
+
+LV_data <- data.frame(time = seq(1:length(ab_table_div(wn_gLVp, "shannon"))),
+                        abundance = ab_table_div(wn_gLVp, "shannon"))
+
+ews_metrics <- c("SD","ar1","skew")
+
+roll_ews <- uniEWS(data = LV_data, metrics =  ews_metrics, method = "rolling",
+                   winsize = 50)
+
+plot(roll_ews,  y_lab = "Abundances")
+
+exp_ews <- uniEWS(data = LV_data, metrics =  ews_metrics, method = "expanding",
+                  burn_in = 10, threshold = 2,  tail.direction = "one.tailed")
+
+plot(exp_ews, y_lab = "Abundances")
+```
+
 Now, we iterate the gLV model n times to get statistical significance.
 ```{r}
 n_iterated_gLV<-function(I, interaction_matrix, N, S, perturb, white_noise){

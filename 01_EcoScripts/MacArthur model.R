@@ -514,3 +514,22 @@ ggbetweenstats(
 )
 
 
+library(earlywarnings)
+library(EWS)
+library(EWSmethods)
+library(codyn)
+library(vegan)
+
+CR_data <- data.frame(time = seq(1:length(ab_table_div(CRsims_T[[1]], "shannon"))),
+                        abundance = ab_table_div(CRsims_T[[1]], "shannon"))
+
+ews_metrics <- c("SD","ar1","skew")
+
+roll_ews <- uniEWS(data = CR_data, metrics =  ews_metrics, method = "rolling", winsize = 50)
+
+plot(roll_ews,  y_lab = "Abundances")
+
+exp_ews <- uniEWS(data = CR_data, metrics =  ews_metrics, method = "expanding",
+                  burn_in = 10, threshold = 2,  tail.direction = "one.tailed")
+
+plot(exp_ews, y_lab = "Abundances")
