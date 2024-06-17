@@ -361,3 +361,25 @@ ab_table_div<-function(ab_table, diversity_type){
         }
   return(div_table)
 }
+
+library(earlywarnings)
+library(EWS)
+library(EWSmethods)
+library(codyn)
+library(vegan)
+
+mice_abundance<-rbind(basal_S2, fat_S2, R1_S2,
+                      van_S2, R2_S2, gen_S2, R3_S2)
+
+mice_data <- data.frame(time = seq(1:length(ab_table_div(t(mice_abundance), "shannon"))),
+                       abundance = ab_table_div(t(mice_abundance), "shannon"))
+
+ews_metrics <- c("SD","ar1","skew")
+
+roll_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "rolling", winsize = 50)
+
+plot(roll_ews,  y_lab = "Abundances")
+
+exp_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "expanding",
+                  burn_in = 10, threshold = 2,  tail.direction = "one.tailed")
+plot(exp_ews, y_lab = "Abundances")
