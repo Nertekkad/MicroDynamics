@@ -194,8 +194,8 @@ v_colored<-function(g, T_table, g_tax, p_tax, g_colors){
 unq<-unique(tax_bacter[,"Phylum"])
 unq<-unq[-c(which(unq == "uncultured"), which(is.na(unq)))]
 library(viridis)
-colors <- sample(viridis_pal()(length(unq)))
-
+#colors <- sample(viridis_pal()(length(unq)))
+colors <- sample(rainbow(100), length(unq))
 # Tadpole under treatment 1
 BTad_T1Net<-v_colored(BTad_T1Net, tax_bacter, g_tax = "Phylum",
                       p_tax = "Genus", g_colors = colors)

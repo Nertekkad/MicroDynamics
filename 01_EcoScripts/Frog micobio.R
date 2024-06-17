@@ -194,8 +194,8 @@ v_colored<-function(g, T_table, g_tax, p_tax, g_colors){
 unq<-unique(tax_fungi[,"Class"])
 unq<-unq[-c(which(unq == "unidentified"), which(is.na(unq)))]
 library(viridis)
-colors <- sample(viridis_pal()(length(unq)))
-
+#colors <- sample(viridis_pal()(length(unq)))
+colors <- sample(rainbow(100), length(unq))
 # Tadpole under treatment 1
 FTad_T1Net<-v_colored(FTad_T1Net, tax_fungi, g_tax = "Phylum",
                          p_tax = "Genus", g_colors = colors)
@@ -307,6 +307,59 @@ mat_colors<-function(colors, g.list){
   return(colmat)
 }
   
+# Abundance tables list
+abs_FTad<-list(FTad_T2, FTad_T1, FTad_Ctr)
+abs_FMet<-list(FMet_T2, FMet_T1, FMet_Ctr)
+abs_FAdl<-list(FAdl_T2, FAdl_T1, FAdl_Ctr)
+
+lay <- layoutMultiplex(ml_FTad, layout="kk", ggplot.format=F, box=T)
+plot_multiplex3D(ml_FTad, layer.layout=lay,
+                 layer.colors=c("red3", "orange", "green3"),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=NULL, layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_FTad, ml_FTad, 10),
+                 node.colors=node_color_mat(ml_FTad, "phylo"),
+                 edge.colors="#838B8B",
+                 node.colors.aggr=NULL,
+                 show.aggregate=F)
+
+lay <- layoutMultiplex(ml_FMet, layout="kk", ggplot.format=F, box=T)
+plot_multiplex3D(ml_FTad, layer.layout=lay,
+                 layer.colors=c("red3", "orange", "green3"),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=NULL, layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_FMet, ml_FMet, 10),
+                 node.colors=node_color_mat(ml_FMet, "phylo"),
+                 edge.colors="#838B8B",
+                 node.colors.aggr=NULL,
+                 show.aggregate=F)
+
+lay <- layoutMultiplex(ml_FAdl, layout="kk", ggplot.format=F, box=T)
+plot_multiplex3D(ml_FAdl, layer.layout=lay,
+                 layer.colors=c("red3", "orange", "green3"),
+                 layer.shift.x=0.5, layer.space=2,
+                 layer.labels=NULL, layer.labels.cex=1.5,
+                 node.size.values="auto",
+                 node.size.scale=abs_mat(abs_FAdl, ml_FAdl, 10),
+                 node.colors=node_color_mat(ml_FAdl, "phylo"),
+                 edge.colors="#838B8B",
+                 node.colors.aggr=NULL,
+                 show.aggregate=F)
+
+
+
+
+
+
+
+
+
+
+
+
+
 # 3D plot for tadpoles
 lay <- layoutMultiplex(ml_FTad, layout="kk", ggplot.format=F, box=T)
 plot_multiplex3D(ml_FTad, layer.layout=lay,
@@ -408,12 +461,10 @@ ctr<-function(g.list, ctr_type){
 }
 
 # Degree centrality
-ml_FTad<-ctr(ml_FTad, "degree")
-ml_FMet<-ctr(ml_FMet, "degree")
-ml_FAdl<-ctr(ml_FAdl, "degree")
+ml_FTad<-ctr_ml(ml_FTad, "degree")
+ml_FMet<-ctr_ml(ml_FMet, "degree")
+ml_FAdl<-ctr_ml(ml_FAdl, "degree")
 
-colmat<-matrix(c(V(ml_FTad[[1]])$hl,V(ml_FTad[[2]])$hl,V(ml_FTad[[3]])$hl),
-               nrow = length(V(ml_FTad[[1]])), ncol = length(ml_FTad))
 
 # Degree 3D plot for tadpoles
 lay <- layoutMultiplex(ml_FTad, layout="kk", ggplot.format=F, box=T)
@@ -421,8 +472,8 @@ plot_multiplex3D(ml_FTad, layer.layout=lay,
                  layer.colors=c("red3", "orange", "green3"),
                  layer.shift.x=0.5, layer.space=2,
                  layer.labels=NULL, layer.labels.cex=1.5,
-                 node.size.values="auto", node.size.scale=abs_mat(a, ml_FTad, 20),
-                 node.colors=mat_colors(V(ml_FTad[[1]])$hl, ml_FTad),
+                 node.size.values="auto", node.size.scale=abs_mat(abs_FTad, ml_FTad, 20),
+                 node.colors=node_color_mat(ml_FTad, "centrality"),
                  edge.colors="black",
                  node.colors.aggr=NULL,
                  show.aggregate=F)

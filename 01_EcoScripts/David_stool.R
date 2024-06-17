@@ -16,7 +16,7 @@ tsplot(david_stoolA_otus[sorted$ix[1:10],])
 O_table <- david_stoolA_otus
 T_table <- david_stool_lineages
 # Table collapse
-T_Collapsed<-T_collapse(T_table = T_table, O_table = O_table,
+T_Collapsed<-T_collapse(F, T_table = T_table, O_table = O_table,
                         names_level = "V7")
 # Clean data
 T_Collapsed<-T_Collapsed[, -c(which(colnames(T_Collapsed) == "none"))]
