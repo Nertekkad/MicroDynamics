@@ -378,3 +378,49 @@ plot(roll_ews,  y_lab = "Abundances")
 exp_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "expanding",
                   burn_in = 10, threshold = 2,  tail.direction = "one.tailed")
 plot(exp_ews, y_lab = "Abundances")
+
+#### MDS ####
+
+library(RADanalysis)
+# Distance matrix using Manhattan distance
+d <- dist(x = mice_abundance,method = "manhattan")
+# Ordination using classical multi-dimensional scaling
+mds <- cmdscale(d = d,k = 5,eig = TRUE)
+# Points' plot
+line_cols <- c("green3","yellow3","dodgerblue4", "red3", "blue",
+               "orange3", "skyblue")
+sample_classes <- c(rep(1, nrow(basal_S2)),rep(2, nrow(fat_S2)),
+                    rep(3, nrow(R1_S2)), rep(4, nrow(van_S2)),
+                    rep(5, nrow(R2_S2)), rep(6, nrow(gen_S2)),
+                    rep(7, nrow(R3_S2)))
+plot(mds$points,xlab = "First coordinate",ylab = "Second coordinate",
+     pch = 19, cex =1,col = line_cols[sample_classes],
+     main = "Multi-Dimensional Scaling plot")
+
+# Add colored points with error bars
+a <- representative_point(input = mds$points,ids = which(sample_classes == 1),
+                          col = scales::alpha(line_cols[1],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 2),
+                          col = scales::alpha(line_cols[2],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 3),
+                          col = scales::alpha(line_cols[3],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 4),
+                          col = scales::alpha(line_cols[4],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 5),
+                          col = scales::alpha(line_cols[5],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 6),
+                          col = scales::alpha(line_cols[6],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+a <- representative_point(input = mds$points,ids = which(sample_classes == 7),
+                          col = scales::alpha(line_cols[7],0.5),
+                          plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)
+
+legend("topleft",bty = "n",legend = c("Basal","Fat-diet","Recovered 1",
+                                       "Vancomycin", "Recovered 2", "Gentamicin",
+                                       "Recovered 3"), col = line_cols,pch = 19)
+
