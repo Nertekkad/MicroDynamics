@@ -239,7 +239,7 @@ d <- dist(x = n_severity_mat,method = "manhattan")
 mds <- cmdscale(d = d,k = 5,eig = TRUE)
 plot(mds$points,xlab = "First coordinate",ylab = "Second coordinate",pch = 19,
      cex =1,col = line_cols[sample_classes],
-     main = "MDS plot with representative points \n of each group and error bars")
+     main = "")
 a <- representative_point(input = mds$points,ids = which(sample_classes == 1),
                           col = scales::alpha(line_cols[1],0.5),
                           plot = TRUE,standard_error_mean = TRUE,pch = 19, cex = 4)

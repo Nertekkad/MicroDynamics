@@ -121,7 +121,7 @@ p1<-ggplot(mice_ml_properties, aes(x = Treatments, y = Mean_degree, color = Stag
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +  
   labs(title = "",
-       x = "Temperature",
+       x = "Period",
        y = "Mean degree") +
   scale_color_manual(values = c("darkgreen", "purple4", "brown4")) +
   theme_minimal()
@@ -130,7 +130,7 @@ p2<-ggplot(mice_ml_properties, aes(x = Treatments, y = sd_degree, color = Stage)
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +  
   labs(title = "",
-       x = "Temperature",
+       x = "Period",
        y = "SD of degree") +
   scale_color_manual(values = c("darkgreen", "purple4", "brown4")) +
   theme_minimal()
@@ -139,7 +139,7 @@ p3<-ggplot(mice_ml_properties, aes(x = Treatments, y = Clusterization, color = S
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +  
   labs(title = "",
-       x = "Temperature",
+       x = "Period",
        y = "Transitivity") +
   scale_color_manual(values = c("darkgreen", "purple4", "brown4")) +
   theme_minimal()
@@ -148,7 +148,7 @@ p4<-ggplot(mice_ml_properties, aes(x = Treatments, y = Edge_density, color = Sta
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +  
   labs(title = "",
-       x = "Temperature",
+       x = "Period",
        y = "Edge density") +
   scale_color_manual(values = c("darkgreen", "purple4", "brown4")) +
   theme_minimal()
@@ -157,7 +157,7 @@ p5<-ggplot(mice_ml_properties, aes(x = Treatments, y = Connected_nodes, color = 
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +  
   labs(title = "",
-       x = "Temperature",
+       x = "Period",
        y = "Proportion of linked nodes") +
   scale_color_manual(values = c("darkgreen", "purple4", "brown4")) +
   theme_minimal()
@@ -166,7 +166,7 @@ p6<-ggplot(mice_ml_properties, aes(x = Treatments, y = Modularity, color = Stage
   geom_point() +
   geom_smooth(method = "lm", se = FALSE) +  
   labs(title = "",
-       x = "Temperature",
+       x = "Period",
        y = "Modularity") +
   scale_color_manual(values = c("darkgreen", "purple4", "brown4")) +
   theme_minimal()
@@ -177,11 +177,6 @@ grid.arrange(p1, p2, p3, p4, p5, p6, ncol = 3)
 
 
 ##### Phyloseq object #####
-
-Tadmet<-meta_bacterias[which(meta_bacterias$Life_stage %in% "Tadpole"),]
-rownames(Tadmet)<-Tadmet[,1]
-Tadotu<-bacterias[,which(colnames(bacterias) %in% rownames(Tadmet))]
-rownames(Tadotu)<-bacterias$id
 
 library(phyloseq)
 
