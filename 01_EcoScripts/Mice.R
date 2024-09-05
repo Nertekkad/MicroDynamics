@@ -304,27 +304,6 @@ p4
 
 #### Early warnings metrics ####
 
-# Shannon diversity
-Div_Shannon <- function(abundancias_ab){
-  abs_rel <- abundancias_ab/sum(abundancias_ab)
-  Shannon <- -sum(abs_rel*log(abs_rel))
-  return(Shannon)
-}
-
-# Simpson dominance
-Dom_Simpson <- function(abundancias_ab){
-  abs_rel <- abundancias_ab/sum(abundancias_ab)
-  Simpson <- sum(abs_rel^2)
-  return(Simpson)
-}
-
-# Pielou evenness
-Eq_Pielou <- function(abundancias_ab){
-  abs_rel <- abundancias_ab/sum(abundancias_ab)
-  Shannon <- -sum(abs_rel*log(abs_rel))
-  Pielou <- Shannon/log(length(abundancias_ab))
-  return(Pielou)
-}
 
 # Diversity function for abundance tables
 ab_table_div<-function(ab_table, diversity_type){
@@ -332,26 +311,26 @@ ab_table_div<-function(ab_table, diversity_type){
   if(diversity_type == "shannon"){
     div_table<-c()
     for(i in 1:ncol(ab_table)){
-      div_table[i]<-diversity(ab_table[, i])
+      div_table[i]<-diversity(ab_table[, i], "shannon")
     }
   } else
     if(diversity_type == "simpson"){
       div_table<-c()
       for(i in 1:ncol(ab_table)){
-        div_table[i]<-Dom_Simpson(ab_table[, i])
+        div_table[i]<-diversity(ab_table[, i], "simpson")
       }
     } else
       if(diversity_type == "pielou"){
         div_table<-c()
         for(i in 1:ncol(ab_table)){
           S <- length(ab_table[, i])
-          div_table[i] <- diversity(ab_table[, i])/log(S)
+          div_table[i] <- diversity(ab_table[, i], "shannon")/log(S)
         }
       } else
         if(diversity_type == "ginisimpson"){
           div_table<-c()
           for(i in 1:ncol(ab_table)){
-            div_table[i]<-1-Dom_Simpson(ab_table[, i])
+            div_table[i]<-1-diversity(ab_table[, i], "simpson")
           }
         }
   return(div_table)
@@ -367,7 +346,7 @@ mice_abundance<-rbind(basal_S2, fat_S2, R1_S2,
                       van_S2, R2_S2, gen_S2, R3_S2)
 
 mice_data <- data.frame(time = seq(1:length(ab_table_div(t(mice_abundance), "shannon"))),
-                       abundance = ab_table_div(t(mice_abundance), "shannon"))
+                       abundance = ab_table_div(t(mice_abundance), "pielou"))
 
 ews_metrics <- c("SD","ar1","skew")
 
@@ -378,6 +357,23 @@ plot(roll_ews,  y_lab = "Abundances")
 exp_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "expanding",
                   burn_in = 10, threshold = 2,  tail.direction = "one.tailed")
 plot(exp_ews, y_lab = "Abundances")
+
+
+#### Diversity time-series ####
+
+div_measures <- data.frame(
+  "Pielou" = ab_table_div(t(mice_abundance), "pielou"),
+  "Simpson" = ab_table_div(t(mice_abundance), "simpson"),
+  "Gini-Simpson" = ab_table_div(t(mice_abundance), "ginisimpson")
+)
+
+matplot(x = seq(1:nrow(div_measures)), y = div_measures,
+        type = "l", xlab = "Samples", ylab = "Diversity",
+        main = "Diversity over time", lwd = 2, lty=1,
+        col = c("green4", "blue4", "red4"))
+
+legend("topright", legend = c("Pielou", "Simpson", "Gini-Simpson"), 
+       col = c("green4", "blue4", "red4"), lty = 1, lwd = 2)
 
 #### MDS ####
 
