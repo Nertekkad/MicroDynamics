@@ -345,18 +345,18 @@ library(vegan)
 mice_abundance<-rbind(basal_S2, fat_S2, R1_S2,
                       van_S2, R2_S2, gen_S2, R3_S2)
 
-mice_data <- data.frame(time = seq(1:length(ab_table_div(t(mice_abundance), "shannon"))),
+mice_data <- data.frame(time = seq(1:nrow(mice_abundance)),
                        abundance = ab_table_div(t(mice_abundance), "pielou"))
 
 ews_metrics <- c("SD","ar1","skew")
 
 roll_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "rolling", winsize = 50)
 
-plot(roll_ews,  y_lab = "Abundances")
+plot(roll_ews,  y_lab = "Diversity")
 
 exp_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "expanding",
                   burn_in = 10, threshold = 2,  tail.direction = "one.tailed")
-plot(exp_ews, y_lab = "Abundances")
+plot(exp_ews, y_lab = "Diversity")
 
 
 #### Diversity time-series ####
@@ -420,3 +420,28 @@ legend("topleft",bty = "n",legend = c("Basal","Fat-diet","Recovered 1",
                                        "Vancomycin", "Recovered 2", "Gentamicin",
                                        "Recovered 3"), col = line_cols,pch = 19)
 
+
+#### Diversity comparison ####
+
+mice_tables<-list(basal_S2, fat_S2, R1_S2, van_S2, R2_S2, gen_S2, R3_S2)
+
+div_mice<-list()
+for(i in 1:length(mice_tables)){
+  div_mice[[i]]<-ab_table_div(t(mice_tables[[i]]), "shannon")/log(ncol(mice_tables[[i]]))
+}
+
+div_mice_df<-data.frame(
+  Diversity = unlist(div_mice),
+  Class = c(rep("Basal", nrow(basal_S2)), rep("Fat diet", nrow(fat_S2)),
+            rep("Recovered 1", nrow(R1_S2)), rep("Vancomycin", nrow(van_S2)),
+            rep("Recovered 2", nrow(R2_S2)), rep("Gentamicin", nrow(gen_S2)),
+            rep("Recovered 3", nrow(R3_S2)))
+)
+
+library(ggstatsplot)
+ggbetweenstats(
+  data  = div_mice_df,
+  x     = Class,
+  y     = Diversity,
+  title = "Pielou evenness"
+)
