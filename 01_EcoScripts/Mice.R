@@ -359,7 +359,7 @@ exp_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "expanding"
 plot(exp_ews, y_lab = "Diversity")
 
 
-+#### Diversity time-series ####
+#### Diversity time-series ####
 
 div_measures <- data.frame(
   "Pielou" = ab_table_div(t(mice_abundance), "pielou"),
