@@ -342,7 +342,7 @@ tsplot(david_stoolB_otus[sorted$ix[1:10],])
 O_table <- david_stoolB_otus
 # Table collapse
 T_Collapsed<-T_collapse(T_table = T_table, O_table = O_table,
-                        names_level = "V7")
+                        names_level = "V7", is_phyloseq = F)
 # Clean data
 T_Collapsed<-T_Collapsed[, -c(which(colnames(T_Collapsed) == "none"))]
 dim(T_Collapsed)

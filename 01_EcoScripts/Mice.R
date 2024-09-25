@@ -359,7 +359,7 @@ exp_ews <- uniEWS(data = mice_data, metrics =  ews_metrics, method = "expanding"
 plot(exp_ews, y_lab = "Diversity")
 
 
-#### Diversity time-series ####
++#### Diversity time-series ####
 
 div_measures <- data.frame(
   "Pielou" = ab_table_div(t(mice_abundance), "pielou"),
@@ -427,7 +427,7 @@ mice_tables<-list(basal_S2, fat_S2, R1_S2, van_S2, R2_S2, gen_S2, R3_S2)
 
 div_mice<-list()
 for(i in 1:length(mice_tables)){
-  div_mice[[i]]<-ab_table_div(t(mice_tables[[i]]), "shannon")/log(ncol(mice_tables[[i]]))
+  div_mice[[i]]<-ab_table_div(t(mice_tables[[i]]), "simpson")/log(ncol(mice_tables[[i]]))
 }
 
 div_mice_df<-data.frame(

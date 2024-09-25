@@ -520,8 +520,39 @@ library(EWSmethods)
 library(codyn)
 library(vegan)
 
-CR_data <- data.frame(time = seq(1:length(ab_table_div(CRsims_T[[1]], "shannon"))),
-                        abundance = ab_table_div(CRsims_T[[1]], "shannon"))
+# Diversity function for abundance tables
+ab_table_div<-function(ab_table, diversity_type){
+  require(vegan)
+  if(diversity_type == "shannon"){
+    div_table<-c()
+    for(i in 1:ncol(ab_table)){
+      div_table[i]<-diversity(ab_table[, i], "shannon")
+    }
+  } else
+    if(diversity_type == "simpson"){
+      div_table<-c()
+      for(i in 1:ncol(ab_table)){
+        div_table[i]<-diversity(ab_table[, i], "simpson")
+      }
+    } else
+      if(diversity_type == "pielou"){
+        div_table<-c()
+        for(i in 1:ncol(ab_table)){
+          S <- length(ab_table[, i])
+          div_table[i] <- diversity(ab_table[, i], "shannon")/log(S)
+        }
+      } else
+        if(diversity_type == "ginisimpson"){
+          div_table<-c()
+          for(i in 1:ncol(ab_table)){
+            div_table[i]<-1-diversity(ab_table[, i], "simpson")
+          }
+        }
+  return(div_table)
+}
+
+CR_data <- data.frame(time = seq(1:ncol(CRsims_T[[1]])),
+                      abundance = unlist(ab_table_div(CRsims_T[[1]], "pielou")))
 
 ews_metrics <- c("SD","ar1","skew")
 
