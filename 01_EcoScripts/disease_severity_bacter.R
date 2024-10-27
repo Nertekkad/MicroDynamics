@@ -395,3 +395,19 @@ ggplot(df_degree, aes(x = Abundances, fill = Severity)) +
        y = "Severity") +
   scale_fill_manual(values = c("severe" = "red", "moderate" = "orange", "mild" = "green")) +
   facet_wrap(~Severity)
+
+
+
+
+library(dysbiosisR)
+library(ggplot2)
+library(microbiome)
+library(dplyr)
+library(phyloseq)
+
+samples_bacter<-otu_bacter[,1]
+otu_bacter<-otu_bacter[,-1]
+row.names(otu_bacter)<-samples_bacter
+otu_bacter<-otu_table(otu_bacter, taxa_are_rows = F)
+meta_data<-sample_data(meta_data)
+phyloseq(otu_bacter, meta_data)

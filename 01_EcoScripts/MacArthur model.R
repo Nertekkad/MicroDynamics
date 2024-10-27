@@ -564,3 +564,4 @@ exp_ews <- uniEWS(data = CR_data, metrics =  ews_metrics, method = "expanding",
                   burn_in = 10, threshold = 2,  tail.direction = "one.tailed")
 
 plot(exp_ews, y_lab = "Abundances")
+
